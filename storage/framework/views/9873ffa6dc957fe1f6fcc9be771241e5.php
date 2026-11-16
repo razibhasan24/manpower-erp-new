@@ -1,123 +1,197 @@
 <!DOCTYPE html>
-<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>" data-bs-theme="<?php echo e(session('theme', 'light')); ?>">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>" data-bs-theme="<?php echo e(in_array(request()->cookie('theme'), ['light', 'dark'], true) ? request()->cookie('theme') : (in_array(session('theme'), ['light', 'dark'], true) ? session('theme') : 'light')); ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <meta name="color-scheme" content="light dark">
     <title><?php echo $__env->yieldContent('title', \App\Services\BrandingService::appName()); ?></title>
-    <?php if($branding?->favicon_path): ?>
+    <?php if(isset($branding) && $branding?->favicon_path): ?>
         <link rel="icon" href="<?php echo e(route('branding.logo')); ?>">
     <?php endif; ?>
+    <?php
+        $primaryColor = \App\Services\BrandingService::primaryColor();
+        $primaryRgb = sscanf($primaryColor, '#%02x%02x%02x') ?: [13, 110, 253];
+    ?>
     <style>
         :root {
-            --bs-primary: <?php echo e(\App\Services\BrandingService::primaryColor()); ?>;
+            --bs-primary: <?php echo e($primaryColor); ?>;
+            --bs-primary-rgb: <?php echo e(implode(', ', $primaryRgb)); ?>;
             --bs-secondary: <?php echo e(\App\Services\BrandingService::secondaryColor()); ?>;
-            --brand-primary: <?php echo e(\App\Services\BrandingService::primaryColor()); ?>;
+            --brand-primary: <?php echo e($primaryColor); ?>;
             --brand-secondary: <?php echo e(\App\Services\BrandingService::secondaryColor()); ?>;
         }
     </style>
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
-<body>
-<div class="d-flex" id="wrapper">
-    <aside class="sidebar bg-dark text-white d-flex flex-column flex-shrink-0" id="sidebar">
-        <a href="<?php echo e(route('dashboard')); ?>" class="d-flex align-items-center px-3 py-3 text-white text-decoration-none border-bottom border-secondary">
-            <?php if($branding?->logo_path): ?>
-                <img src="<?php echo e(route('branding.logo')); ?>" alt="Logo" height="32" class="me-2">
-            <?php endif; ?>
-            <span class="fs-6 fw-bold"><?php echo e(\App\Services\BrandingService::appName()); ?></span>
-        </a>
-        <nav class="nav nav-pills flex-column px-2 py-2 gap-1" aria-label="Main navigation">
-            
-            <?php $__currentLoopData = config('menu.items', []); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <?php if(empty($item['permission']) || auth()->user()?->can($item['permission'])): ?>
-                    <?php if(Route::has($item['route'])): ?>
-                        <a class="nav-link text-white <?php echo e(request()->routeIs($item['active'] ?? $item['route']) ? 'active' : ''); ?>" href="<?php echo e(route($item['route'])); ?>"><?php echo e(__($item['label'])); ?></a>
-                    <?php endif; ?>
-                <?php endif; ?>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        </nav>
-        <div class="mt-auto p-3 border-top border-secondary small text-white-50">
-            <?php echo e(\App\Services\BrandingService::currency()); ?> &middot; <?php echo e(\App\Services\BrandingService::timezone()); ?>
+<body class="app-body">
+<a class="skip-link" href="#mainContent"><?php echo e(__('Skip to main content')); ?></a>
 
-        </div>
-    </aside>
+<div class="app-shell" id="appShell">
+    <?php if (isset($component)) { $__componentOriginal2880b66d47486b4bfeaf519598a469d6 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal2880b66d47486b4bfeaf519598a469d6 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.sidebar','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('sidebar'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal2880b66d47486b4bfeaf519598a469d6)): ?>
+<?php $attributes = $__attributesOriginal2880b66d47486b4bfeaf519598a469d6; ?>
+<?php unset($__attributesOriginal2880b66d47486b4bfeaf519598a469d6); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal2880b66d47486b4bfeaf519598a469d6)): ?>
+<?php $component = $__componentOriginal2880b66d47486b4bfeaf519598a469d6; ?>
+<?php unset($__componentOriginal2880b66d47486b4bfeaf519598a469d6); ?>
+<?php endif; ?>
 
-    <div class="flex-grow-1 d-flex flex-column min-vh-100" id="page-content">
-        <header class="topbar d-flex align-items-center justify-content-between px-3 py-2 border-bottom bg-body">
-            <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-sm btn-outline-secondary d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar" aria-label="Toggle navigation">&#9776;</button>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="<?php echo e(route('dashboard')); ?>"><?php echo e(__('Home')); ?></a></li>
-                        <?php echo $__env->yieldContent('breadcrumbs'); ?>
-                    </ol>
-                </nav>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-sm btn-outline-secondary" type="button" onclick="toggleTheme()" aria-label="Toggle theme">&#9788;</button>
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <?php echo e(auth()->user()->name); ?>
+    <div class="app-main">
+        <?php if (isset($component)) { $__componentOriginalfd1f218809a441e923395fcbf03e4272 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalfd1f218809a441e923395fcbf03e4272 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.header','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('header'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalfd1f218809a441e923395fcbf03e4272)): ?>
+<?php $attributes = $__attributesOriginalfd1f218809a441e923395fcbf03e4272; ?>
+<?php unset($__attributesOriginalfd1f218809a441e923395fcbf03e4272); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalfd1f218809a441e923395fcbf03e4272)): ?>
+<?php $component = $__componentOriginalfd1f218809a441e923395fcbf03e4272; ?>
+<?php unset($__componentOriginalfd1f218809a441e923395fcbf03e4272); ?>
+<?php endif; ?>
 
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="<?php echo e(route('profile.edit')); ?>"><?php echo e(__('Profile')); ?></a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form method="POST" action="<?php echo e(route('logout')); ?>">
-                                <?php echo csrf_field(); ?>
-                                <button type="submit" class="dropdown-item"><?php echo e(__('Log out')); ?></button>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </header>
-
-        <main class="container-fluid py-3 flex-grow-1">
+        <main class="app-content" id="mainContent" tabindex="-1">
             <?php if(session('success')): ?>
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <?php echo e(session('success')); ?>
-
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+                <?php if (isset($component)) { $__componentOriginal5194778a3a7b899dcee5619d0610f5cf = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5194778a3a7b899dcee5619d0610f5cf = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.alert','data' => ['type' => 'success','dismissible' => true,'autodismiss' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('alert'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['type' => 'success','dismissible' => true,'autodismiss' => true]); ?><?php echo e(session('success')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5194778a3a7b899dcee5619d0610f5cf)): ?>
+<?php $attributes = $__attributesOriginal5194778a3a7b899dcee5619d0610f5cf; ?>
+<?php unset($__attributesOriginal5194778a3a7b899dcee5619d0610f5cf); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5194778a3a7b899dcee5619d0610f5cf)): ?>
+<?php $component = $__componentOriginal5194778a3a7b899dcee5619d0610f5cf; ?>
+<?php unset($__componentOriginal5194778a3a7b899dcee5619d0610f5cf); ?>
+<?php endif; ?>
             <?php endif; ?>
             <?php if(session('error')): ?>
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <?php echo e(session('error')); ?>
-
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+                <?php if (isset($component)) { $__componentOriginal5194778a3a7b899dcee5619d0610f5cf = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5194778a3a7b899dcee5619d0610f5cf = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.alert','data' => ['type' => 'danger','dismissible' => true,'autodismiss' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('alert'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['type' => 'danger','dismissible' => true,'autodismiss' => true]); ?><?php echo e(session('error')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5194778a3a7b899dcee5619d0610f5cf)): ?>
+<?php $attributes = $__attributesOriginal5194778a3a7b899dcee5619d0610f5cf; ?>
+<?php unset($__attributesOriginal5194778a3a7b899dcee5619d0610f5cf); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5194778a3a7b899dcee5619d0610f5cf)): ?>
+<?php $component = $__componentOriginal5194778a3a7b899dcee5619d0610f5cf; ?>
+<?php unset($__componentOriginal5194778a3a7b899dcee5619d0610f5cf); ?>
+<?php endif; ?>
+            <?php endif; ?>
+            <?php if(session('status')): ?>
+                <?php if (isset($component)) { $__componentOriginal5194778a3a7b899dcee5619d0610f5cf = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5194778a3a7b899dcee5619d0610f5cf = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.alert','data' => ['type' => 'info','dismissible' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('alert'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['type' => 'info','dismissible' => true]); ?><?php echo e(session('status')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5194778a3a7b899dcee5619d0610f5cf)): ?>
+<?php $attributes = $__attributesOriginal5194778a3a7b899dcee5619d0610f5cf; ?>
+<?php unset($__attributesOriginal5194778a3a7b899dcee5619d0610f5cf); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5194778a3a7b899dcee5619d0610f5cf)): ?>
+<?php $component = $__componentOriginal5194778a3a7b899dcee5619d0610f5cf; ?>
+<?php unset($__componentOriginal5194778a3a7b899dcee5619d0610f5cf); ?>
+<?php endif; ?>
             <?php endif; ?>
             <?php if($errors->any()): ?>
-                <div class="alert alert-danger" role="alert">
-                    <ul class="mb-0">
+                <?php if (isset($component)) { $__componentOriginal5194778a3a7b899dcee5619d0610f5cf = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5194778a3a7b899dcee5619d0610f5cf = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.alert','data' => ['type' => 'danger','dismissible' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('alert'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['type' => 'danger','dismissible' => true]); ?>
+                    <strong class="d-block mb-1"><?php echo e(__('Please fix the following:')); ?></strong>
+                    <ul class="mb-0 ps-3">
                         <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <li><?php echo e($error); ?></li>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </ul>
-                </div>
+                 <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5194778a3a7b899dcee5619d0610f5cf)): ?>
+<?php $attributes = $__attributesOriginal5194778a3a7b899dcee5619d0610f5cf; ?>
+<?php unset($__attributesOriginal5194778a3a7b899dcee5619d0610f5cf); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5194778a3a7b899dcee5619d0610f5cf)): ?>
+<?php $component = $__componentOriginal5194778a3a7b899dcee5619d0610f5cf; ?>
+<?php unset($__componentOriginal5194778a3a7b899dcee5619d0610f5cf); ?>
+<?php endif; ?>
             <?php endif; ?>
 
             <?php echo $__env->yieldContent('content'); ?>
         </main>
 
-        <footer class="border-top py-2 px-3 small text-muted d-flex justify-content-between">
-            <span><?php echo e(\App\Services\BrandingService::appName()); ?></span>
-            <span><?php echo e(now()->format('Y-m-d H:i')); ?></span>
+        <footer class="app-footer">
+            <span><?php echo e(\App\Services\BrandingService::appName()); ?> &copy; <?php echo e(now()->year); ?></span>
+            <span><?php echo e(now()->format('Y-m-d H:i')); ?> &middot; <?php echo e(\App\Services\BrandingService::timezone()); ?></span>
         </footer>
     </div>
 </div>
+
+<div class="sidebar-backdrop" data-sidebar-backdrop aria-hidden="true"></div>
+<div class="sidebar-tooltip" id="sidebarTooltip" role="tooltip" hidden></div>
+
 <script>
-function toggleTheme() {
-    const html = document.documentElement;
-    const next = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-bs-theme', next);
-    document.cookie = 'theme=' + next + '; path=/; max-age=' + (60 * 60 * 24 * 365);
-}
+    // Apply the persisted desktop rail state before the sidebar paints.
+    (function () {
+        try {
+            if (window.matchMedia('(min-width: 992px)').matches
+                && window.localStorage.getItem('erp.sidebar.collapsed') === '1') {
+                document.getElementById('appShell')?.classList.add('is-collapsed');
+            }
+        } catch (error) {
+            /* localStorage can be unavailable */
+        }
+    })();
 </script>
+
 <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html>
