@@ -1,0 +1,631 @@
+# TASK: COMPLETE PROFESSIONAL MANPOWER ERP SIDEBAR, NAVIGATION & LOGIN PAGE IMPROVEMENT
+
+## PROJECT
+Manpower Recruitment & Overseas Employment ERP
+
+## ROLE
+Act as a Senior Laravel 12 Architect, Backend Developer, Frontend Developer, UI/UX Designer and Security Engineer.
+
+My existing Manpower ERP project is already under development. However, the Sidebar and some navigation functionality are incomplete.
+
+Your task is to inspect the existing project and complete the Sidebar, Navigation, Routes, Controllers, Views and Login Page improvements.
+
+**IMPORTANT: Do not rebuild the entire project. Work on the existing codebase.**
+
+---
+
+# PART 1: PROJECT INSPECTION
+
+Before writing or modifying any code:
+
+1. Inspect the complete Laravel project structure.
+2. Check the existing Laravel and PHP versions.
+3. Inspect existing authentication.
+4. Inspect existing dashboard layout.
+5. Inspect Sidebar Blade files and components.
+6. Inspect existing routes/web.php and route groups.
+7. Inspect existing controllers.
+8. Inspect existing views.
+9. Inspect existing middleware and permissions.
+10. Inspect installed frontend packages and assets.
+
+Identify:
+- Missing Sidebar menus.
+- Incomplete navigation links.
+- Missing route definitions.
+- Missing controllers.
+- Missing Blade views.
+- Broken route names.
+- Duplicate routes.
+- Missing permission checks.
+- Existing design inconsistencies.
+
+Do not overwrite working code unnecessarily.
+
+# PART 2: COMPLETE PROFESSIONAL SIDEBAR
+
+Create a complete, modern, professional and responsive Sidebar.
+
+Use the existing project's frontend architecture and design system.
+
+Requirements:
+
+- Modern enterprise ERP design.
+- Collapsible Sidebar.
+- Expandable menu groups.
+- Professional Lucide or existing icon system.
+- Active menu highlighting.
+- Active submenu highlighting.
+- Smooth expand/collapse animation.
+- Responsive mobile navigation.
+- Desktop and tablet compatibility.
+- Proper scrolling for long menus.
+- Consistent spacing and typography.
+- Tooltips when collapsed.
+- Sidebar state persistence where appropriate.
+
+The Sidebar must look professional and must not copy the old software design.
+
+## REQUIRED SIDEBAR MENU STRUCTURE
+
+### 1. Dashboard
+- Main Dashboard
+- Recruitment Dashboard
+- Financial Dashboard
+
+### 2. Branch Management
+- All Branches
+- Add Branch
+- Branch Reports
+
+### 3. Agent Management
+- All Agents
+- Add Agent
+- Agent Documents
+- Agent Ledger
+- Agent Payments
+- Agent Reports
+
+### 4. Passport Holder Management
+- All Passport Holders
+- Register Passport Holder
+- Passport Holder Documents
+- Passport Holder Payments
+- Passport Holder Ledger
+- Passport Holder Reports
+
+### 5. Recruitment Management
+- All Registrations
+- New Registration
+- Pending Registrations
+- Active Applications
+- Cancelled Registrations
+- Recruitment Tracking
+- Recruitment History
+
+### 6. Country, Company & Position
+- Country Management
+- Company Management
+- Job Position Management
+- Country-wise Workflow Settings
+- Country Permissions
+
+### 7. Selection & Grading
+- Pending Selection
+- Selection & Grading
+- Selected Candidates
+- Waiting List
+- Rejected Candidates
+- Grading Configuration
+- Selection History
+
+### 8. Delegation Management
+- New Delegation
+- Pending Delegation
+- Approved Delegation
+- Rejected Delegation
+- Returned Delegation
+- Delegation Documents
+- Delegation History
+
+### 9. Medical Management
+- Medical Centers
+- Medical Assessment
+- Pending Medical
+- Fit Candidates
+- Unfit Candidates
+- Expired Medical
+- Medical History
+
+### 10. Police Clearance
+- Pending Clearance
+- Cleared Candidates
+- Uncleared Candidates
+- Returned Applications
+- Police Certificates
+- Clearance History
+
+### 11. Training & Fingerprint
+- Training Centers
+- Training Courses
+- Training Applications
+- Training Attendance
+- Training Results
+- Training Certificates
+- Fingerprint Appointments
+- Fingerprint History
+
+### 12. Manpower Approval
+- New Applications
+- Pending Approval
+- Approved Applications
+- Rejected Applications
+- Approval History
+
+### 13. Visa & Immigration
+- Visa Lots
+- Visa Applications
+- MOFA Processing
+- Visa Submission
+- Visa Approved
+- Visa Rejected
+- Visa Returned
+- Visa Cancelled
+- Work Permit
+- Appointment Management
+- Visa Documents
+- Visa History
+
+### 14. Passport & Visa Return
+- Passport Received
+- Passport Return Requests
+- Passport Returned
+- Pending Passport Return
+- Visa Return
+- Return History
+
+### 15. Flight Management
+- Flight Booking
+- Pending Tickets
+- Ticket Issued
+- Flight Rescheduling
+- Flight Cancellation
+- Airline Management
+- Travel Agency
+- Flight Reports
+
+### 16. Post Arrival Support
+- Arrival Management
+- Airport Pickup
+- Employer Information
+- Accommodation
+- Candidate Feedback
+- Complaints
+- Follow-up Management
+- Support History
+
+### 17. Accounting & Finance
+- Accounting Dashboard
+- Chart of Accounts
+- Account Heads
+- Payment Voucher
+- Receipt Voucher
+- Journal Voucher
+- Contra Voucher
+- Daily Income
+- Daily Expenses
+- Agent Collections
+- Candidate Collections
+- Vendor Payments
+- Advance Payments
+- Refund Management
+- Bank Accounts
+- Bank Deposits
+- Bank Transfers
+- General Ledger
+- Agent Ledger
+- Passport Holder Ledger
+- Vendor Ledger
+- Employee Ledger
+- Trial Balance
+- Balance Sheet
+- Income Statement
+- Cash Book
+- Bank Book
+- Day Book
+
+### 18. HRM & Payroll
+- Employee Management
+- Departments
+- Designations
+- Attendance
+- Check In / Check Out
+- Leave Management
+- Holidays
+- Salary Structure
+- Payroll Processing
+- Salary Payments
+- Advance Salary
+- Employee Ledger
+- HRM Reports
+
+### 19. Visitor Management
+- Visitor Registration
+- Today's Visitors
+- Visitor History
+- Visitor Pass
+- Visitor Reports
+
+### 20. Reports & Analytics
+- Recruitment Reports
+- Agent Reports
+- Passport Holder Reports
+- Country Reports
+- Selection Reports
+- Medical Reports
+- Police Clearance Reports
+- Visa Reports
+- Return Reports
+- Flight Reports
+- Accounting Reports
+- Due Reports
+- HRM Reports
+- Payroll Reports
+- Branch Reports
+
+### 21. User & Access Management
+- User Management
+- Role Management
+- Permission Management
+- Country-wise Permissions
+- Branch-wise Permissions
+- User Activity
+- Login History
+- Audit Logs
+
+### 22. Settings & Configuration
+- Company Settings
+- White-label Branding
+- General Settings
+- Currency Settings
+- Language Settings
+- Date & Time Settings
+- Workflow Settings
+- Notification Settings
+- Email Settings
+- Invoice Settings
+- PDF Settings
+- Backup & Restore
+- System Configuration
+
+---
+
+# PART 3: ROUTE, CONTROLLER & VIEW INTEGRATION
+
+THIS IS A CRITICAL REQUIREMENT.
+
+Every implemented Sidebar menu item must have a valid navigation destination.
+
+For every menu item:
+
+1. Create or reuse a proper named Laravel route.
+2. Connect the route to the appropriate controller.
+3. Create or reuse the corresponding Blade view.
+4. Use consistent route naming conventions.
+5. Add authentication middleware.
+6. Apply appropriate authorization middleware or policies.
+7. Verify the route exists.
+8. Verify the Blade view exists.
+9. Verify navigation works without errors.
+
+Example architecture:
+
+- BranchController
+- AgentController
+- PassportHolderController
+- RecruitmentController
+- SelectionController
+- DelegationController
+- MedicalController
+- PoliceClearanceController
+- TrainingController
+- FingerprintController
+- ManpowerApprovalController
+- VisaController
+- PassportReturnController
+- FlightController
+- PostArrivalController
+- AccountingController
+- VoucherController
+- LedgerController
+- EmployeeController
+- PayrollController
+- VisitorController
+- ReportController
+- UserManagementController
+- SettingsController
+
+Use existing controllers whenever possible.
+
+Do not create duplicate controllers or routes.
+
+## Important Rules
+
+- Do not create fake CRUD functionality.
+- Do not create buttons that do nothing.
+- Do not claim that a module is fully implemented just because its page opens.
+- Do not expose unfinished business operations as working features.
+- If a module is not yet developed, create only a clearly identified module landing page or development-status page.
+- Keep future modules ready for their respective development phases.
+- Do not bypass existing business logic or authorization.
+
+---
+
+# PART 4: ROLE-BASED SIDEBAR
+
+Sidebar menus must be dynamically displayed according to user permissions.
+
+Roles:
+
+1. Super Admin
+2. Admin
+3. Branch Manager
+4. Accounts Staff
+5. General Staff
+6. Agent
+7. Passport Holder
+
+Rules:
+
+Super Admin:
+- Full authorized system access.
+- All management menus.
+
+Admin:
+- Only assigned permissions.
+
+Branch Manager:
+- Authorized branch menus.
+
+Accounts Staff:
+- Accounting and authorized financial menus.
+
+General Staff:
+- Only assigned modules.
+
+Agent:
+- Own recruitment records.
+- Own passport holders.
+- Own payments and ledger.
+- Authorized country operations.
+
+Passport Holder:
+- Personal dashboard.
+- Own application.
+- Own passport and visa status.
+- Own payment history.
+- Own documents.
+
+IMPORTANT:
+
+Do not rely only on hiding Sidebar menus.
+
+All routes, controllers, queries and API endpoints must enforce server-side authorization.
+
+Country and branch permissions must also be respected.
+
+An Agent must never access another Agent's data.
+
+A Passport Holder must never access another Passport Holder's data.
+
+There is NO Sub-Agent role.
+
+---
+
+# PART 5: LOGIN PAGE IMPROVEMENT
+
+Improve the existing login page with a modern professional design.
+
+Requirements:
+
+1. Professional responsive login layout.
+2. Dynamic company logo.
+3. Dynamic software name.
+4. Email or username login, according to existing authentication design.
+5. Password input.
+6. Show Password option.
+7. Hide Password option.
+8. Remember Me checkbox.
+9. Forgot Password link.
+10. Validation error messages.
+11. Loading state during login.
+12. Mobile responsive layout.
+13. Professional background and typography.
+14. Light and dark theme compatibility where supported.
+
+## Show / Hide Password
+
+Implement a working eye icon inside the password input.
+
+Behavior:
+
+- Initially password must be hidden.
+- Clicking the eye icon displays the password.
+- Clicking again hides the password.
+- Use accessible button controls.
+- Do not submit the login form when clicking the eye icon.
+- Keep the password value unchanged when toggling visibility.
+
+## Forgot Password Functionality
+
+Implement a complete secure Laravel password reset flow.
+
+Required pages:
+
+1. Forgot Password Request Page.
+2. Password Reset Email Notification.
+3. Password Reset Page.
+4. Password Successfully Updated Confirmation.
+
+Use Laravel's native password broker and existing authentication architecture.
+
+Requirements:
+
+- Validate email.
+- Generate secure password reset tokens.
+- Send reset link using configured mail settings.
+- Set token expiration.
+- Prevent token reuse.
+- Validate password confirmation.
+- Enforce password security rules.
+- Invalidate existing sessions after successful reset where appropriate.
+- Show clear success and error messages.
+- Apply rate limiting.
+- Prevent email enumeration where appropriate.
+
+Use existing Laravel password reset functionality if already available.
+
+Do not hardcode SMTP credentials.
+
+If email configuration is missing, identify it and document the required environment configuration. Do not pretend email delivery works without testing it.
+
+---
+
+# PART 6: HEADER & NAVIGATION
+
+Improve the dashboard header with:
+
+- Sidebar toggle button.
+- Company logo and name.
+- Breadcrumb navigation.
+- Notification icon.
+- User profile dropdown.
+- Profile Settings.
+- Change Password.
+- Logout.
+
+Ensure all actions work correctly.
+
+---
+
+# PART 7: DESIGN CONSISTENCY
+
+Use reusable Blade components.
+
+Suggested components:
+
+- Sidebar
+- Sidebar Menu Item
+- Sidebar Submenu
+- Header
+- Breadcrumb
+- Notification Dropdown
+- User Profile Dropdown
+- Page Header
+- Status Badge
+- Confirmation Modal
+- Alert Message
+
+Use the project's existing Bootstrap, Vite, JavaScript and CSS architecture.
+
+Avoid unnecessary new packages.
+
+Do not introduce conflicting CSS or JavaScript libraries.
+
+---
+
+# PART 8: TESTING
+
+After implementation, run relevant checks.
+
+1. Check all named routes.
+2. Check for duplicate routes.
+3. Verify all Sidebar links.
+4. Verify all referenced controllers.
+5. Verify all referenced Blade views.
+6. Test Sidebar expand/collapse.
+7. Test active menu highlighting.
+8. Test mobile Sidebar.
+9. Test role-based menu visibility.
+10. Test country-based access.
+11. Test branch-based access.
+12. Test Agent data isolation.
+13. Test Passport Holder data isolation.
+14. Test login validation.
+15. Test Show/Hide Password.
+16. Test Forgot Password request.
+17. Test reset token validation.
+18. Test password reset.
+19. Test unauthorized route access.
+20. Check Laravel logs for errors.
+
+Run appropriate commands, such as:
+
+php artisan route:list
+php artisan route:clear
+php artisan view:clear
+php artisan optimize:clear
+npm run build
+
+Run existing automated tests and add relevant tests for new functionality.
+
+Do not run destructive database commands.
+
+Do not use migrate:fresh.
+
+Do not delete existing user data.
+
+---
+
+# PART 9: COMPLETION REPORT
+
+After finishing, provide:
+
+1. Project Inspection Summary.
+2. Sidebar Design Completed.
+3. Total Main Menu Groups.
+4. Total Submenu Items.
+5. Routes Created.
+6. Routes Reused.
+7. Controllers Created.
+8. Controllers Modified.
+9. Views Created.
+10. Views Modified.
+11. Login Page Improvements.
+12. Show/Hide Password Test Result.
+13. Forgot Password Test Result.
+14. Role Permission Test Result.
+15. Country Permission Test Result.
+16. Responsive Design Test Result.
+17. Commands Executed.
+18. Tests Passed.
+19. Tests Failed.
+20. Remaining Issues.
+
+Include actual file paths.
+
+Clearly distinguish completed features from unfinished modules.
+
+# FINAL DEVELOPMENT RULE
+
+Work only on this task.
+
+Do not start another development phase.
+
+Do not rebuild existing modules.
+
+Do not overwrite working code without inspection.
+
+Do not delete database records.
+
+Do not automatically continue to the next phase.
+
+First inspect, then prepare an implementation plan.
+
+After presenting the plan, WAIT FOR MY APPROVAL.
+
+Only after my approval, implement the changes.
+
+After implementation and testing, provide the complete completion report.
+
+END OF TASK.

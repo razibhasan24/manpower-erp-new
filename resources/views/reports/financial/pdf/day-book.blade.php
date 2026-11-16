@@ -1,0 +1,5 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:sans-serif;font-size:12px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #999;padding:4px;text-align:left}.r{text-align:right}</style></head><body><h2>Day Book</h2><p>{{ $report_title ?? '' }}</p>
+<table><thead><tr><th>Date</th><th>Voucher</th><th>Type</th><th>Narration</th><th class="r">Debit</th><th class="r">Credit</th></tr></thead>
+<tbody>@foreach($vouchers as $v)<tr><td>{{ $v['voucher_date'] }}</td><td>{{ $v['voucher_number'] }}</td><td>{{ $v['voucher_type'] }}</td><td>{{ $v['narration'] }}</td><td class="r">{{ number_format($v['total_debit'], 2) }}</td><td class="r">{{ number_format($v['total_credit'], 2) }}</td></tr>@endforeach</tbody></table>
+<p>Total Debit: {{ number_format($total_debit, 2) }} — Total Credit: {{ number_format($total_credit, 2) }}</p>
+</body></html>
