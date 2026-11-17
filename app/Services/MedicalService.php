@@ -77,7 +77,7 @@ class MedicalService
 
     protected function attributes(array $data, ?User $user, ?Medical $existing = null): array
     {
-        $allowed = ['medical_centre_id', 'medical_date', 'result', 'expiry_date', 'remarks'];
+        $allowed = ['recruitment_id', 'medical_centre_id', 'medical_date', 'result', 'expiry_date', 'remarks'];
         $attrs = array_intersect_key($data, array_flip($allowed));
         if ($existing === null && $user) {
             $attrs['created_by'] = $user->id;

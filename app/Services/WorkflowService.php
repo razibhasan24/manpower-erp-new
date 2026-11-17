@@ -249,4 +249,80 @@ class WorkflowService
     {
         return self::STAGE_STATUSES[$stage] ?? [];
     }
+    /**
+ * Record initial registration history and audit log.
+ */
+public function recordInitialRegistration(
+    Recruitment $recruitment,
+    ?string $remarks = null,
+    ?User $user = null
+): RecruitmentStageHistory {
+
+    return DB::transaction(function () use (
+        $recruitment,
+        $remarks,
+        $user
+    ) {
+
+        $user = $user ?? auth()->user();
+
+        if (! $user) {
+            throw new AuthorizationException(
+                'An authenticated user is required.'
+            );
+        }
+
+        $lockedRecruitment = Recruitment::query()
+            ->visibleTo($user)
+            ->whereKey($recruitment->getKey())
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        if (
+            $lockedRecruitment->current_stage !== 'registration' ||
+            $lockedRecruitment->current_status !== 'pending'
+        ) {
+            throw new InvalidArgumentException(
+                'Initial registration must start with registration/pending.'
+            );
+        }
+
+        $alreadyRecorded = RecruitmentStageHistory::query()
+            ->where('recruitment_id', $lockedRecruitment->id)
+            ->where('stage', 'registration')
+            ->where('status', 'pending')
+            ->exists();
+
+        if ($alreadyRecorded) {
+            throw new InvalidArgumentException(
+                'Initial registration history has already been recorded.'
+            );
+        }
+
+        $history = RecruitmentStageHistory::create([
+            'recruitment_id' => $lockedRecruitment->id,
+            'stage' => 'registration',
+            'status' => 'pending',
+            'changed_by' => $user->id,
+            'changed_at' => now(),
+            'remarks' => $remarks,
+        ]);
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'recruitment.initial_registration',
+            'model_type' => Recruitment::class,
+            'model_id' => $lockedRecruitment->id,
+            'old_values' => [],
+            'new_values' => [
+                'current_stage' => 'registration',
+                'current_status' => 'pending',
+            ],
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        return $history;
+    });
+}
 }

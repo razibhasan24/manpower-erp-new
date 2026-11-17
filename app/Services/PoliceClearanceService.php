@@ -77,7 +77,7 @@ class PoliceClearanceService
 
     protected function attributes(array $data, ?User $user, ?PoliceClearance $existing = null): array
     {
-        $allowed = ['status', 'issue_date', 'expiry_date', 'remarks'];
+        $allowed = ['recruitment_id', 'status', 'issue_date', 'expiry_date', 'remarks'];
         $attrs = array_intersect_key($data, array_flip($allowed));
         if ($existing === null && $user) {
             $attrs['created_by'] = $user->id;

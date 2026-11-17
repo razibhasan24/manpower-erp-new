@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Support\Menu;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 /**
@@ -17,7 +18,7 @@ use Illuminate\View\View;
  */
 class ModuleStatusController extends Controller
 {
-    public function show(string $module): View
+    public function show(string $module): View|RedirectResponse
     {
         $definition = Menu::module($module);
 
@@ -29,6 +30,16 @@ class ModuleStatusController extends Controller
 
         foreach ((array) ($definition['permission'] ?? []) as $permission) {
             abort_unless($user->can($permission), 403, 'You are not authorised to view this module.');
+        }
+
+        $workingModules = [
+            'medical-centres' => 'medical-centres.index',
+            'training-centres' => 'training-centres.index',
+            'training-courses' => 'training-courses.index',
+        ];
+
+        if (isset($workingModules[$module])) {
+            return redirect()->route($workingModules[$module]);
         }
 
         return view('modules.status', [

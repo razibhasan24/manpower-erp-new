@@ -84,7 +84,7 @@ class FingerprintService
 
     protected function attributes(array $data, ?User $user, ?Fingerprint $existing = null): array
     {
-        $allowed = ['appointment_date', 'submission_date', 'status', 'reference_number', 'remarks'];
+        $allowed = ['recruitment_id', 'appointment_date', 'submission_date', 'status', 'reference_number', 'remarks'];
         $attrs = array_intersect_key($data, array_flip($allowed));
         if ($existing === null && $user) {
             $attrs['created_by'] = $user->id;

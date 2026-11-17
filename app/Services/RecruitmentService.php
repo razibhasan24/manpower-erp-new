@@ -6,123 +6,203 @@ namespace App\Services;
 
 use App\Models\Recruitment;
 use App\Models\User;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 use App\Models\Branch;
 use App\Models\PassportHolder;
 use App\Models\RecruitmentDocument;
 use App\Models\TrackingNumber;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
-/**
- * Recruitment business logic (Phases 08-12).
- *
- * Controllers stay thin: they validate, authorise and delegate here.
- * List queries always start from the model's scopeVisibleTo() so an Agent
- * or Passport Holder can never select another party's rows.
- */
 class RecruitmentService
 {
+    public const ACTIVE_STATUSES = [
+        'pending',
+        'approved',
+    ];
+
+    /**
+     * List visible recruitments.
+     */
     public function list(array $filters, User $user): LengthAwarePaginator
     {
-        $query = Recruitment::query()->visibleTo($user)->with(['passportHolder', 'agent', 'branch', 'country', 'company', 'position']);
+        $query = Recruitment::query()
+            ->visibleTo($user)
+            ->with([
+                'passportHolder',
+                'agent',
+                'branch',
+                'country',
+                'company',
+                'position',
+            ]);
 
         if (! empty($filters['search'])) {
-            $term = '%'.($filters['search']).'%';
+            $term = '%' . $filters['search'] . '%';
+
             $query->where(function ($q) use ($term) {
                 $q->where('tracking_number', 'like', $term);
             });
         }
+
         if (! empty($filters['current_status'])) {
             $query->where('current_status', $filters['current_status']);
         }
+
         if (! empty($filters['current_stage'])) {
             $query->where('current_stage', $filters['current_stage']);
         }
+
         if (! empty($filters['active'])) {
             $query->whereIn('current_status', self::ACTIVE_STATUSES);
         }
+
         if (! empty($filters['branch_id'])) {
             $query->where('branch_id', $filters['branch_id']);
         }
+
         if (! empty($filters['country_id'])) {
             $query->where('country_id', $filters['country_id']);
         }
+
         if (! empty($filters['agent_id'])) {
             $query->where('agent_id', $filters['agent_id']);
         }
-        return $query->latest()->paginate(15)->withQueryString();
+
+        return $query->latest()
+            ->paginate(15)
+            ->withQueryString();
     }
 
-    public const ACTIVE_STATUSES = ['pending', 'approved', 'completed'];
-
+    /**
+     * Create a new recruitment.
+     */
     public function create(array $data, User $user): Recruitment
     {
         return DB::transaction(function () use ($data, $user) {
+
             $files = $data['documents'] ?? [];
+
             unset($data['documents']);
 
-            $passportHolder = PassportHolder::findOrFail((int) $data['passport_holder_id']);
+            $passportHolder = PassportHolder::query()
+                ->whereKey((int) $data['passport_holder_id'])
+                ->firstOrFail();
+
             $this->assertNoActiveDuplicate($passportHolder);
 
-            $branch = Branch::findOrFail((int) $data['branch_id']);
+            $branch = Branch::query()
+                ->whereKey((int) $data['branch_id'])
+                ->firstOrFail();
 
-            // Financial responsibility is NOT decided at registration
-            // (master prompt section 11 / Phase 01 section 7). It stays
-            // undecided until Selection & Grading (Group C).
+            // Financial responsibility is decided during Selection.
             $data['financial_responsible_type'] = null;
             $data['financial_responsible_id'] = null;
-            [$data['tracking_number'], $sequence] = $this->generateTrackingNumber($branch);
+
+            // Generate tracking number.
+            [$trackingNumber, $sequence] =
+                $this->generateTrackingNumber($branch);
+
+            $data['tracking_number'] = $trackingNumber;
+
+            // Initial workflow status.
             $data['current_stage'] = 'registration';
             $data['current_status'] = 'pending';
 
+            // Create recruitment.
             $recruitment = Recruitment::create($data);
-            $recruitment->forceFill(['created_by' => $user->id, 'updated_by' => $user->id])->save();
 
-            // Persist the number in the tracking_numbers table (Group A
-            // model) so the branch/year sequence is durable and auditable.
+            $recruitment->forceFill([
+                'created_by' => $user->id,
+                'updated_by' => $user->id,
+            ])->save();
+
+            // Save tracking number.
             TrackingNumber::create([
-                'tracking_number' => $recruitment->tracking_number,
+                'tracking_number' => $trackingNumber,
                 'recruitment_id' => $recruitment->id,
                 'branch_id' => $branch->id,
                 'year' => (int) now()->format('Y'),
                 'sequence' => $sequence,
             ]);
 
+            // Upload registration documents.
             foreach ((array) $files as $type => $file) {
+
                 if ($file instanceof UploadedFile) {
-                    $this->storeDocument($recruitment, $file, (string) $type, $user);
+                    $this->storeDocument(
+                        $recruitment,
+                        $file,
+                        (string) $type,
+                        $user
+                    );
                 }
             }
 
-            $this->recordTransition($recruitment, 'registration', 'pending', $data['remarks'] ?? null, $user);
+            // Record initial registration history and audit log.
+            app(WorkflowService::class)->recordInitialRegistration(
+                $recruitment,
+                $data['remarks'] ?? null,
+                $user
+            );
 
-            return $recruitment->fresh(['passportHolder', 'agent', 'branch', 'country', 'company', 'position']);
+            return $recruitment->fresh([
+                'passportHolder',
+                'agent',
+                'branch',
+                'country',
+                'company',
+                'position',
+            ]);
         });
     }
 
-    public function update(Recruitment $recruitment, array $data, User $user): Recruitment
-    {
-        return DB::transaction(function () use ($recruitment, $data, $user) {
+    /**
+     * Update recruitment information.
+     *
+     * Workflow fields cannot be changed through this method.
+     */
+    public function update(
+        Recruitment $recruitment,
+        array $data,
+        User $user
+    ): Recruitment {
+        return DB::transaction(function () use (
+            $recruitment,
+            $data,
+            $user
+        ) {
+
             $files = $data['documents'] ?? [];
+
             unset($data['documents']);
 
-            // Stage, status, tracking number and financial responsibility
-            // are never edited through the registration form: stage moves
-            // only through WorkflowService and financial responsibility
-            // is decided at Selection.
+            // Protect workflow-managed and financial fields.
             unset(
-                $data['tracking_number'], $data['current_stage'], $data['current_status'],
-                $data['financial_responsible_type'], $data['financial_responsible_id']
+                $data['tracking_number'],
+                $data['current_stage'],
+                $data['current_status'],
+                $data['financial_responsible_type'],
+                $data['financial_responsible_id']
             );
 
             $recruitment->update($data);
-            $recruitment->forceFill(['updated_by' => $user->id])->save();
 
+            $recruitment->forceFill([
+                'updated_by' => $user->id,
+            ])->save();
+
+            // Upload additional documents.
             foreach ((array) $files as $type => $file) {
+
                 if ($file instanceof UploadedFile) {
-                    $this->storeDocument($recruitment, $file, (string) $type, $user);
+                    $this->storeDocument(
+                        $recruitment,
+                        $file,
+                        (string) $type,
+                        $user
+                    );
                 }
             }
 
@@ -131,54 +211,72 @@ class RecruitmentService
     }
 
     /**
-     * "Delete" on a recruitment means cancel (see cancel()). The
-     * controller's destroy action calls this so no route hard-deletes
-     * a recruitment record.
+     * Delete means cancel.
+     * Recruitment records are never hard-deleted here.
      */
-    public function delete(Recruitment $recruitment, User $user): Recruitment
-    {
-        return $this->cancel($recruitment, 'Cancelled from the registrations list.', $user);
+    public function delete(
+        Recruitment $recruitment,
+        User $user
+    ): Recruitment {
+        return $this->cancel(
+            $recruitment,
+            'Cancelled from the registrations list.',
+            $user
+        );
     }
 
-
-
     /**
-     * Tracking number format (Decision D7, Phase 12):
-     * YYYY + branch code + zero-padded serial, e.g. 2026-DHK-000001.
-     * The serial restarts at 000001 for each branch each calendar year and
-     * is the next number after the highest existing serial for that
-     * branch/year. Generation runs inside the registration transaction;
-     * a unique-constraint collision is retried a small number of times.
-     */
-    /**
-     * @return array{0: string, 1: int} [tracking number, sequence]
+     * Generate tracking number.
+     *
+     * Format: YYYY-BRANCH-000001
      */
     public function generateTrackingNumber(Branch $branch): array
     {
         $year = now()->format('Y');
-        $prefix = $year.'-'.strtoupper($branch->code).'-';
+
+        $prefix = $year . '-' . strtoupper($branch->code) . '-';
 
         $max = Recruitment::query()
-            ->where('tracking_number', 'like', $prefix.'%')
+            ->where('tracking_number', 'like', $prefix . '%')
             ->lockForUpdate()
             ->max('tracking_number');
 
         $serial = 1;
+
         if ($max !== null) {
-            $serial = ((int) substr((string) $max, strlen($prefix))) + 1;
+            $serial = (
+                (int) substr(
+                    (string) $max,
+                    strlen($prefix)
+                )
+            ) + 1;
         }
 
-        return [$prefix.str_pad((string) $serial, 6, '0', STR_PAD_LEFT), $serial];
+        $trackingNumber = $prefix
+            . str_pad(
+                (string) $serial,
+                6,
+                '0',
+                STR_PAD_LEFT
+            );
+
+        return [$trackingNumber, $serial];
     }
 
     /**
-     * Store a registration document on the private disk and record it.
-     * Downloads go through RecruitmentController::downloadDocument(),
-     * which re-checks the policy - no public URL to a scan ever exists.
+     * Store document privately.
      */
-    public function storeDocument(Recruitment $recruitment, UploadedFile $file, string $type, User $user): RecruitmentDocument
-    {
-        $path = $file->store('recruitments/'.$recruitment->id, 'private');
+    public function storeDocument(
+        Recruitment $recruitment,
+        UploadedFile $file,
+        string $type,
+        User $user
+    ): RecruitmentDocument {
+
+        $path = $file->store(
+            'recruitments/' . $recruitment->id,
+            'private'
+        );
 
         return RecruitmentDocument::create([
             'recruitment_id' => $recruitment->id,
@@ -193,63 +291,64 @@ class RecruitmentService
     }
 
     /**
-     * Cancel a registration. The record is never hard-deleted: the
-     * cancellation is a status change, the history is preserved, and a
-     * later registration for the same passport can be created because
-     * the duplicate check only counts ACTIVE registrations.
+     * Cancel recruitment through WorkflowService.
+     *
+     * WorkflowService handles:
+     * - Authorization
+     * - Database transaction
+     * - Recruitment status
+     * - Stage history
+     * - Audit log
      */
-    public function cancel(Recruitment $recruitment, ?string $remarks, User $user): Recruitment
-    {
-        return DB::transaction(function () use ($recruitment, $remarks, $user) {
-            if (in_array($recruitment->current_status, ['cancelled', 'completed'], true)) {
-                throw ValidationException::withMessages([
-                    'recruitment' => 'This registration is already '.$recruitment->current_status.' and cannot be cancelled.',
-                ]);
-            }
+    public function cancel(
+        Recruitment $recruitment,
+        ?string $remarks,
+        User $user
+    ): Recruitment {
 
-            $recruitment->update([
-                'current_status' => 'cancelled',
-                'remarks' => $remarks ?? $recruitment->remarks,
-            ]);
-            $recruitment->forceFill(['updated_by' => $user->id])->save();
+        app(WorkflowService::class)->cancel(
+            $recruitment,
+            $remarks,
+            $user
+        );
 
-            $this->recordTransition($recruitment, 'registration', 'cancelled', $remarks, $user);
-
-            return $recruitment->fresh();
-        });
+        return $recruitment->fresh([
+            'passportHolder',
+            'agent',
+            'branch',
+            'country',
+            'company',
+            'position',
+        ]);
     }
 
     /**
-     * Record the initial Registration stage through the shared workflow
-     * engine when it is available; otherwise the stage/status columns
-     * set at creation already describe the registration.
+     * Prevent duplicate active registrations
+     * for the same passport holder.
      */
-    protected function recordTransition(Recruitment $recruitment, string $stage, string $status, ?string $remarks, User $user): void
-    {
-        if (class_exists(WorkflowService::class)) {
-            // MERGE FIX 2026-11-13 (coordinator): transition() is an
-            // INSTANCE method — calling it statically throws an Error
-            // in PHP 8. Resolve it from the container instead.
-            app(WorkflowService::class)->transition($recruitment, $stage, $status, $remarks, $user);
-        }
-    }
+    protected function assertNoActiveDuplicate(
+        PassportHolder $passportHolder
+    ): void {
 
-    /**
-     * Reject a registration when the same passport number already has an
-     * ACTIVE recruitment (master prompt section 9). Cancelled, rejected
-     * and completed registrations are history and do not block a new one.
-     */
-    protected function assertNoActiveDuplicate(PassportHolder $passportHolder): void
-    {
         $exists = Recruitment::query()
-            ->where('passport_holder_id', $passportHolder->id)
-            ->whereIn('current_status', self::ACTIVE_STATUSES)
+            ->where(
+                'passport_holder_id',
+                $passportHolder->id
+            )
+            ->whereIn(
+                'current_status',
+                self::ACTIVE_STATUSES
+            )
             ->exists();
 
         if ($exists) {
+
             throw ValidationException::withMessages([
-                'passport_holder_id' => 'This passport already has an active registration. Cancel the active registration before creating a new one.',
+                'passport_holder_id' =>
+                    'This passport already has an active registration. '
+                    . 'Cancel the active registration before creating a new one.',
             ]);
         }
     }
+    
 }

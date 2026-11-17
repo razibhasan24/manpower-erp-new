@@ -92,7 +92,7 @@ class FlightService
 
     protected function attributes(array $data, ?User $user, ?Flight $existing = null): array
     {
-        $allowed = ['airline_id', 'flight_number', 'travel_agency_id', 'departure_date', 'departure_airport', 'arrival_airport', 'ticket_number', 'status'];
+        $allowed = ['recruitment_id', 'airline_id', 'flight_number', 'travel_agency_id', 'departure_date', 'departure_airport', 'arrival_airport', 'ticket_number', 'status', 'remarks'];
         $attrs = array_intersect_key($data, array_flip($allowed));
         if ($existing === null && $user) {
             $attrs['created_by'] = $user->id;

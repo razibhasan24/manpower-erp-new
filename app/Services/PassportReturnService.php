@@ -77,7 +77,7 @@ class PassportReturnService
 
     protected function attributes(array $data, ?User $user, ?PassportReturn $existing = null): array
     {
-        $allowed = ['status', 'return_date', 'return_reason', 'return_type', 'responsible_person', 'received_by', 'delivered_to', 'identity_verified_by', 'remarks'];
+        $allowed = ['recruitment_id', 'status', 'return_date', 'return_reason', 'return_type', 'responsible_person', 'received_by', 'delivered_to', 'identity_verified_by', 'remarks'];
         $attrs = array_intersect_key($data, array_flip($allowed));
         if ($existing === null && $user) {
             $attrs['created_by'] = $user->id;

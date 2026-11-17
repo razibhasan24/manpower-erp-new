@@ -82,7 +82,7 @@ class VisaService
 
     protected function attributes(array $data, ?User $user, ?Visa $existing = null): array
     {
-        $allowed = ['visa_lot_id', 'submission_date', 'status', 'mofa_status', 'remarks'];
+        $allowed = ['recruitment_id', 'visa_lot_id', 'submission_date', 'status', 'mofa_status', 'remarks'];
         $attrs = array_intersect_key($data, array_flip($allowed));
         if ($existing === null && $user) {
             $attrs['created_by'] = $user->id;

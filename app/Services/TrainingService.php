@@ -83,7 +83,7 @@ class TrainingService
 
     protected function attributes(array $data, ?User $user, ?Training $existing = null): array
     {
-        $allowed = ['training_centre_id', 'course_id', 'start_date', 'end_date', 'attendance_percentage', 'result', 'remarks'];
+        $allowed = ['recruitment_id', 'training_centre_id', 'course_id', 'start_date', 'end_date', 'attendance_percentage', 'result', 'remarks'];
         $attrs = array_intersect_key($data, array_flip($allowed));
         if ($existing === null && $user) {
             $attrs['created_by'] = $user->id;

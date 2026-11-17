@@ -74,6 +74,16 @@
                 <tr>
                     <td><a href="{{ route('recruitments.show', $item) }}">{{ $item->tracking_number }}</a></td><td>{{ $item->passportHolder?->full_name ?? '—' }}</td><td>{{ $item->agent?->name ?? '—' }}</td><td>{{ $item->country?->name ?? '—' }}</td><td>{{ ucwords(str_replace('_', ' ', $item->current_stage)) }}</td><td><x-badge>{{ $item->current_status }}</x-badge></td>
                     <td class="text-nowrap">
+                        @if ($item->selection)
+                            @can('selection.view')
+                                <x-button href="{{ route('selections.show', $item->selection) }}" class="btn-sm btn-outline-success" title="View Selection &amp; Grading">Selection &amp; Grading</x-button>
+                            @endcan
+                        @elseif ($item->current_status !== 'cancelled')
+                            @can('selection.create')
+                                <x-button href="{{ route('selections.create', ['recruitment_id' => $item->id]) }}" class="btn-sm btn-success" title="Proceed to Selection &amp; Grading">Selection &amp; Grading</x-button>
+                            @endcan
+                        @endif
+                        
                         @can('recruitment.view')
                             <x-button href="{{ route('recruitments.show', $item) }}" class="btn-sm btn-outline-primary">View</x-button>
                         @endcan

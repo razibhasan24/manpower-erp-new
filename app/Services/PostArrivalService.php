@@ -79,7 +79,7 @@ class PostArrivalService
 
     protected function attributes(array $data, ?User $user, ?PostArrival $existing = null): array
     {
-        $allowed = ['arrival_date', 'airport_pickup', 'employer_contact', 'accommodation', 'feedback', 'status'];
+        $allowed = ['recruitment_id', 'arrival_date', 'airport_pickup', 'employer_contact', 'accommodation', 'feedback', 'status', 'remarks'];
         $attrs = array_intersect_key($data, array_flip($allowed));
         if ($existing === null && $user) {
             $attrs['created_by'] = $user->id;

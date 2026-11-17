@@ -78,16 +78,28 @@ class SelectionService
         return $this->changeStatus($selection, 'cancelled', $remarks, $user);
     }
 
+   
     protected function attributes(array $data, ?User $user, ?Selection $existing = null): array
     {
-        $allowed = ['grade', 'status', 'decided_at', 'remarks'];
+        $allowed = [
+            'recruitment_id',
+            'grade',
+            'status',
+            'decided_at',
+            'remarks',
+        ];
+
         $attrs = array_intersect_key($data, array_flip($allowed));
+
         if ($existing === null && $user) {
             $attrs['created_by'] = $user->id;
         }
+
         $attrs['updated_by'] = $user?->id;
+
         return $attrs;
     }
+
 
     /** Uploads go to the private disk and are served only through an authorised download (Phase 01 section 13). */
     protected function storeFiles(Selection $selection, array $data): void

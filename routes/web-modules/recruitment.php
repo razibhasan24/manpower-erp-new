@@ -11,6 +11,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('recruitments', [RecruitmentController::class, 'index'])->middleware('permission:recruitment.view')->name('recruitments.index');
     Route::get('recruitments/create', [RecruitmentController::class, 'create'])->middleware('permission:recruitment.create')->name('recruitments.create');
     Route::post('recruitments', [RecruitmentController::class, 'store'])->middleware('permission:recruitment.create')->name('recruitments.store');
+    Route::post('/recruitments/{recruitment}/approve',[RecruitmentController::class, 'approve'])->name('recruitments.approve');
     Route::get('recruitments/tracking', [RecruitmentController::class, 'tracking'])->middleware('permission:recruitment.view')->name('recruitments.tracking');
     Route::get('recruitments/{recruitment}', [RecruitmentController::class, 'show'])->middleware('permission:recruitment.view')->name('recruitments.show');
     Route::get('recruitments/{recruitment}/edit', [RecruitmentController::class, 'edit'])->middleware('permission:recruitment.edit')->name('recruitments.edit');

@@ -128,7 +128,7 @@ return [
             'label' => 'Medical Management',
             'icon' => 'stethoscope',
             'items' => [
-                ['label' => 'Medical Centers', 'route' => 'modules.show', 'params' => ['module' => 'medical-centres'], 'permission' => 'medical.view'],
+                ['label' => 'Medical Centers', 'route' => 'medical-centres.index', 'permission' => 'medical-centre.view', 'active' => ['medical-centres.*']],
                 ['label' => 'Medical Assessment', 'route' => 'medicals.index', 'permission' => 'medical.view', 'active' => ['medicals.*']],
                 ['label' => 'Pending Medical', 'route' => 'medicals.index', 'query' => ['status' => 'pending'], 'permission' => 'medical.view'],
                 ['label' => 'Fit Candidates', 'route' => 'medicals.index', 'query' => ['status' => 'fit'], 'permission' => 'medical.view'],
@@ -155,8 +155,8 @@ return [
             'label' => 'Training & Fingerprint',
             'icon' => 'graduation-cap',
             'items' => [
-                ['label' => 'Training Centers', 'route' => 'modules.show', 'params' => ['module' => 'training-centres'], 'permission' => 'training.view'],
-                ['label' => 'Training Courses', 'route' => 'modules.show', 'params' => ['module' => 'training-courses'], 'permission' => 'training.view'],
+                ['label' => 'Training Centers', 'route' => 'training-centres.index', 'permission' => 'training-centre.view', 'active' => ['training-centres.*']],
+                ['label' => 'Training Courses', 'route' => 'training-courses.index', 'permission' => 'training-course.view', 'active' => ['training-courses.*']],
                 ['label' => 'Training Applications', 'route' => 'trainings.index', 'permission' => 'training.view', 'active' => ['trainings.*']],
                 ['label' => 'Training Attendance', 'route' => 'modules.show', 'params' => ['module' => 'training-attendance'], 'permission' => 'training.view'],
                 ['label' => 'Training Results', 'route' => 'trainings.index', 'query' => ['results' => '1'], 'permission' => 'training.view'],

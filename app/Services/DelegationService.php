@@ -78,7 +78,7 @@ class DelegationService
 
     protected function attributes(array $data, ?User $user, ?Delegation $existing = null): array
     {
-        $allowed = ['application_date', 'reference_number', 'status', 'remarks'];
+        $allowed = ['recruitment_id', 'application_date', 'reference_number', 'status', 'remarks'];
         $attrs = array_intersect_key($data, array_flip($allowed));
         if ($existing === null && $user) {
             $attrs['created_by'] = $user->id;

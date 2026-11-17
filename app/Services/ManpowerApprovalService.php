@@ -77,7 +77,7 @@ class ManpowerApprovalService
 
     protected function attributes(array $data, ?User $user, ?ManpowerApproval $existing = null): array
     {
-        $allowed = ['approval_reference', 'approval_date', 'status', 'remarks'];
+        $allowed = ['recruitment_id', 'approval_reference', 'approval_date', 'status', 'remarks'];
         $attrs = array_intersect_key($data, array_flip($allowed));
         if ($existing === null && $user) {
             $attrs['created_by'] = $user->id;
