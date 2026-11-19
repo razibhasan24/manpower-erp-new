@@ -1,7 +1,12 @@
 <?php
 
 use App\Http\Controllers\PassportReturnController;
+use App\Http\Controllers\PassportReceivedController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('passport-received', [PassportReceivedController::class, 'index'])
+    ->middleware(['auth', 'permission:passport-return.view'])
+    ->name('passport-received.index');
 
 Route::middleware(['auth', 'permission:passport-return.create'])->group(function () {
     Route::get('passport-returns/create', [PassportReturnController::class, 'create'])->name('passport-returns.create');

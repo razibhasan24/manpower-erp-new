@@ -6,7 +6,7 @@
 <form method="POST" action="{{ route('hrm.payroll.store') }}">
     @csrf
     <div class="mb-3"><label class="form-label">Employee</label>
-        <select name="employee_id" class="form-select" required>@foreach($employees as $e)<option value="{{ $e->id }}">{{ $e->user->name ?? $e->employee_code }} ({{ $e->employee_code }})</option>@endforeach</select></div>
+        <select name="employee_id" class="form-select" required>@foreach($employees as $e)<option value="{{ $e->id }}">{{ $e->name ?: ($e->user?->name ?? $e->employee_code) }} ({{ $e->employee_code }})</option>@endforeach</select></div>
     <div class="mb-3"><label class="form-label">Month</label><input type="month" name="month" value="{{ now()->format('Y-m') }}" class="form-control" required></div>
     <div class="row">
         <div class="col-md-4 mb-3"><label class="form-label">Bonus</label><input type="number" step="0.01" min="0" name="bonus" class="form-control" value="0"></div>

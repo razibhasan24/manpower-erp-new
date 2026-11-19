@@ -4,8 +4,12 @@ namespace App\Http\Controllers\Hrm;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEmployeeRequest;
+use App\Http\Requests\UpdateEmployeeRequest;
 use App\Http\Resources\EmployeeResource;
 use App\Models\Employee;
+use App\Models\Branch;
+use App\Models\Department;
+use App\Models\Designation;
 use App\Services\EmployeeService;
 use Illuminate\Http\Request;
 
@@ -17,9 +21,15 @@ class EmployeeController extends Controller
     {
         $this->authorize('viewAny', Employee::class);
 
-        $items = Employee::query()
+        $items = Employee::visibleTo($request->user())
             ->with(['department', 'designation', 'user'])
-            ->when($request->filled('search'), fn ($q) => $q->where('employee_code', 'like', '%' . $request->search . '%'))
+            ->when($request->filled('search'), fn ($q) => $q->where(function ($filter) use ($request) {
+                $search = '%'.$request->string('search').'%';
+                $filter->where('employee_code', 'like', $search)
+                    ->orWhere('name', 'like', $search)
+                    ->orWhereHas('user', fn ($users) => $users->where('name', 'like', $search)->orWhere('email', 'like', $search));
+            }))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
             ->orderByDesc('id')
             ->paginate(20)
             ->withQueryString();
@@ -31,11 +41,11 @@ class EmployeeController extends Controller
         return view('hrm.employees.index', compact('items'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $this->authorize('create', Employee::class);
 
-        return view('hrm.employees.create', $this->formData());
+        return view('hrm.employees.create', $this->formData($request));
     }
 
     public function store(StoreEmployeeRequest $request)
@@ -48,49 +58,60 @@ class EmployeeController extends Controller
             ->with('success', 'Employee created successfully.');
     }
 
-    public function show(Employee $item)
+    public function show(Employee $employee)
     {
-        $this->authorize('view', $item);
+        $this->authorize('view', $employee);
+        $employee->load(['department', 'designation', 'branch', 'user', 'documents']);
 
         if (request()->wantsJson()) {
-            return new EmployeeResource($item);
+            return new EmployeeResource($employee);
         }
 
-        return view('hrm.employees.show', compact('item'));
+        return view('hrm.employees.show', ['item' => $employee]);
     }
 
-    public function edit(Employee $item)
+    public function edit(Request $request, Employee $employee)
     {
-        $this->authorize('update', $item);
+        $this->authorize('update', $employee);
 
-        return view('hrm.employees.edit', array_merge(['item' => $item], $this->formData($item)));
+        return view('hrm.employees.edit', array_merge(['item' => $employee], $this->formData($request, $employee)));
     }
 
-    public function update(StoreEmployeeRequest $request, Employee $item)
+    public function update(UpdateEmployeeRequest $request, Employee $employee)
     {
-        $this->authorize('update', $item);
+        $this->authorize('update', $employee);
 
-        $this->service->update($item, $request->validated());
+        $this->service->update($employee, $request->validated());
 
-        return redirect()->route('hrm.employees.show', $item)
+        return redirect()->route('hrm.employees.show', $employee)
             ->with('success', 'Employee updated successfully.');
     }
 
-    public function destroy(Employee $item)
+    public function destroy(Employee $employee)
     {
-        $this->authorize('delete', $item);
+        $this->authorize('delete', $employee);
 
-        $deleted = $this->service->delete($item);
+        $this->service->delete($employee);
 
         return redirect()->route('hrm.employees.index')
-            ->with('success', $deleted ? 'Employee deleted.' : 'Employee has posted records, so it was deactivated instead of deleted.');
+            ->with('success', 'Employee deactivated.');
     }
 
-    protected function formData(?Employee $item = null): array
+    protected function formData(Request $request, ?Employee $item = null): array
     {
+        $departments = Department::query()->where(function ($query) use ($item) {
+            $query->where('status', 'active')->when($item?->department_id, fn ($q, $id) => $q->orWhereKey($id));
+        })->orderBy('name')->get();
+        $designations = Designation::query()->where(function ($query) use ($item) {
+            $query->where('status', 'active')->when($item?->designation_id, fn ($q, $id) => $q->orWhereKey($id));
+        })->orderBy('name')->get();
+        $branches = Branch::visibleTo($request->user())->where(function ($query) use ($item) {
+            $query->where('status', 'active')->when($item?->branch_id, fn ($q, $id) => $q->orWhereKey($id));
+        })->orderBy('name')->get();
         return [
-            'departments' => \App\Models\Department::where('status', 'active')->orderBy('name')->get(),
-            'designations' => \App\Models\Designation::where('status', 'active')->orderBy('name')->get(),
+            'departments' => $departments,
+            'designations' => $designations,
+            'branches' => $branches,
         ];
     }
 }

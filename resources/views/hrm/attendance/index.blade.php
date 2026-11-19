@@ -34,7 +34,7 @@
     <thead><tr><th>Employee</th><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Source</th></tr></thead>
     <tbody>
     @forelse($items as $item)
-        <tr><td>{{ $item->employee->user->name ?? $item->employee->employee_code ?? $item->employee_id }}</td><td>{{ $item->date }}</td><td>{{ $item->check_in }}</td><td>{{ $item->check_out }}</td>
+        <tr><td>{{ $item->employee->name ?: ($item->employee->user?->name ?? $item->employee->employee_code ?? $item->employee_id) }}</td><td>{{ $item->date }}</td><td>{{ $item->check_in }}</td><td>{{ $item->check_out }}</td>
             <td><x-badge :status="$item->status" /></td><td>{{ $item->source }}</td></tr>
     @empty
         <tr><td colspan="6" class="text-center text-muted py-4">No attendance records found.</td></tr>

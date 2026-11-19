@@ -865,7 +865,7 @@ class ReportService
         $records = $query->orderBy('employees.employee_code')->get();
 
         $rows = $records->map(fn (Employee $e) => [
-            'name' => $e->user?->name ?? $e->employee_code,
+            'name' => $e->name ?: ($e->user?->name ?? $e->employee_code),
             'department' => $e->department?->name ?? '—',
             'designation' => $e->designation?->name ?? '—',
             'branch' => $e->branch?->name ?? '—',
@@ -897,7 +897,7 @@ class ReportService
         $records = $query->orderByDesc('payrolls.month')->get();
 
         $rows = $records->map(fn (Payroll $p) => [
-            'employee' => $p->employee?->user?->name ?? $p->employee?->employee_code ?? '—',
+            'employee' => $p->employee?->name ?: ($p->employee?->user?->name ?? $p->employee?->employee_code ?? '—'),
             'month' => $p->month,
             'gross' => $this->money($p->gross),
             'deductions' => $this->money($p->deductions),

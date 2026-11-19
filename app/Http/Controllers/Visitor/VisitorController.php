@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVisitorRequest;
 use App\Http\Resources\VisitorResource;
 use App\Models\Visitor;
+use App\Models\VisitorPass;
 use App\Services\VisitorService;
 use Illuminate\Http\Request;
 
@@ -81,6 +82,23 @@ class VisitorController extends Controller
         $this->authorize('view', $visitor);
 
         return view('visitors.pass', ['item' => $visitor]);
+    }
+
+    public function passRegister(Request $request)
+    {
+        $this->authorize('viewAny', Visitor::class);
+
+        $records = VisitorPass::visibleTo($request->user())->with('visitor')
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
+            ->when($request->filled('search'), fn ($q) => $q->where(function ($filter) use ($request) {
+                $search = '%'.$request->string('search').'%';
+                $filter->where('pass_number', 'like', $search)
+                    ->orWhereHas('visitor', fn ($visitor) => $visitor->where('name', 'like', $search)
+                        ->orWhere('phone', 'like', $search));
+            }))
+            ->orderByDesc('issued_at')->orderByDesc('id')->paginate(20)->withQueryString();
+
+        return view('visitors.passes', compact('records'));
     }
 
     public function dailyReport(Request $request)

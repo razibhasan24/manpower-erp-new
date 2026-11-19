@@ -71,7 +71,9 @@ class Menu
                 'icon' => (string) ($group['icon'] ?? 'circle-help'),
                 'items' => $items,
                 'active' => $anyActive,
-                'open' => $anyActive || self::belongsToGroup($group),
+                // Keep one submenu open: only the group containing the active
+                // item is expanded when a page is rendered.
+                'open' => $anyActive,
             ];
         }
 
@@ -167,36 +169,6 @@ class Menu
         }
 
         return true;
-    }
-
-    /**
-     * Group is considered "current" for detail pages (show/edit) whose route
-     * prefix matches one of its real destinations. modules.show is skipped
-     * because it is shared by every development-status page.
-     */
-    protected static function belongsToGroup(array $group): bool
-    {
-        $current = (string) (request()->route()?->getName() ?? '');
-
-        if ($current === '') {
-            return false;
-        }
-
-        $prefix = Str::before($current, '.');
-
-        foreach ((array) ($group['items'] ?? []) as $item) {
-            $route = (string) ($item['route'] ?? '');
-
-            if ($route === '' || $route === 'modules.show') {
-                continue;
-            }
-
-            if (Str::before($route, '.') === $prefix) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**

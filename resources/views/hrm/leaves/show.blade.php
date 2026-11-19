@@ -13,7 +13,7 @@
 @endif
 <div class="card"><div class="card-body">
 <table class="table table-bordered mb-0">
-<tr><th style="width:200px">Employee</th><td>{{ $item->employee->user->name ?? '' }}</td></tr><tr><th style="width:200px">Type</th><td>{{ $item->type }}</td></tr><tr><th style="width:200px">From</th><td>{{ $item->start_date }}</td></tr><tr><th style="width:200px">To</th><td>{{ $item->end_date }}</td></tr><tr><th style="width:200px">Reason</th><td>{{ $item->reason }}</td></tr><tr><th style="width:200px">Status</th><td><x-badge :status="$item->status" /></td></tr>
+<tr><th style="width:200px">Employee</th><td>{{ $item->employee->name ?: ($item->employee->user?->name ?? '') }}</td></tr><tr><th style="width:200px">Type</th><td>{{ $item->type }}</td></tr><tr><th style="width:200px">From</th><td>{{ $item->start_date }}</td></tr><tr><th style="width:200px">To</th><td>{{ $item->end_date }}</td></tr><tr><th style="width:200px">Reason</th><td>{{ $item->reason }}</td></tr><tr><th style="width:200px">Status</th><td><x-badge :status="$item->status" /></td></tr>
 </table>
 
 </div></div>

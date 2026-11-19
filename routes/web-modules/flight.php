@@ -1,7 +1,13 @@
 <?php
 
 use App\Http\Controllers\FlightController;
+use App\Http\Controllers\FlightSupportController;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth', 'permission:flight.view'])->group(function () {
+    Route::get('airlines', [FlightSupportController::class, 'airlines'])->name('airlines.index');
+    Route::get('travel-agencies', [FlightSupportController::class, 'travelAgencies'])->name('travel-agencies.index');
+});
 
 Route::middleware(['auth', 'permission:flight.create'])->group(function () {
     Route::get('flights/create', [FlightController::class, 'create'])->name('flights.create');

@@ -13,7 +13,7 @@
 @endif
 <div class="card"><div class="card-body">
 <table class="table table-bordered mb-0">
-<tr><th style="width:200px">Employee</th><td>{{ $item->employee->user->name ?? '' }}</td></tr><tr><th style="width:200px">Basic</th><td>{{ number_format($item->basic, 2) }}</td></tr><tr><th style="width:200px">Allowances</th><td>{{ json_encode($item->allowances) }}</td></tr><tr><th style="width:200px">Deductions</th><td>{{ json_encode($item->deductions) }}</td></tr><tr><th style="width:200px">Effective From</th><td>{{ $item->effective_from }}</td></tr>
+<tr><th style="width:200px">Employee</th><td>{{ $item->employee->name ?: ($item->employee->user?->name ?? '') }}</td></tr><tr><th style="width:200px">Basic</th><td>{{ number_format($item->basic, 2) }}</td></tr><tr><th style="width:200px">Allowances</th><td>{{ json_encode($item->allowances) }}</td></tr><tr><th style="width:200px">Deductions</th><td>{{ json_encode($item->deductions) }}</td></tr><tr><th style="width:200px">Effective From</th><td>{{ $item->effective_from }}</td></tr>
 </table>
 
 </div></div>

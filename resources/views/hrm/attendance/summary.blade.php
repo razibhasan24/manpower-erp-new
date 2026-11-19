@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Attendance Summary')
 @section('content')
-<h1 class="mb-3">Attendance Summary — {{ $employee->user->name ?? $employee->employee_code }} ({{ $summary['month'] }})</h1>
+<h1 class="mb-3">Attendance Summary — {{ $employee->name ?: ($employee->user?->name ?? $employee->employee_code) }} ({{ $summary['month'] }})</h1>
 <div class="card"><div class="card-body">
 <table class="table table-bordered mb-0">
     <tr><th>Present</th><td>{{ $summary['present'] }}</td></tr>

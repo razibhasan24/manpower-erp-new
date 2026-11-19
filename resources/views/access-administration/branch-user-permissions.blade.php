@@ -1,0 +1,8 @@
+@extends('layouts.app')
+@section('title', __('Branch User Permissions'))
+@section('content')
+<h1 class="mb-3">{{ __('Branch User Permissions') }}</h1>
+<div class="alert alert-info">{{ __('This page displays branch assignments currently stored for each user. Assignment changes are managed through user administration.') }}</div>
+<form method="GET" class="row g-2 mb-3"><div class="col-md-4"><input name="search" value="{{ request('search') }}" class="form-control" placeholder="{{ __('Search user name or email') }}"></div><div class="col-md-4"><select name="branch_id" class="form-select"><option value="">{{ __('All branches') }}</option>@foreach($branches as $branch)<option value="{{ $branch->id }}" @selected((string) request('branch_id') === (string) $branch->id)>{{ $branch->name }}</option>@endforeach</select></div><div class="col-auto"><button class="btn btn-primary">{{ __('Filter') }}</button></div><div class="col-auto"><a class="btn btn-outline-secondary" href="{{ route('branch-user-permissions.index') }}">{{ __('Clear') }}</a></div></form>
+<div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>{{ __('User') }}</th><th>{{ __('Email') }}</th><th>{{ __('Role') }}</th><th>{{ __('Primary branch') }}</th><th>{{ __('Additional branch assignments') }}</th></tr></thead><tbody>@forelse($users as $user)<tr><td>{{ $user->name }}</td><td>{{ $user->email }}</td><td>{{ $user->roles->pluck('name')->join(', ') ?: '—' }}</td><td>{{ $user->branch?->name ?? '—' }}</td><td>{{ $user->branches->pluck('name')->join(', ') ?: '—' }}</td></tr>@empty<tr><td colspan="5" class="text-center text-muted">{{ __('No users found.') }}</td></tr>@endforelse</tbody></table></div>{{ $users->links() }}
+@endsection

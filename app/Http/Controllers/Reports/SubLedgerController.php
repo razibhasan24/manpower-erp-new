@@ -36,7 +36,12 @@ class SubLedgerController extends Controller
         $this->authorize('viewAny', \App\Models\Voucher::class);
 
         $rows = $this->ledgers->dueList($type, $request->integer('branch_id') ?: null);
+        $partyNames = match ($type) {
+            'agent' => \App\Models\Agent::visibleTo($request->user())->whereIn('id', $rows->pluck('party_id'))->pluck('name', 'id'),
+            'passport_holder' => \App\Models\PassportHolder::visibleTo($request->user())->whereIn('id', $rows->pluck('party_id'))->pluck('full_name', 'id'),
+            default => collect(),
+        };
 
-        return view('reports.sub-ledgers.due-list', ['rows' => $rows, 'type' => $type]);
+        return view('reports.sub-ledgers.due-list', ['rows' => $rows, 'type' => $type, 'partyNames' => $partyNames]);
     }
 }

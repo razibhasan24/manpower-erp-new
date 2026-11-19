@@ -1,0 +1,9 @@
+@extends('layouts.app')
+@section('title', __('Post Arrival Complaints'))
+@section('content')
+<h1 class="mb-3">{{ __('Post Arrival Complaints') }}</h1>
+<form method="GET" class="row g-2 mb-3"><div class="col-md-5"><input name="search" value="{{ request('search') }}" class="form-control" placeholder="{{ __('Search subject, description, tracking or candidate') }}"></div><div class="col-md-3"><select name="status" class="form-select"><option value="">{{ __('All statuses') }}</option>@foreach(['open','in_progress','resolved','closed'] as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ __(ucwords(str_replace('_', ' ', $status))) }}</option>@endforeach</select></div><div class="col-auto"><button class="btn btn-primary">{{ __('Filter') }}</button></div><div class="col-auto"><a class="btn btn-outline-secondary" href="{{ route('post-arrival-complaints.index') }}">{{ __('Clear') }}</a></div></form>
+<div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>{{ __('Date') }}</th><th>{{ __('Tracking') }}</th><th>{{ __('Candidate') }}</th><th>{{ __('Subject') }}</th><th>{{ __('Description') }}</th><th>{{ __('Status') }}</th><th></th></tr></thead><tbody>
+@forelse($records as $record)<tr><td>{{ $record->created_at?->format('Y-m-d') ?? '—' }}</td><td>{{ $record->recruitment?->tracking_number ?? '—' }}</td><td>{{ $record->recruitment?->passportHolder?->full_name ?? '—' }}</td><td>{{ $record->subject }}</td><td>{{ \Illuminate\Support\Str::limit($record->description, 100) ?: '—' }}</td><td><x-badge :status="$record->status" /></td><td>@if($record->postArrival)<x-button href="{{ route('post-arrivals.show', $record->postArrival) }}" variant="secondary" size="sm">{{ __('View') }}</x-button>@endif</td></tr>@empty<tr><td colspan="7" class="text-center text-muted">{{ __('No complaints found.') }}</td></tr>@endforelse
+</tbody></table></div>{{ $records->links() }}
+@endsection

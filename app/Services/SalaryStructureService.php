@@ -13,7 +13,8 @@ class SalaryStructureService extends ServiceBase
         return DB::transaction(fn () => SalaryStructure::create($data));
     }
 
-    public function update(SalaryStructure $item, array $data): SalaryStructure
+    /** @param SalaryStructure $item */
+    public function update($item, array $data): SalaryStructure
     {
         return DB::transaction(function () use ($item, $data) {
             $item->update($data);
@@ -22,7 +23,8 @@ class SalaryStructureService extends ServiceBase
         });
     }
 
-    public function delete(SalaryStructure $item): bool
+    /** @param SalaryStructure $item */
+    public function delete($item): bool
     {
         // Salary structures are history: a new effective_from replaces them, never a delete.
         return (bool) $item->delete();

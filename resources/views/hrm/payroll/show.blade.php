@@ -2,7 +2,7 @@
 @section('title', 'Payroll')
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Payroll — {{ $item->employee->user->name ?? '' }} ({{ $item->month }})</h1>
+    <h1>Payroll — {{ $item->employee->name ?: ($item->employee->user?->name ?? '') }} ({{ $item->month }})</h1>
     <a href="{{ route('hrm.payroll.index') }}" class="btn btn-secondary">Back to list</a>
 </div>
 @if(session('success'))
@@ -10,7 +10,7 @@
 @endif
 <div class="card mb-3"><div class="card-body">
 <table class="table table-bordered mb-0">
-    <tr><th style="width:200px">Employee</th><td>{{ $item->employee->user->name ?? $item->employee->employee_code ?? $item->employee_id }}</td></tr>
+    <tr><th style="width:200px">Employee</th><td>{{ $item->employee->name ?: ($item->employee->user?->name ?? $item->employee->employee_code ?? $item->employee_id) }}</td></tr>
     <tr><th>Month</th><td>{{ $item->month }}</td></tr>
     <tr><th>Gross</th><td>{{ number_format($item->gross, 2) }}</td></tr>
     <tr><th>Bonus</th><td>{{ number_format($item->bonus, 2) }}</td></tr>

@@ -27,6 +27,6 @@ Route::middleware([
     Route::get('bank-book', [FinancialReportController::class, 'bankBook'])->name('bank-book');
     Route::get('day-book', [FinancialReportController::class, 'dayBook'])->name('day-book');
 
-    Route::get('sub-ledgers/{type}/{id}', [SubLedgerController::class, 'show'])->name('sub-ledger');
+    Route::get('sub-ledgers/{type}/{id}', [SubLedgerController::class, 'show'])->whereNumber('id')->name('sub-ledger');
     Route::get('sub-ledgers/{type}/due-list', [SubLedgerController::class, 'dueList'])->name('sub-ledger.due-list');
 });

@@ -3,6 +3,10 @@
 use App\Http\Controllers\Visitor\VisitorController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('visitor-passes', [VisitorController::class, 'passRegister'])
+    ->middleware(['auth', 'verified', 'permission:visitor.view'])
+    ->name('visitor-passes.index');
+
 /**
  * Visitor web routes (Phase 27). Glob-loaded by routes/web.php (Group A).
  */

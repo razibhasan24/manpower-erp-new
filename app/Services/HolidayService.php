@@ -13,7 +13,8 @@ class HolidayService extends ServiceBase
         return DB::transaction(fn () => Holiday::create($data));
     }
 
-    public function update(Holiday $item, array $data): Holiday
+    /** @param Holiday $item */
+    public function update($item, array $data): Holiday
     {
         return DB::transaction(function () use ($item, $data) {
             $item->update($data);
@@ -22,7 +23,8 @@ class HolidayService extends ServiceBase
         });
     }
 
-    public function delete(Holiday $item): bool
+    /** @param Holiday $item */
+    public function delete($item): bool
     {
         return (bool) $item->delete();
     }

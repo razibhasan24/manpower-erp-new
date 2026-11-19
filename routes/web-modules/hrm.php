@@ -17,7 +17,13 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'verified'])->prefix('hrm')->name('hrm.')->group(function () {
     Route::resource('departments', DepartmentController::class)->middleware('permission:department.view');
     Route::resource('designations', DesignationController::class)->middleware('permission:designation.view');
-    Route::resource('employees', EmployeeController::class)->middleware('permission:employee.view');
+    Route::get('employees', [EmployeeController::class, 'index'])->name('employees.index')->middleware('permission:employee.view');
+    Route::get('employees/create', [EmployeeController::class, 'create'])->name('employees.create')->middleware('permission:employee.create');
+    Route::post('employees', [EmployeeController::class, 'store'])->name('employees.store')->middleware('permission:employee.create');
+    Route::get('employees/{employee}', [EmployeeController::class, 'show'])->name('employees.show')->middleware('permission:employee.view');
+    Route::get('employees/{employee}/edit', [EmployeeController::class, 'edit'])->name('employees.edit')->middleware('permission:employee.update');
+    Route::put('employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update')->middleware('permission:employee.update');
+    Route::delete('employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy')->middleware('permission:employee.delete');
     Route::resource('holidays', HolidayController::class)->middleware('permission:holiday.view');
     Route::resource('leaves', LeaveController::class)->middleware('permission:leave.view');
     Route::resource('salary-structures', SalaryStructureController::class)->middleware('permission:salary_structure.view');

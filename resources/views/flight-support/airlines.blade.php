@@ -1,0 +1,7 @@
+@extends('layouts.app')
+@section('title', __('Airlines'))
+@section('content')
+<h1 class="mb-3">{{ __('Airlines') }}</h1>
+<form method="GET" class="row g-2 mb-3"><div class="col-md-5"><input name="search" value="{{ request('search') }}" class="form-control" placeholder="{{ __('Search airline or code') }}"></div><div class="col-md-3"><select name="status" class="form-select"><option value="">{{ __('All statuses') }}</option>@foreach(['active','inactive'] as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ __(ucfirst($status)) }}</option>@endforeach</select></div><div class="col-auto"><button class="btn btn-primary">{{ __('Filter') }}</button></div><div class="col-auto"><a class="btn btn-outline-secondary" href="{{ route('airlines.index') }}">{{ __('Clear') }}</a></div></form>
+<div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>{{ __('Name') }}</th><th>{{ __('Code') }}</th><th>{{ __('Status') }}</th><th>{{ __('Created') }}</th></tr></thead><tbody>@forelse($records as $record)<tr><td>{{ $record->name }}</td><td>{{ $record->code ?: '—' }}</td><td><x-badge :status="$record->status" /></td><td>{{ $record->created_at?->format('Y-m-d') ?? '—' }}</td></tr>@empty<tr><td colspan="4" class="text-center text-muted">{{ __('No airlines found.') }}</td></tr>@endforelse</tbody></table></div>{{ $records->links() }}
+@endsection

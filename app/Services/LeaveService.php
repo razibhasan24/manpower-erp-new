@@ -13,7 +13,8 @@ class LeaveService extends ServiceBase
         return DB::transaction(fn () => Leave::create($data));
     }
 
-    public function update(Leave $item, array $data): Leave
+    /** @param Leave $item */
+    public function update($item, array $data): Leave
     {
         return DB::transaction(function () use ($item, $data) {
             $item->update($data);
@@ -22,7 +23,8 @@ class LeaveService extends ServiceBase
         });
     }
 
-    public function delete(Leave $item): bool
+    /** @param Leave $item */
+    public function delete($item): bool
     {
         if ($item->status === 'approved') {
             // An approved leave is history; cancel it instead of deleting.

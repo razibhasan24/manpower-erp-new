@@ -18,7 +18,7 @@
     <thead><tr><th>Employee</th><th>Month</th><th class="text-end">Gross</th><th class="text-end">Deductions</th><th class="text-end">Net</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
     <tbody>
     @forelse($items as $item)
-        <tr><td>{{ $item->employee->user->name ?? $item->employee->employee_code ?? $item->employee_id }}</td><td>{{ $item->month }}</td>
+        <tr><td>{{ $item->employee->name ?: ($item->employee->user?->name ?? $item->employee->employee_code ?? $item->employee_id) }}</td><td>{{ $item->month }}</td>
             <td class="text-end">{{ number_format($item->gross, 2) }}</td>
             <td class="text-end">{{ number_format($item->deductions, 2) }}</td>
             <td class="text-end">{{ number_format($item->net, 2) }}</td>

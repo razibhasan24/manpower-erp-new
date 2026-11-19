@@ -1,7 +1,15 @@
 <?php
 
 use App\Http\Controllers\VisaController;
+use App\Http\Controllers\VisaRegisterController;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth', 'permission:visa.view'])->group(function () {
+    Route::get('visa-lots', [VisaRegisterController::class, 'lots'])->name('visa-register.lots');
+    Route::get('work-permits', [VisaRegisterController::class, 'workPermits'])->name('visa-register.work-permits');
+    Route::get('appointments', [VisaRegisterController::class, 'appointments'])->name('visa-register.appointments');
+    Route::get('visa-documents', [VisaRegisterController::class, 'documents'])->name('visa-register.documents');
+});
 
 Route::middleware(['auth', 'permission:visa.create'])->group(function () {
     Route::get('visas/create', [VisaController::class, 'create'])->name('visas.create');

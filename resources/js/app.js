@@ -79,6 +79,12 @@ function initSidebar() {
 
     const storedGroups = readGroups();
     const groupButtons = [...sidebar.querySelectorAll('[data-sidebar-group]')];
+    const activeGroup = groupButtons
+        .map((button) => button.closest('.sidebar-group'))
+        .find((group) => group && (group.classList.contains('is-active') || group.dataset.open === 'true'));
+    const activeKey = activeGroup?.dataset.menuGroup || '';
+    const rememberedKey = storedGroups.at(-1) || '';
+    const initialOpenKey = activeKey || rememberedKey;
 
     groupButtons.forEach((button) => {
         const group = button.closest('.sidebar-group');
@@ -88,9 +94,7 @@ function initSidebar() {
 
         const key = group.dataset.menuGroup || '';
         const submenu = group.querySelector('.sidebar-submenu');
-        const shouldOpen = group.classList.contains('is-active')
-            || group.dataset.open === 'true'
-            || storedGroups.includes(key);
+        const shouldOpen = key === initialOpenKey;
 
         group.classList.toggle('is-open', shouldOpen);
         button.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
@@ -104,17 +108,22 @@ function initSidebar() {
             }
 
             const opening = !group.classList.contains('is-open');
-            group.classList.toggle('is-open', opening);
-            button.setAttribute('aria-expanded', opening ? 'true' : 'false');
-            if (submenu) {
-                submenu.inert = !opening;
-            }
+            groupButtons.forEach((groupButton) => {
+                const otherGroup = groupButton.closest('.sidebar-group');
+                if (!otherGroup) {
+                    return;
+                }
 
-            const current = readGroups().filter((item) => item !== key);
-            if (opening) {
-                current.push(key);
-            }
-            writeGroups(current);
+                const isOpen = opening && otherGroup === group;
+                otherGroup.classList.toggle('is-open', isOpen);
+                groupButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                const otherSubmenu = otherGroup.querySelector('.sidebar-submenu');
+                if (otherSubmenu) {
+                    otherSubmenu.inert = !isOpen;
+                }
+            });
+
+            writeGroups(opening ? [key] : []);
         });
     });
 

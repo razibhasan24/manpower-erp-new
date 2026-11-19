@@ -13,7 +13,8 @@ class DesignationService extends ServiceBase
         return DB::transaction(fn () => Designation::create($data));
     }
 
-    public function update(Designation $item, array $data): Designation
+    /** @param Designation $item */
+    public function update($item, array $data): Designation
     {
         return DB::transaction(function () use ($item, $data) {
             $item->update($data);
@@ -22,7 +23,8 @@ class DesignationService extends ServiceBase
         });
     }
 
-    public function delete(Designation $item): bool
+    /** @param Designation $item */
+    public function delete($item): bool
     {
         if ($item->employees()->exists()) {
             $item->update(['status' => 'inactive']);

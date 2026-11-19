@@ -1,7 +1,18 @@
 <?php
 
 use App\Http\Controllers\PostArrivalController;
+use App\Http\Controllers\FlightSupportController;
+use App\Http\Controllers\PostArrivalRegistersController;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth', 'permission:post-arrival.view'])->group(function () {
+    Route::get('airport-pickup', [FlightSupportController::class, 'airportPickup'])->name('airport-pickup.index');
+    Route::get('accommodation', [FlightSupportController::class, 'accommodation'])->name('accommodation.index');
+    Route::get('employer-information', [FlightSupportController::class, 'employerInformation'])->name('employer-information.index');
+    Route::get('follow-ups', [PostArrivalRegistersController::class, 'followUps'])->name('follow-ups.index');
+    Route::get('candidate-feedback', [PostArrivalRegistersController::class, 'feedback'])->name('candidate-feedback.index');
+    Route::get('post-arrival-complaints', [PostArrivalRegistersController::class, 'complaints'])->name('post-arrival-complaints.index');
+});
 
 Route::middleware(['auth', 'permission:post-arrival.create'])->group(function () {
     Route::get('post-arrivals/create', [PostArrivalController::class, 'create'])->name('post-arrivals.create');

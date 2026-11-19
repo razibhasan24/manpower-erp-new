@@ -7,7 +7,7 @@
     <thead><tr><th>Party ID</th><th class="text-end">Total Debit</th><th class="text-end">Total Credit</th><th class="text-end">Balance Due</th><th class="text-end">Actions</th></tr></thead>
     <tbody>
     @forelse($rows as $row)
-        <tr><td>{{ $row->party_id }}</td><td class="text-end">{{ number_format($row->total_debit, 2) }}</td>
+        <tr><td>{{ $partyNames[$row->party_id] ?? ('#'.$row->party_id) }}</td><td class="text-end">{{ number_format($row->total_debit, 2) }}</td>
             <td class="text-end">{{ number_format($row->total_credit, 2) }}</td>
             <td class="text-end">{{ number_format($row->balance, 2) }}</td>
             <td class="text-end"><a href="{{ route('reports.financial.sub-ledger', ['type' => $type, 'id' => $row->party_id]) }}" class="btn btn-sm btn-outline-primary">Ledger</a></td></tr>

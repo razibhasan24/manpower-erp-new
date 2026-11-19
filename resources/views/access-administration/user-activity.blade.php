@@ -1,0 +1,8 @@
+@extends('layouts.app')
+@section('title', __('User Activity'))
+@section('content')
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3"><h1 class="mb-0">{{ __('User Activity') }}</h1><a class="btn btn-outline-secondary" href="{{ route('login-history.index') }}">{{ __('Login history') }}</a></div>
+<p class="text-muted">{{ __('Recent business actions recorded in the audit log.') }}</p>
+<form method="GET" class="row g-2 mb-3"><div class="col-md-6"><input name="search" value="{{ request('search') }}" class="form-control" placeholder="{{ __('Search action, record type or user') }}"></div><div class="col-auto"><button class="btn btn-primary">{{ __('Search') }}</button></div><div class="col-auto"><a class="btn btn-outline-secondary" href="{{ route('user-activity.index') }}">{{ __('Clear') }}</a></div></form>
+<div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>{{ __('Time') }}</th><th>{{ __('User') }}</th><th>{{ __('Activity') }}</th><th>{{ __('Affected record') }}</th><th>{{ __('IP address') }}</th></tr></thead><tbody>@forelse($records as $record)<tr><td>{{ $record->created_at?->format('Y-m-d H:i:s') ?? '—' }}</td><td>{{ $record->user?->name ?? __('System') }}</td><td>{{ $record->action }}</td><td>{{ $record->auditable_type ? class_basename($record->auditable_type).' #'.$record->auditable_id : '—' }}</td><td>{{ $record->ip_address ?? '—' }}</td></tr>@empty<tr><td colspan="5" class="text-center text-muted">{{ __('No activity found.') }}</td></tr>@endforelse</tbody></table></div>{{ $records->links() }}
+@endsection

@@ -142,7 +142,7 @@ class PayrollService
             'debit_account_code' => '1310',
             'sub_ledger_type' => 'employee',
             'sub_ledger_id' => $employee->id,
-            'narration' => $data['narration'] ?? 'Advance salary — ' . ($employee->user->name ?? $employee->employee_code),
+            'narration' => $data['narration'] ?? 'Advance salary — ' . ($employee->name ?: ($employee->user?->name ?? $employee->employee_code)),
         ]));
     }
 }

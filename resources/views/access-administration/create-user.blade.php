@@ -1,0 +1,33 @@
+@extends('layouts.app')
+@section('title', __('Create User'))
+@section('content')
+<div class="d-flex justify-content-between align-items-center mb-3"><h1 class="mb-0">{{ __('Create User') }}</h1><a class="btn btn-outline-secondary" href="{{ route('users.index') }}">{{ __('Back to users') }}</a></div>
+<div class="alert alert-info">{{ __('The new user will be asked to change this initial password after signing in. You can assign one role and additional permissions available to your own account.') }}</div>
+<form method="POST" action="{{ route('users.store') }}">
+    @csrf
+    <div class="card mb-3"><div class="card-header">{{ __('Account details') }}</div><div class="card-body"><div class="row g-3">
+        <div class="col-md-6"><label for="name" class="form-label">{{ __('Full name') }}</label><input id="name" name="name" value="{{ old('name') }}" class="form-control @error('name') is-invalid @enderror" required>@error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+        <div class="col-md-6"><label for="email" class="form-label">{{ __('Email') }}</label><input id="email" type="email" name="email" value="{{ old('email') }}" class="form-control @error('email') is-invalid @enderror" required>@error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+        <div class="col-md-6"><label for="phone" class="form-label">{{ __('Phone') }}</label><input id="phone" name="phone" value="{{ old('phone') }}" class="form-control @error('phone') is-invalid @enderror">@error('phone')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+        <div class="col-md-3"><label for="password" class="form-label">{{ __('Initial password') }}</label><input id="password" type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>@error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+        <div class="col-md-3"><label for="password_confirmation" class="form-label">{{ __('Confirm password') }}</label><input id="password_confirmation" type="password" name="password_confirmation" class="form-control" required></div>
+        <div class="col-md-4"><label for="status" class="form-label">{{ __('Status') }}</label><select id="status" name="status" class="form-select" required>@foreach(['active','inactive','suspended'] as $status)<option value="{{ $status }}" @selected(old('status', 'active') === $status)>{{ __(ucfirst($status)) }}</option>@endforeach</select>@error('status')<div class="text-danger small">{{ $message }}</div>@enderror</div>
+    </div></div></div>
+
+    <div class="card mb-3"><div class="card-header">{{ __('Role and permissions') }}</div><div class="card-body">
+        <div class="mb-3"><label for="role_id" class="form-label">{{ __('Role') }}</label><select id="role_id" name="role_id" class="form-select @error('role_id') is-invalid @enderror" required><option value="">{{ __('Select a role') }}</option>@foreach($roles as $role)<option value="{{ $role->id }}" @selected((string) old('role_id') === (string) $role->id)>{{ $role->name }}</option>@endforeach</select>@error('role_id')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+        <label class="form-label">{{ __('Additional direct permissions') }}</label>
+        <p class="small text-muted">{{ __('The role grants its standard permissions. Select only extra permissions needed for this user.') }}</p>
+        @error('permission_ids')<div class="text-danger small mb-2">{{ $message }}</div>@enderror
+        <div class="row g-3">@foreach($permissions->groupBy(fn ($permission) => explode('.', $permission->name, 2)[0]) as $module => $modulePermissions)<div class="col-lg-4 col-md-6"><div class="border rounded p-3 h-100"><strong>{{ \Illuminate\Support\Str::headline($module) }}</strong><div class="mt-2">@foreach($modulePermissions as $permission)<div class="form-check"><input class="form-check-input" type="checkbox" id="permission_{{ $permission->id }}" name="permission_ids[]" value="{{ $permission->id }}" @checked(in_array((string) $permission->id, array_map('strval', old('permission_ids', [])), true))><label class="form-check-label" for="permission_{{ $permission->id }}">{{ \Illuminate\Support\Str::headline(substr($permission->name, strlen($module) + 1)) }}</label></div>@endforeach</div></div></div>@endforeach</div>
+    </div></div>
+
+    <div class="card mb-3"><div class="card-header">{{ __('Branch and country access') }}</div><div class="card-body"><p class="small text-muted">{{ __('The primary branch is automatically included in the user’s allowed branch assignments.') }}</p><div class="row g-4">
+        <div class="col-md-4"><label for="branch_id" class="form-label">{{ __('Primary branch') }}</label><select id="branch_id" name="branch_id" class="form-select"><option value="">{{ __('No primary branch') }}</option>@foreach($branches as $branch)<option value="{{ $branch->id }}" @selected((string) old('branch_id') === (string) $branch->id)>{{ $branch->name }}</option>@endforeach</select>@error('branch_id')<div class="text-danger small">{{ $message }}</div>@enderror</div>
+        <div class="col-md-4"><label class="form-label">{{ __('Additional branch access') }}</label>@forelse($branches as $branch)<div class="form-check"><input class="form-check-input" type="checkbox" name="branch_ids[]" id="branch_{{ $branch->id }}" value="{{ $branch->id }}" @checked(in_array((string) $branch->id, array_map('strval', old('branch_ids', [])), true))><label class="form-check-label" for="branch_{{ $branch->id }}">{{ $branch->name }}</label></div>@empty<span class="text-muted">{{ __('No branches available.') }}</span>@endforelse @error('branch_ids.*')<div class="text-danger small">{{ $message }}</div>@enderror</div>
+        <div class="col-md-4"><label class="form-label">{{ __('Country access') }}</label>@forelse($countries as $country)<div class="form-check"><input class="form-check-input" type="checkbox" name="country_ids[]" id="country_{{ $country->id }}" value="{{ $country->id }}" @checked(in_array((string) $country->id, array_map('strval', old('country_ids', [])), true))><label class="form-check-label" for="country_{{ $country->id }}">{{ $country->name }}</label></div>@empty<span class="text-muted">{{ __('No countries available.') }}</span>@endforelse @error('country_ids.*')<div class="text-danger small">{{ $message }}</div>@enderror</div>
+    </div></div></div>
+
+    <div class="d-flex gap-2"><button class="btn btn-primary" type="submit">{{ __('Create user') }}</button><a class="btn btn-outline-secondary" href="{{ route('users.index') }}">{{ __('Cancel') }}</a></div>
+</form>
+@endsection

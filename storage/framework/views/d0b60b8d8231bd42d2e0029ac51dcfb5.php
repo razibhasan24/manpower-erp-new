@@ -1,0 +1,12 @@
+<?php $__env->startSection('title', __('Permission Management')); ?>
+<?php $__env->startSection('content'); ?>
+<h1 class="mb-3"><?php echo e(__('Permissions')); ?></h1>
+<div class="alert alert-info"><?php echo e(__('This is a read-only catalogue of permissions and their assigned roles. Permission changes are not available in this screen.')); ?></div>
+<form method="GET" class="row g-2 mb-3"><div class="col-md-6"><input name="search" value="<?php echo e(request('search')); ?>" class="form-control" placeholder="<?php echo e(__('Search permission name')); ?>"></div><div class="col-auto"><button class="btn btn-primary"><?php echo e(__('Search')); ?></button></div><div class="col-auto"><a class="btn btn-outline-secondary" href="<?php echo e(route('permissions.index')); ?>"><?php echo e(__('Clear')); ?></a></div></form>
+<div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th><?php echo e(__('Permission')); ?></th><th><?php echo e(__('Module')); ?></th><th><?php echo e(__('Action')); ?></th><th><?php echo e(__('Guard')); ?></th><th><?php echo e(__('Assigned roles')); ?></th></tr></thead><tbody>
+<?php $__empty_1 = true; $__currentLoopData = $permissions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $permission): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?><?php ($parts = array_pad(explode('.', $permission->name, 2), 2, '—')); ?><tr><td><?php echo e($permission->name); ?></td><td><?php echo e(\Illuminate\Support\Str::headline($parts[0])); ?></td><td><?php echo e(\Illuminate\Support\Str::headline($parts[1])); ?></td><td><?php echo e($permission->guard_name); ?></td><td><?php echo e($permission->roles->pluck('name')->join(', ') ?: '—'); ?></td></tr><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?><tr><td colspan="5" class="text-center text-muted"><?php echo e(__('No permissions found.')); ?></td></tr><?php endif; ?>
+</tbody></table></div><?php echo e($permissions->links()); ?>
+
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH R:\xampp\htdocs\manpower-erp-new\resources\views/access-administration/permissions.blade.php ENDPATH**/ ?>

@@ -5,9 +5,14 @@
 // controller and policy then enforce branch/country/ownership scope.
 
 use App\Http\Controllers\CountryController;
+use App\Http\Controllers\CountryAdministrationController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('country-user-permissions', [CountryAdministrationController::class, 'userPermissions'])
+        ->middleware('permission:user.manage')->name('country-user-permissions.index');
+    Route::get('country-workflow-settings', [CountryAdministrationController::class, 'workflowSettings'])
+        ->middleware('permission:core.manage')->name('country-workflow-settings.index');
     Route::get('countries', [CountryController::class, 'index'])->middleware('permission:core.view')->name('countries.index');
     Route::get('countries/create', [CountryController::class, 'create'])->middleware('permission:core.manage')->name('countries.create');
     Route::post('countries', [CountryController::class, 'store'])->middleware('permission:core.manage')->name('countries.store');

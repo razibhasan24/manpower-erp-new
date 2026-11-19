@@ -17,7 +17,7 @@
     <thead><tr><th>Employee</th><th>Basic</th><th>Effective From</th><th class="text-end">Actions</th></tr></thead>
     <tbody>
     @forelse($items as $item)
-        <tr><td>{{ $item->employee->user->name ?? '' }}</td><td>{{ number_format($item->basic, 2) }}</td><td>{{ $item->effective_from }}</td>
+        <tr><td>{{ $item->employee->name ?: ($item->employee->user?->name ?? '') }}</td><td>{{ number_format($item->basic, 2) }}</td><td>{{ $item->effective_from }}</td>
             <td class="text-end">
                 <a href="{{ route('hrm.salary-structures.show', $item) }}" class="btn btn-sm btn-outline-primary">View</a>
                 <a href="{{ route('hrm.salary-structures.edit', $item) }}" class="btn btn-sm btn-outline-secondary">Edit</a>

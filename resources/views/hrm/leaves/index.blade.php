@@ -17,7 +17,7 @@
     <thead><tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
     <tbody>
     @forelse($items as $item)
-        <tr><td>{{ $item->employee->user->name ?? '' }}</td><td>{{ $item->type }}</td><td>{{ $item->start_date }}</td><td>{{ $item->end_date }}</td><td><x-badge :status="$item->status" /></td>
+        <tr><td>{{ $item->employee->name ?: ($item->employee->user?->name ?? '') }}</td><td>{{ $item->type }}</td><td>{{ $item->start_date }}</td><td>{{ $item->end_date }}</td><td><x-badge :status="$item->status" /></td>
             <td class="text-end">
                 <a href="{{ route('hrm.leaves.show', $item) }}" class="btn btn-sm btn-outline-primary">View</a>
                 <a href="{{ route('hrm.leaves.edit', $item) }}" class="btn btn-sm btn-outline-secondary">Edit</a>

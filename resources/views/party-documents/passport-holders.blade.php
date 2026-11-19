@@ -1,0 +1,9 @@
+@extends('layouts.app')
+@section('title', __('Passport Holder Documents'))
+@section('content')
+<h1 class="mb-3">{{ __('Passport Holder Documents') }}</h1>
+<form method="GET" class="row g-2 mb-3"><div class="col-md-6"><input name="search" value="{{ request('search') }}" class="form-control" placeholder="{{ __('Search candidate, passport or document') }}"></div><div class="col-auto"><button class="btn btn-primary">{{ __('Search') }}</button></div><div class="col-auto"><a class="btn btn-outline-secondary" href="{{ route('passport-holder-documents.index') }}">{{ __('Clear') }}</a></div></form>
+<div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>{{ __('Passport Holder') }}</th><th>{{ __('Passport number') }}</th><th>{{ __('Document') }}</th><th>{{ __('Type') }}</th><th>{{ __('Uploaded') }}</th><th>{{ __('Size') }}</th><th>{{ __('Actions') }}</th></tr></thead><tbody>
+@forelse($records as $record)<tr><td>{{ $record->passportHolder?->full_name ?? '—' }}</td><td>{{ $record->passportHolder?->passport_number ?? '—' }}</td><td>{{ $record->original_name ?: basename($record->file_path) }}</td><td>{{ \Illuminate\Support\Str::headline($record->type) }}</td><td>{{ $record->created_at?->format('Y-m-d') ?? '—' }}</td><td>{{ $record->size ? number_format($record->size / 1024, 1).' KB' : '—' }}</td><td class="text-nowrap">@if($record->passportHolder)<a class="btn btn-sm btn-outline-primary" href="{{ route('passport-holders.documents.download', [$record->passportHolder, $record]) }}">{{ __('Download') }}</a><a class="btn btn-sm btn-outline-secondary" href="{{ route('passport-holders.show', $record->passportHolder) }}">{{ __('Candidate') }}</a>@endif</td></tr>@empty<tr><td colspan="7" class="text-center text-muted">{{ __('No passport holder documents found.') }}</td></tr>@endforelse
+</tbody></table></div>{{ $records->links() }}
+@endsection

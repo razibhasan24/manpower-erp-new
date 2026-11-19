@@ -13,7 +13,8 @@ class DepartmentService extends ServiceBase
         return DB::transaction(fn () => Department::create($data));
     }
 
-    public function update(Department $item, array $data): Department
+    /** @param Department $item */
+    public function update($item, array $data): Department
     {
         return DB::transaction(function () use ($item, $data) {
             $item->update($data);
@@ -22,7 +23,8 @@ class DepartmentService extends ServiceBase
         });
     }
 
-    public function delete(Department $item): bool
+    /** @param Department $item */
+    public function delete($item): bool
     {
         if ($item->employees()->exists()) {
             $item->update(['status' => 'inactive']);

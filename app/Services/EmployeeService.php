@@ -13,7 +13,8 @@ class EmployeeService extends ServiceBase
         return DB::transaction(fn () => Employee::create($data));
     }
 
-    public function update(Employee $item, array $data): Employee
+    /** @param Employee $item */
+    public function update($item, array $data): Employee
     {
         return DB::transaction(function () use ($item, $data) {
             $item->update($data);
@@ -22,7 +23,8 @@ class EmployeeService extends ServiceBase
         });
     }
 
-    public function delete(Employee $item): bool
+    /** @param Employee $item */
+    public function delete($item): bool
     {
         // Employees are never hard-deleted: payroll/ledger history depends on them.
         $item->update(['status' => 'inactive']);

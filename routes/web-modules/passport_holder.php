@@ -5,9 +5,11 @@
 // controller and policy then enforce branch/country/ownership scope.
 
 use App\Http\Controllers\PassportHolderController;
+use App\Http\Controllers\PartyDocumentController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('passport-holder-documents', [PartyDocumentController::class, 'passportHolderDocuments'])->middleware('permission:passport-holder.view')->name('passport-holder-documents.index');
     Route::get('passport-holders', [PassportHolderController::class, 'index'])->middleware('permission:passport-holder.view')->name('passport-holders.index');
     Route::get('passport-holders/create', [PassportHolderController::class, 'create'])->middleware('permission:passport-holder.create')->name('passport-holders.create');
     Route::post('passport-holders', [PassportHolderController::class, 'store'])->middleware('permission:passport-holder.create')->name('passport-holders.store');
