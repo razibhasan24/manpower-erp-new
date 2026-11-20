@@ -42,6 +42,12 @@ trait WorkflowStepper
             $stages = WorkflowService::STAGES;
             $currentIndex = array_search($recruitment->current_stage, $stages, true);
             $targetIndex = array_search($stage, $stages, true);
+            // Editing a record from a completed earlier stage must not push
+            // the recruitment backward. Explicit returns are handled above
+            // only when WorkflowService allows that returned transition.
+            if ($currentIndex !== false && $targetIndex !== false && $targetIndex < $currentIndex) {
+                return;
+            }
             if ($currentIndex !== false && $targetIndex !== false && $targetIndex > $currentIndex && $currentIndex < count($stages) - 1) {
                 $next = $stages[$currentIndex + 1];
                 $this->workflow->transition($recruitment, $next, WorkflowService::STAGE_STATUSES[$next][0], $remarks, $user);

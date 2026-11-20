@@ -43,6 +43,19 @@ return [
                 ['label' => 'Branch Reports', 'route' => 'reports.show', 'params' => ['report' => 'branch'], 'permission' => ['report.view', 'branch.view']],
             ],
         ],
+        
+         [
+            'key' => 'core',
+            'label' => 'Country, Company & Position',
+            'icon' => 'globe',
+            'items' => [
+                ['label' => 'Country Management', 'route' => 'countries.index', 'permission' => 'core.view', 'active' => ['countries.*']],
+                ['label' => 'Company Management', 'route' => 'companies.index', 'permission' => 'core.view', 'active' => ['companies.*']],
+                ['label' => 'Job Position Management', 'route' => 'positions.index', 'permission' => 'core.view', 'active' => ['positions.*']],
+                ['label' => 'Country-wise Workflow Settings', 'route' => 'modules.show', 'params' => ['module' => 'country-workflow-settings'], 'permission' => 'core.manage'],
+                ['label' => 'Country Permissions', 'route' => 'modules.show', 'params' => ['module' => 'country-user-permissions'], 'permission' => 'user.manage'],
+            ],
+        ],
         [
             'key' => 'agents',
             'label' => 'Agent Management',
@@ -101,18 +114,7 @@ return [
                 ['label' => 'Recruitment History', 'route' => 'reports.show', 'params' => ['report' => 'recruitment'], 'permission' => ['report.view', 'recruitment.view']],
             ],
         ],
-        [
-            'key' => 'core',
-            'label' => 'Country, Company & Position',
-            'icon' => 'globe',
-            'items' => [
-                ['label' => 'Country Management', 'route' => 'countries.index', 'permission' => 'core.view', 'active' => ['countries.*']],
-                ['label' => 'Company Management', 'route' => 'companies.index', 'permission' => 'core.view', 'active' => ['companies.*']],
-                ['label' => 'Job Position Management', 'route' => 'positions.index', 'permission' => 'core.view', 'active' => ['positions.*']],
-                ['label' => 'Country-wise Workflow Settings', 'route' => 'modules.show', 'params' => ['module' => 'country-workflow-settings'], 'permission' => 'core.manage'],
-                ['label' => 'Country Permissions', 'route' => 'modules.show', 'params' => ['module' => 'country-user-permissions'], 'permission' => 'user.manage'],
-            ],
-        ],
+       
         [
             'key' => 'selection',
             'label' => 'Selection & Grading',
@@ -265,6 +267,7 @@ return [
             'items' => [
                 ['label' => 'Accounting Dashboard', 'route' => 'dashboard.financial', 'permission' => 'accounting.view'],
                 ['label' => 'Chart of Accounts', 'route' => 'accounting.accounts.index', 'permission' => 'account.view', 'active' => ['accounting.accounts.*']],
+                ['label' => 'Payment Modes', 'route' => 'accounting.payment-modes.index', 'permission' => 'account.view', 'active' => ['accounting.payment-modes.*']],
                 ['label' => 'Account Heads', 'route' => 'accounting.account-types.index', 'permission' => 'account_type.view', 'active' => ['accounting.account-types.*']],
                 ['label' => 'Payment Voucher', 'route' => 'accounting.vouchers.index', 'query' => ['voucher_type' => 'payment'], 'permission' => 'voucher.view'],
                 ['label' => 'Receipt Voucher', 'route' => 'accounting.vouchers.index', 'query' => ['voucher_type' => 'receipt'], 'permission' => 'voucher.view'],

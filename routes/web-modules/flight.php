@@ -10,6 +10,13 @@ Route::middleware(['auth', 'permission:flight.view'])->group(function () {
 });
 
 Route::middleware(['auth', 'permission:flight.create'])->group(function () {
+    Route::get('airlines/create', [FlightSupportController::class, 'createAirline'])->name('airlines.create');
+    Route::post('airlines', [FlightSupportController::class, 'storeAirline'])->name('airlines.store');
+    Route::get('travel-agencies/create', [FlightSupportController::class, 'createTravelAgency'])->name('travel-agencies.create');
+    Route::post('travel-agencies', [FlightSupportController::class, 'storeTravelAgency'])->name('travel-agencies.store');
+});
+
+Route::middleware(['auth', 'permission:flight.create'])->group(function () {
     Route::get('flights/create', [FlightController::class, 'create'])->name('flights.create');
     Route::post('flights', [FlightController::class, 'store'])->name('flights.store');
 });

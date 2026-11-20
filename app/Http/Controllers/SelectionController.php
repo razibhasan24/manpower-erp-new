@@ -8,6 +8,7 @@ use App\Http\Requests\Selection\UpdateSelectionRequest;
 use App\Models\Selection;
 use App\Models\Recruitment;
 use App\Models\GradingCriterion;
+use App\Models\Account;
 use App\Services\SelectionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -59,11 +60,15 @@ class SelectionController extends Controller
         $this->authorize('create', Selection::class);
 
         $recruitments = Recruitment::visibleTo($request->user())
+            ->with(['agent', 'passportHolder'])
             ->orderByDesc('id')
             ->limit(200)
             ->get();
 
-        return view('selections.create', compact('recruitments'));
+        $cashAccounts = Account::whereIn('code', ['1110', '1120'])
+            ->where('status', 'active')->orderBy('code')->get();
+
+        return view('selections.create', compact('recruitments', 'cashAccounts'));
     }
 
     public function store(StoreSelectionRequest $request)
@@ -106,13 +111,18 @@ class SelectionController extends Controller
         $this->authorize('update', $selection);
 
         $recruitments = Recruitment::visibleTo(auth()->user())
+            ->with(['agent', 'passportHolder'])
             ->orderByDesc('id')
             ->limit(200)
             ->get();
 
+        $cashAccounts = Account::whereIn('code', ['1110', '1120'])
+            ->where('status', 'active')->orderBy('code')->get();
+
         return view('selections.edit', [
             'record' => $selection,
             'recruitments' => $recruitments,
+            'cashAccounts' => $cashAccounts,
         ]);
     }
 

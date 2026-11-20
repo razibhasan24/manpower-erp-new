@@ -8,6 +8,7 @@ use App\Models\Visa;
 use App\Models\VisaLot;
 use App\Models\WorkPermit;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class VisaRegisterController extends Controller
@@ -22,6 +23,31 @@ class VisaRegisterController extends Controller
             ->orderByDesc('id')->paginate(15)->withQueryString();
 
         return view('visa-register.lots', compact('records'));
+    }
+
+    public function createLot(Request $request): View
+    {
+        $this->authorize('create', Visa::class);
+        $countries = \App\Models\Country::visibleTo($request->user())->where('status', 'active')->orderBy('name')->get();
+
+        return view('visa-register.lots-create', compact('countries'));
+    }
+
+    public function storeLot(Request $request)
+    {
+        $this->authorize('create', Visa::class);
+
+        $data = $request->validate([
+            'lot_number' => ['required', 'string', 'max:255', Rule::unique('visa_lots', 'lot_number')],
+            'country_id' => ['nullable', 'integer', 'exists:countries,id'],
+            'status' => ['required', Rule::in(['open', 'submitted', 'closed', 'cancelled'])],
+            'remarks' => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        $lot = VisaLot::create($data);
+        $lot->forceFill(['created_by' => $request->user()->id, 'updated_by' => $request->user()->id])->save();
+
+        return redirect()->route('visa-register.lots')->with('success', __('Visa lot created successfully.'));
     }
 
     public function workPermits(Request $request): View

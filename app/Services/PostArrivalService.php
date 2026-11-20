@@ -127,6 +127,7 @@ class PostArrivalService
             'post_arrival_id' => $postArrival->id,
             'type' => $data['type'], 'description' => $data['description'] ?? null,
             'status' => $data['status'] ?? 'open',
+            'created_by' => $user?->id, 'updated_by' => $user?->id,
         ]);
     }
 }

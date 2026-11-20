@@ -16,10 +16,17 @@
                     </select></div>
                 <div class="mb-3"><label class="form-label">Amount</label><input type="number" step="0.01" min="0.01" name="amount" class="form-control" required></div>
                 <div class="mb-3"><label class="form-label">Date</label><input type="date" name="voucher_date" value="{{ now()->toDateString() }}" class="form-control" required></div>
+                <div class="mb-3"><label class="form-label">Payment Mode</label>
+                    <select id="payment_mode_id" class="form-select">
+                        <option value="">Choose Cash / Bank mode</option>
+                        @foreach($paymentModes as $mode)<option value="{{ $mode->id }}" data-account-id="{{ $mode->account_id }}">{{ $mode->name }} ({{ ucfirst($mode->mode_type) }})</option>@endforeach
+                    </select>
+                    <div class="form-text"><a href="{{ route('accounting.payment-modes.index') }}">Manage payment modes</a></div>
+                </div>
                 <div class="mb-3"><label class="form-label">Debit Account</label>
-                    <select name="debit_account_id" class="form-select">@foreach($accounts as $a)<option value="{{ $a->id }}">{{ $a->code }} — {{ $a->name }}</option>@endforeach</select></div>
+                    <select id="operation_debit_account" name="debit_account_id" class="form-select">@foreach($accounts as $a)<option value="{{ $a->id }}">{{ $a->code }} — {{ $a->name }}</option>@endforeach</select></div>
                 <div class="mb-3"><label class="form-label">Credit Account</label>
-                    <select name="credit_account_id" class="form-select">@foreach($accounts as $a)<option value="{{ $a->id }}">{{ $a->code }} — {{ $a->name }}</option>@endforeach</select></div>
+                    <select id="operation_credit_account" name="credit_account_id" class="form-select">@foreach($accounts as $a)<option value="{{ $a->id }}">{{ $a->code }} — {{ $a->name }}</option>@endforeach</select></div>
                 <div class="mb-3"><label class="form-label">Narration</label><textarea name="narration" class="form-control" rows="2"></textarea></div>
                 <button type="submit" class="btn btn-primary">Post Operation</button>
             </form>
@@ -48,4 +55,19 @@
         </div></div>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const mode = document.getElementById('payment_mode_id');
+    const operation = document.querySelector('select[name="operation"]');
+    const debit = document.getElementById('operation_debit_account');
+    const credit = document.getElementById('operation_credit_account');
+    const debitOperations = ['daily_income', 'agent_due_collection', 'candidate_payment'];
+
+    mode?.addEventListener('change', function () {
+        const accountId = this.options[this.selectedIndex]?.dataset.accountId;
+        if (!accountId) return;
+        (debitOperations.includes(operation.value) ? debit : credit).value = accountId;
+    });
+});
+</script>
 @endsection

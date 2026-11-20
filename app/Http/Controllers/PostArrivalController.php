@@ -6,9 +6,12 @@ use App\Http\Requests\PostArrival\ChangePostArrivalStatusRequest;
 use App\Http\Requests\PostArrival\StorePostArrivalRequest;
 use App\Http\Requests\PostArrival\UpdatePostArrivalRequest;
 use App\Models\PostArrival;
+use App\Models\Recruitment;
 use App\Services\PostArrivalService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class PostArrivalController extends Controller
 {
@@ -29,6 +32,90 @@ class PostArrivalController extends Controller
         $this->authorize('create', PostArrival::class);
         $recruitments = \App\Models\Recruitment::visibleTo($request->user())->orderByDesc('id')->limit(200)->get();
         return view('post-arrivals.create', compact('recruitments'));
+    }
+
+    public function createAirportPickup(Request $request): View
+    {
+        return $this->createRegister($request, 'airport-pickup');
+    }
+
+    public function createEmployerInformation(Request $request): View
+    {
+        return $this->createRegister($request, 'employer-information');
+    }
+
+    public function createAccommodation(Request $request): View
+    {
+        return $this->createRegister($request, 'accommodation');
+    }
+
+    public function createCandidateFeedback(Request $request): View
+    {
+        return $this->createRegister($request, 'candidate-feedback');
+    }
+
+    public function storeAirportPickup(Request $request)
+    {
+        return $this->storeRegister($request, 'airport-pickup');
+    }
+
+    public function storeEmployerInformation(Request $request)
+    {
+        return $this->storeRegister($request, 'employer-information');
+    }
+
+    public function storeAccommodation(Request $request)
+    {
+        return $this->storeRegister($request, 'accommodation');
+    }
+
+    public function storeCandidateFeedback(Request $request)
+    {
+        return $this->storeRegister($request, 'candidate-feedback');
+    }
+
+    private function createRegister(Request $request, string $register): View
+    {
+        $this->authorize('create', PostArrival::class);
+        $recruitments = Recruitment::visibleTo($request->user())
+            ->with('passportHolder')->orderByDesc('id')->limit(300)->get();
+        $titles = [
+            'airport-pickup' => __('Create Airport Pickup'),
+            'employer-information' => __('Add Employer Information'),
+            'accommodation' => __('Add Accommodation'),
+            'candidate-feedback' => __('Add Candidate Feedback'),
+        ];
+
+        return view('post-arrivals.register-create', compact('register', 'recruitments', 'titles'));
+    }
+
+    private function storeRegister(Request $request, string $register)
+    {
+        $this->authorize('create', PostArrival::class);
+
+        $fieldRules = match ($register) {
+            'airport-pickup' => [],
+            'employer-information' => ['employer_contact' => ['required', 'string', 'max:255']],
+            'accommodation' => ['accommodation' => ['required', 'string', 'max:5000']],
+            'candidate-feedback' => ['feedback' => ['required', 'string', 'max:5000']],
+            default => abort(404),
+        };
+        $data = $request->validate(array_merge([
+            'recruitment_id' => ['required', 'integer', Rule::exists('recruitments', 'id')],
+            'arrival_date' => ['nullable', 'date'],
+            'status' => ['required', Rule::in(PostArrivalService::STATUSES)],
+        ], $fieldRules));
+        $recruitment = Recruitment::visibleTo($request->user())->findOrFail($data['recruitment_id']);
+        if ($register === 'airport-pickup') {
+            $data['airport_pickup'] = true;
+        }
+
+        $record = PostArrival::visibleTo($request->user())->where('recruitment_id', $recruitment->id)->latest('id')->first();
+        $record = $record && $request->user()->can('update', $record)
+            ? $this->service->update($record, $data, $request->user())
+            : $this->service->create($data, $request->user());
+
+        return redirect()->route($register.'.index')->with('success', __('Post-arrival information saved successfully.'));
     }
 
     public function store(StorePostArrivalRequest $request)

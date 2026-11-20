@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', __('Visa Lots'))
 @section('content')
-<h1 class="mb-3">{{ __('Visa Lots') }}</h1>
+<div class="d-flex justify-content-between align-items-center mb-3"><h1 class="mb-0">{{ __('Visa Lots') }}</h1>@can('visa.create')<a class="btn btn-primary" href="{{ route('visa-register.lots.create') }}">{{ __('Create Lot') }}</a>@endcan</div>
 <form method="GET" class="row g-2 mb-3">
     <div class="col-md-5"><input name="search" value="{{ request('search') }}" class="form-control" placeholder="{{ __('Search lot number') }}"></div>
     <div class="col-md-3"><select name="status" class="form-select"><option value="">{{ __('All statuses') }}</option>@foreach(['open','submitted','closed','cancelled'] as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ __(ucfirst($status)) }}</option>@endforeach</select></div>

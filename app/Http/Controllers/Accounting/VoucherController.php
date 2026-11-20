@@ -7,6 +7,7 @@ use App\Http\Requests\ReverseVoucherRequest;
 use App\Http\Requests\StoreVoucherRequest;
 use App\Http\Resources\VoucherResource;
 use App\Models\Voucher;
+use App\Models\PaymentMode;
 use App\Services\ChartOfAccountsService;
 use App\Services\VoucherService;
 use Illuminate\Http\Request;
@@ -50,6 +51,7 @@ class VoucherController extends Controller
 
         return view('accounting.vouchers.create', [
             'accounts' => $this->chart->postingAccounts(),
+            'paymentModes' => PaymentMode::with('account')->where('status', 'active')->whereHas('account', fn ($query) => $query->where('status', 'active'))->orderBy('mode_type')->orderBy('name')->get(),
             'types' => VoucherService::TYPES,
             'operations' => VoucherService::OPERATIONS,
         ]);

@@ -21,6 +21,7 @@ class StoreSelectionRequest extends FormRequest
             'remarks' => ['nullable', 'string'],
             'financial_responsible_type' => ['nullable', 'in:agent,passport_holder'],
             'financial_responsible_id' => ['nullable', 'integer'],
+            'advance_account_id' => ['nullable', 'integer', 'exists:accounts,id'],
             'salary' => ['nullable', 'numeric', 'min:0'],
             'company_service_charge' => ['nullable', 'numeric', 'min:0'],
             'agent_charge' => ['nullable', 'numeric', 'min:0'],

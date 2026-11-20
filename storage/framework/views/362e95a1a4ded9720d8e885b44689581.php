@@ -9,7 +9,18 @@
         <tr><td><?php echo e($partyNames[$row->party_id] ?? ('#'.$row->party_id)); ?></td><td class="text-end"><?php echo e(number_format($row->total_debit, 2)); ?></td>
             <td class="text-end"><?php echo e(number_format($row->total_credit, 2)); ?></td>
             <td class="text-end"><?php echo e(number_format($row->balance, 2)); ?></td>
-            <td class="text-end"><a href="<?php echo e(route('reports.financial.sub-ledger', ['type' => $type, 'id' => $row->party_id])); ?>" class="btn btn-sm btn-outline-primary">Ledger</a></td></tr>
+            <td class="text-end">
+                <a href="<?php echo e(route('reports.financial.sub-ledger', ['type' => $type, 'id' => $row->party_id])); ?>" class="btn btn-sm btn-outline-primary">Ledger</a>
+                <?php if($type === 'passport_holder'): ?>
+                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('create', \App\Models\Voucher::class)): ?>
+                        <?php if($row->balance > 0): ?>
+                            <a href="<?php echo e(route('reports.financial.sub-ledger.transaction.create', ['type' => $type, 'id' => $row->party_id, 'action' => 'receive'])); ?>" class="btn btn-sm btn-success">Receive</a>
+                        <?php elseif($row->balance < 0): ?>
+                            <a href="<?php echo e(route('reports.financial.sub-ledger.transaction.create', ['type' => $type, 'id' => $row->party_id, 'action' => 'pay'])); ?>" class="btn btn-sm btn-outline-danger">Pay</a>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </td></tr>
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
         <tr><td colspan="5" class="text-center text-muted py-4">No outstanding dues.</td></tr>
     <?php endif; ?>

@@ -12,6 +12,11 @@ Route::middleware(['auth', 'permission:visa.view'])->group(function () {
 });
 
 Route::middleware(['auth', 'permission:visa.create'])->group(function () {
+    Route::get('visa-lots/create', [VisaRegisterController::class, 'createLot'])->name('visa-register.lots.create');
+    Route::post('visa-lots', [VisaRegisterController::class, 'storeLot'])->name('visa-register.lots.store');
+});
+
+Route::middleware(['auth', 'permission:visa.create'])->group(function () {
     Route::get('visas/create', [VisaController::class, 'create'])->name('visas.create');
     Route::post('visas', [VisaController::class, 'store'])->name('visas.store');
 });

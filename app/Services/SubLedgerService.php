@@ -65,6 +65,7 @@ class SubLedgerService
         $this->assertType($type);
 
         $totals = $this->baseQuery($type, $id)
+            ->select([])
             ->selectRaw('COALESCE(SUM(journal_entry_lines.debit),0) as debit, COALESCE(SUM(journal_entry_lines.credit),0) as credit')
             ->first();
 
@@ -118,6 +119,7 @@ class SubLedgerService
 
         $totals = $this->baseQuery($type, $id)
             ->whereDate('journal_entries.entry_date', '<', $from)
+            ->select([])
             ->selectRaw('COALESCE(SUM(journal_entry_lines.debit),0) as debit, COALESCE(SUM(journal_entry_lines.credit),0) as credit')
             ->first();
 

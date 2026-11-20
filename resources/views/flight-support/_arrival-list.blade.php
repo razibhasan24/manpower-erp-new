@@ -1,3 +1,4 @@
+@can('post-arrival.create')<div class="d-flex justify-content-end mb-3"><a class="btn btn-primary" href="{{ $createUrl }}">{{ __('Create') }}</a></div>@endcan
 <form method="GET" class="row g-2 mb-3">
     <div class="col-md-5"><input name="search" value="{{ request('search') }}" class="form-control" placeholder="{{ __('Search tracking or candidate') }}"></div>
     <div class="col-md-3"><select name="status" class="form-select"><option value="">{{ __('All statuses') }}</option>@foreach(['pending','arrived','settled','issue_reported','completed'] as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ __(ucwords(str_replace('_', ' ', $status))) }}</option>@endforeach</select></div>

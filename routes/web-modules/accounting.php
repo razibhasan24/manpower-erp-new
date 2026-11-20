@@ -4,6 +4,7 @@ use App\Http\Controllers\Accounting\AccountController;
 use App\Http\Controllers\Accounting\AccountTypeController;
 use App\Http\Controllers\Accounting\JournalEntryController;
 use App\Http\Controllers\Accounting\VoucherController;
+use App\Http\Controllers\Accounting\PaymentModeController;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -18,6 +19,10 @@ Route::middleware(['auth', 'verified'])->prefix('accounting')->name('accounting.
         ->middleware('permission:account_type.view');
 
     Route::resource('accounts', AccountController::class)
+        ->middleware('permission:account.view');
+
+    Route::resource('payment-modes', PaymentModeController::class)
+        ->only(['index', 'create', 'store', 'edit', 'update', 'destroy'])
         ->middleware('permission:account.view');
 
     Route::resource('vouchers', VoucherController::class)

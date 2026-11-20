@@ -29,4 +29,10 @@ Route::middleware([
 
     Route::get('sub-ledgers/{type}/{id}', [SubLedgerController::class, 'show'])->whereNumber('id')->name('sub-ledger');
     Route::get('sub-ledgers/{type}/due-list', [SubLedgerController::class, 'dueList'])->name('sub-ledger.due-list');
+    Route::get('sub-ledgers/{type}/{id}/transactions/{action}', [SubLedgerController::class, 'transactionForm'])
+        ->whereNumber('id')->where('type', 'passport_holder')->whereIn('action', ['receive', 'pay'])
+        ->name('sub-ledger.transaction.create')->middleware('permission:voucher.create');
+    Route::post('sub-ledgers/{type}/{id}/transactions/{action}', [SubLedgerController::class, 'storeTransaction'])
+        ->whereNumber('id')->where('type', 'passport_holder')->whereIn('action', ['receive', 'pay'])
+        ->name('sub-ledger.transaction.store')->middleware('permission:voucher.create');
 });

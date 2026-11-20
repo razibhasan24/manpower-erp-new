@@ -7,6 +7,7 @@ use App\Models\Flight;
 use App\Models\PostArrival;
 use App\Models\TravelAgency;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class FlightSupportController extends Controller
@@ -25,6 +26,28 @@ class FlightSupportController extends Controller
         return view('flight-support.airlines', compact('records'));
     }
 
+    public function createAirline(): View
+    {
+        $this->authorize('create', Flight::class);
+
+        return view('flight-support.airlines-create');
+    }
+
+    public function storeAirline(Request $request)
+    {
+        $this->authorize('create', Flight::class);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'code' => ['nullable', 'string', 'max:10', Rule::unique('airlines', 'code')],
+            'status' => ['required', Rule::in(['active', 'inactive'])],
+        ]);
+
+        Airline::create($data);
+
+        return redirect()->route('airlines.index')->with('success', __('Airline created successfully.'));
+    }
+
     public function travelAgencies(Request $request): View
     {
         $this->authorize('viewAny', Flight::class);
@@ -39,6 +62,30 @@ class FlightSupportController extends Controller
             ->orderBy('name')->paginate(15)->withQueryString();
 
         return view('flight-support.travel-agencies', compact('records'));
+    }
+
+    public function createTravelAgency(): View
+    {
+        $this->authorize('create', Flight::class);
+
+        return view('flight-support.travel-agencies-create');
+    }
+
+    public function storeTravelAgency(Request $request)
+    {
+        $this->authorize('create', Flight::class);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'address' => ['nullable', 'string', 'max:5000'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'status' => ['required', Rule::in(['active', 'inactive'])],
+        ]);
+
+        TravelAgency::create($data);
+
+        return redirect()->route('travel-agencies.index')->with('success', __('Travel agency created successfully.'));
     }
 
     public function airportPickup(Request $request): View

@@ -20,6 +20,8 @@ class ArrivalSupport extends Model
         'description',
         'status',
         'resolved_at',
+        'created_by',
+        'updated_by',
     ];
 
     protected $casts = [

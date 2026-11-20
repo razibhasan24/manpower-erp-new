@@ -23,6 +23,8 @@ class PostArrival extends Model
         'accommodation',
         'feedback',
         'status',
+        'created_by',
+        'updated_by',
     ];
 
     protected $casts = [

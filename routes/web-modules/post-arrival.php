@@ -17,6 +17,18 @@ Route::middleware(['auth', 'permission:post-arrival.view'])->group(function () {
 Route::middleware(['auth', 'permission:post-arrival.create'])->group(function () {
     Route::get('post-arrivals/create', [PostArrivalController::class, 'create'])->name('post-arrivals.create');
     Route::post('post-arrivals', [PostArrivalController::class, 'store'])->name('post-arrivals.store');
+    Route::get('airport-pickup/create', [PostArrivalController::class, 'createAirportPickup'])->name('airport-pickup.create');
+    Route::post('airport-pickup', [PostArrivalController::class, 'storeAirportPickup'])->name('airport-pickup.store');
+    Route::get('employer-information/create', [PostArrivalController::class, 'createEmployerInformation'])->name('employer-information.create');
+    Route::post('employer-information', [PostArrivalController::class, 'storeEmployerInformation'])->name('employer-information.store');
+    Route::get('accommodation/create', [PostArrivalController::class, 'createAccommodation'])->name('accommodation.create');
+    Route::post('accommodation', [PostArrivalController::class, 'storeAccommodation'])->name('accommodation.store');
+    Route::get('candidate-feedback/create', [PostArrivalController::class, 'createCandidateFeedback'])->name('candidate-feedback.create');
+    Route::post('candidate-feedback', [PostArrivalController::class, 'storeCandidateFeedback'])->name('candidate-feedback.store');
+    Route::get('post-arrival-complaints/create', [PostArrivalRegistersController::class, 'createComplaint'])->name('post-arrival-complaints.create');
+    Route::post('post-arrival-complaints', [PostArrivalRegistersController::class, 'storeComplaint'])->name('post-arrival-complaints.store');
+    Route::get('follow-ups/create', [PostArrivalRegistersController::class, 'createFollowUp'])->name('follow-ups.create');
+    Route::post('follow-ups', [PostArrivalRegistersController::class, 'storeFollowUp'])->name('follow-ups.store');
 });
 Route::middleware(['auth', 'permission:post-arrival.view'])->group(function () {
     Route::get('post-arrivals', [PostArrivalController::class, 'index'])->name('post-arrivals.index');

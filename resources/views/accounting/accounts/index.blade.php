@@ -3,7 +3,10 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Chart of Accounts</h1>
-    <a href="{{ route('accounting.accounts.create') }}" class="btn btn-primary">Add Account</a>
+    <div class="d-flex gap-2">
+        <a href="{{ route('accounting.payment-modes.index') }}" class="btn btn-outline-primary">Payment Modes</a>
+        <a href="{{ route('accounting.accounts.create') }}" class="btn btn-primary">Add Account</a>
+    </div>
 </div>
 @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
