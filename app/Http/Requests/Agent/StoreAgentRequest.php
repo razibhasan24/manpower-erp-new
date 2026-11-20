@@ -21,13 +21,13 @@ class StoreAgentRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:30'],
-            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['required', 'string', 'max:30', 'unique:users,phone'],
+            'password' => ['required', 'string', 'min:8'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'address' => ['nullable', 'string'],
             'nid' => ['nullable', 'string', 'max:50'],
             'trade_license' => ['nullable', 'string', 'max:100'],
             'branch_id' => ['required', 'integer', 'exists:branches,id'],
-            'user_id' => ['nullable', 'integer', 'exists:users,id'],
             'country_ids' => ['nullable', 'array'],
             'country_ids.*' => ['integer', 'exists:countries,id'],
             'status' => ['required', 'in:active,inactive'],

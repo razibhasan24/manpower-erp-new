@@ -27,7 +27,7 @@
             <div class="mb-3">
                 <label for="email" class="form-label">{{ __('Email address') }}</label>
                 <input
-                    type="email"
+                    type="text"
                     name="email"
                     id="email"
                     class="form-control @error('email') is-invalid @enderror"
@@ -35,8 +35,8 @@
                     required
                     autofocus
                     autocomplete="username"
-                    inputmode="email"
-                    placeholder="name@company.com"
+                    inputmode="text"
+                    placeholder="name@example.com"
                 >
                 @error('email')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -88,7 +88,7 @@
         </form>
 
         <p class="auth-help text-center mt-3 mb-0">
-            {{ __('Use your assigned work email. Contact your administrator if you cannot sign in.') }}
+            {{ __('Use the email address registered to your account. Contact your administrator if you cannot sign in.') }}
         </p>
     </div>
 @endsection

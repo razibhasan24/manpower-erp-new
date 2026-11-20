@@ -81,7 +81,7 @@
             <div class="mb-3">
                 <label for="email" class="form-label"><?php echo e(__('Email address')); ?></label>
                 <input
-                    type="email"
+                    type="text"
                     name="email"
                     id="email"
                     class="form-control <?php $__errorArgs = ['email'];
@@ -96,8 +96,8 @@ unset($__errorArgs, $__bag); ?>"
                     required
                     autofocus
                     autocomplete="username"
-                    inputmode="email"
-                    placeholder="name@company.com"
+                    inputmode="text"
+                    placeholder="name@example.com"
                 >
                 <?php $__errorArgs = ['email'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -208,7 +208,7 @@ unset($__errorArgs, $__bag); ?>
         </form>
 
         <p class="auth-help text-center mt-3 mb-0">
-            <?php echo e(__('Use your assigned work email. Contact your administrator if you cannot sign in.')); ?>
+            <?php echo e(__('Use the email address registered to your account. Contact your administrator if you cannot sign in.')); ?>
 
         </p>
     </div>

@@ -2,21 +2,23 @@
 <?php $__env->startSection('content'); ?>
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Employees</h1>
-    <a href="<?php echo e(route('hrm.employees.create')); ?>" class="btn btn-primary">Add Employee</a>
+    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('employee.create')): ?><a href="<?php echo e(route('hrm.employees.create')); ?>" class="btn btn-primary">Add Employee</a><?php endif; ?>
 </div>
 <?php if(session('success')): ?>
     <div class="alert alert-success"><?php echo e(session('success')); ?></div>
 <?php endif; ?>
 <form method="GET" class="row g-2 mb-3">
-    <div class="col-md-4"><input type="text" name="search" value="<?php echo e(request('search')); ?>" class="form-control" placeholder="Search..."></div>
+    <div class="col-md-4"><input type="text" name="search" value="<?php echo e(request('search')); ?>" class="form-control" placeholder="Employee code, name or email..."></div>
+    <div class="col-md-3"><select name="status" class="form-select"><option value="">All statuses</option><?php $__currentLoopData = ['active','inactive','terminated']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $status): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($status); ?>" <?php if(request('status') === $status): echo 'selected'; endif; ?>><?php echo e(ucfirst($status)); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?></select></div>
     <div class="col-auto"><button class="btn btn-secondary" type="submit">Search</button></div>
+    <div class="col-auto"><a href="<?php echo e(route('hrm.employees.index')); ?>" class="btn btn-outline-secondary">Clear</a></div>
 </form>
 <div class="card"><div class="table-responsive">
 <table class="table table-striped mb-0">
     <thead><tr><th>Code</th><th>Name</th><th>Department</th><th>Designation</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
     <tbody>
     <?php $__empty_1 = true; $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-        <tr><td><?php echo e($item->employee_code); ?></td><td><?php echo e($item->user->name ?? '—'); ?></td><td><?php echo e($item->department->name ?? ''); ?></td><td><?php echo e($item->designation->name ?? ''); ?></td><td><?php if (isset($component)) { $__componentOriginal2ddbc40e602c342e508ac696e52f8719 = $component; } ?>
+        <tr><td><?php echo e($item->employee_code); ?></td><td><?php echo e($item->name ?: ($item->user?->name ?? '—')); ?></td><td><?php echo e($item->department?->name ?? '—'); ?></td><td><?php echo e($item->designation?->name ?? '—'); ?></td><td><?php if (isset($component)) { $__componentOriginal2ddbc40e602c342e508ac696e52f8719 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal2ddbc40e602c342e508ac696e52f8719 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.badge','data' => ['status' => $item->status]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('badge'); ?>
@@ -38,7 +40,8 @@
 <?php endif; ?></td>
             <td class="text-end">
                 <a href="<?php echo e(route('hrm.employees.show', $item)); ?>" class="btn btn-sm btn-outline-primary">View</a>
-                <a href="<?php echo e(route('hrm.employees.edit', $item)); ?>" class="btn btn-sm btn-outline-secondary">Edit</a>
+                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('employee.update')): ?><a href="<?php echo e(route('hrm.employees.edit', $item)); ?>" class="btn btn-sm btn-outline-secondary">Edit</a><?php endif; ?>
+                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('employee.delete')): ?><form method="POST" action="<?php echo e(route('hrm.employees.destroy', $item)); ?>" class="d-inline" onsubmit="return confirm('Deactivate this employee?')"><?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?><button class="btn btn-sm btn-outline-danger" type="submit">Deactivate</button></form><?php endif; ?>
             </td>
         </tr>
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>

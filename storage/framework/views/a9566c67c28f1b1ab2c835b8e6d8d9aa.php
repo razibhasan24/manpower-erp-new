@@ -258,6 +258,29 @@ endif;
 unset($__errorArgs, $__bag); ?>
     </div>
 
+    <?php if(!isset($passport_holder)): ?>
+        <div class="col-xl-3 col-lg-3 col-md-6"><?php if (isset($component)) { $__componentOriginalc2fcfa88dc54fee60e0757a7e0572df1 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc2fcfa88dc54fee60e0757a7e0572df1 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.input','data' => ['type' => 'password','name' => 'password','label' => 'Login Password (min. 8 characters)','required' => true,'autocomplete' => 'new-password']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('input'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['type' => 'password','name' => 'password','label' => 'Login Password (min. 8 characters)','required' => true,'autocomplete' => 'new-password']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalc2fcfa88dc54fee60e0757a7e0572df1)): ?>
+<?php $attributes = $__attributesOriginalc2fcfa88dc54fee60e0757a7e0572df1; ?>
+<?php unset($__attributesOriginalc2fcfa88dc54fee60e0757a7e0572df1); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc2fcfa88dc54fee60e0757a7e0572df1)): ?>
+<?php $component = $__componentOriginalc2fcfa88dc54fee60e0757a7e0572df1; ?>
+<?php unset($__componentOriginalc2fcfa88dc54fee60e0757a7e0572df1); ?>
+<?php endif; ?></div>
+    <?php endif; ?>
+
     <div class="col-xl-3 col-lg-3 col-md-6">
         <label for="present_address" class="form-label">Present Address</label>
         <textarea id="present_address" name="present_address" rows="3"

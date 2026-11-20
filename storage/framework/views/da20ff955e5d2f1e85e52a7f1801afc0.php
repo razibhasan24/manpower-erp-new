@@ -1,19 +1,15 @@
-<p class="text-muted"><?php echo e(__('Employee name and email are taken from the linked user account.')); ?></p>
 <div class="row g-3 mb-3">
     <div class="col-md-6">
-        <label for="user_id" class="form-label"><?php echo e(__('Linked user')); ?> <span class="text-danger">*</span></label>
-        <select id="user_id" name="user_id" class="form-select <?php $__errorArgs = ['user_id'];
+        <label for="name" class="form-label"><?php echo e(__('Employee name')); ?> <span class="text-danger">*</span></label>
+        <input id="name" name="name" value="<?php echo e(old('name', $item->name ?? $item->user?->name ?? '')); ?>" class="form-control <?php $__errorArgs = ['name'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" required>
-            <option value=""><?php echo e(__('Select a user')); ?></option>
-            <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($user->id); ?>" <?php if((string) old('user_id', $item->user_id ?? '') === (string) $user->id): echo 'selected'; endif; ?>><?php echo e($user->name); ?> — <?php echo e($user->email); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        </select>
-        <?php $__errorArgs = ['user_id'];
+unset($__errorArgs, $__bag); ?>" maxlength="255" required>
+        <?php $__errorArgs = ['name'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -21,7 +17,6 @@ $message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
-        <?php if($users->isEmpty()): ?><div class="form-text text-warning"><?php echo e(__('No unassigned users are available. Create a user account first or select the current employee account.')); ?></div><?php endif; ?>
     </div>
     <div class="col-md-6">
         <label for="employee_code" class="form-label"><?php echo e(__('Employee code')); ?> <span class="text-danger">*</span></label>

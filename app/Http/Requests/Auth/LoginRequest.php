@@ -24,7 +24,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string'],
             'remember' => ['sometimes', 'boolean'],
         ];
@@ -34,11 +34,13 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $identifier = $this->string('email')->toString();
+        $field = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+        if (! Auth::attempt([$field => $identifier, 'password' => $this->input('password')], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             LoginHistory::create([
-                'user_id' => \App\Models\User::where('email', $this->input('email'))->value('id'),
+                'user_id' => \App\Models\User::where($field, $identifier)->value('id'),
                 'ip_address' => $this->ip(),
                 'user_agent' => $this->userAgent(),
                 'login_at' => now(),

@@ -62,6 +62,10 @@
         @enderror
     </div>
 
+    @if (!isset($passport_holder))
+        <div class="col-xl-3 col-lg-3 col-md-6"><x-input type="password" name="password" label="Login Password (min. 8 characters)" required autocomplete="new-password" /></div>
+    @endif
+
     <div class="col-xl-3 col-lg-3 col-md-6">
         <label for="present_address" class="form-label">Present Address</label>
         <textarea id="present_address" name="present_address" rows="3"

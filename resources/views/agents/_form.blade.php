@@ -14,6 +14,10 @@
         @enderror
     </div>
 
+    @if (!isset($agent))
+        <div class="col-md-4"><x-input type="password" name="password" label="Login Password (min. 8 characters)" required autocomplete="new-password" /></div>
+    @endif
+
     <div class="col-md-4">
         <x-input type="email" name="email" label="Email" :value="old('email', $agent->email ?? '')" />
         @error('email')
@@ -54,21 +58,6 @@
             @endforeach
         </select>
         @error('branch_id')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-
-    <div class="col-md-4">
-        <label for="user_id" class="form-label">Login User (optional)</label>
-        <select id="user_id" name="user_id" class="form-select @error('user_id') is-invalid @enderror">
-            <option value="">-- Select --</option>
-            @foreach ($users as $option)
-                <option value="{{ $option->id }}" @selected((string) old('user_id', (string) ($agent->user_id ?? '')) === (string) $option->id)>
-                    {{ $option->name }}
-                </option>
-            @endforeach
-        </select>
-        @error('user_id')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>

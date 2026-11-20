@@ -118,6 +118,81 @@ class AccessAdministrationController extends Controller
         return view('access-administration.users', compact('users'));
     }
 
+    public function editUser(Request $request, User $user): View
+    {
+        $this->authorize('update', $user);
+        abort_unless($request->user()->can('role.manage'), 403);
+        [$roles, $permissions, $branches, $countries] = $this->userAssignmentOptions($request->user());
+        abort_if($user->roles->contains('name', 'Super Admin'), 404);
+
+        return view('access-administration.create-user', compact('user', 'roles', 'permissions', 'branches', 'countries'));
+    }
+
+    public function updateUser(Request $request, User $user)
+    {
+        $this->authorize('update', $user);
+        abort_unless($request->user()->can('role.manage'), 403);
+        abort_if($user->roles()->where('name', 'Super Admin')->exists(), 404);
+        [$roles, $permissions, $branches, $countries] = $this->userAssignmentOptions($request->user());
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'role_id' => ['required', 'integer', Rule::in($roles->pluck('id')->all())],
+            'permission_ids' => ['nullable', 'array'],
+            'permission_ids.*' => ['integer', Rule::in($permissions->pluck('id')->all())],
+            'branch_id' => ['nullable', 'integer', Rule::in($branches->pluck('id')->all())],
+            'branch_ids' => ['nullable', 'array'], 'branch_ids.*' => ['integer', Rule::in($branches->pluck('id')->all())],
+            'country_ids' => ['nullable', 'array'], 'country_ids.*' => ['integer', Rule::in($countries->pluck('id')->all())],
+            'status' => ['required', Rule::in(['active', 'inactive', 'suspended'])],
+        ]);
+
+        DB::transaction(function () use ($user, $validated, $roles, $permissions) {
+            $data = collect($validated)->only(['name', 'email', 'phone', 'status', 'branch_id'])->all();
+            if (! empty($validated['password'])) {
+                $data['password'] = Hash::make($validated['password']);
+                $data['must_change_password'] = true;
+            }
+            $user->update($data);
+            $user->syncRoles($roles->firstWhere('id', (int) $validated['role_id']));
+            $user->syncPermissions($permissions->whereIn('id', $validated['permission_ids'] ?? []));
+            $branchIds = collect($validated['branch_ids'] ?? [])->map(fn ($id) => (int) $id);
+            if (! empty($validated['branch_id'])) $branchIds->push((int) $validated['branch_id']);
+            $user->branches()->sync($branchIds->unique()->values()->all());
+            $user->countries()->sync($validated['country_ids'] ?? []);
+        });
+
+        return redirect()->route('users.index')->with('success', __('User updated successfully.'));
+    }
+
+    public function editRole(Request $request, Role $role): View
+    {
+        abort_unless($request->user()->can('role.manage'), 403);
+        abort_if($role->name === 'Super Admin' || $role->guard_name !== 'web', 404);
+        $permissions = Permission::where('guard_name', 'web')
+            ->whereIn('name', $request->user()->getAllPermissions()->pluck('name'))
+            ->orderBy('name')->get();
+
+        return view('access-administration.edit-role', compact('role', 'permissions'));
+    }
+
+    public function updateRole(Request $request, Role $role)
+    {
+        abort_unless($request->user()->can('role.manage'), 403);
+        abort_if($role->name === 'Super Admin' || $role->guard_name !== 'web', 404);
+        $permissions = Permission::where('guard_name', 'web')
+            ->whereIn('name', $request->user()->getAllPermissions()->pluck('name'))
+            ->get();
+        $validated = $request->validate([
+            'permission_ids' => ['nullable', 'array'],
+            'permission_ids.*' => ['integer', Rule::in($permissions->pluck('id')->all())],
+        ]);
+        $role->syncPermissions($permissions->whereIn('id', $validated['permission_ids'] ?? []));
+
+        return redirect()->route('roles.index')->with('success', __('Role permissions updated successfully.'));
+    }
+
     public function createUser(Request $request): View
     {
         $this->authorize('create', User::class);

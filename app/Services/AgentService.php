@@ -46,9 +46,23 @@ class AgentService
     {
         return DB::transaction(function () use ($data, $user) {
             $countryIds = $data['country_ids'] ?? [];
-            unset($data['country_ids']);
+            $password = $data['password'];
+            unset($data['country_ids'], $data['password'], $data['user_id']);
+
+            if (User::where('phone', $data['phone'])->exists()) {
+                throw ValidationException::withMessages(['phone' => 'This mobile number already has a login account.']);
+            }
+
+            $accountUser = User::create([
+                'name' => $data['name'], 'phone' => $data['phone'], 'email' => $data['email'],
+                'password' => $password, 'branch_id' => $data['branch_id'], 'status' => $data['status'] === 'active' ? 'active' : 'inactive',
+                'must_change_password' => false,
+            ]);
+            $accountUser->assignRole('Agent');
 
             $agent = Agent::create($data);
+            $agent->user_id = $accountUser->id;
+            $agent->save();
             $agent->forceFill(['created_by' => $user->id, 'updated_by' => $user->id])->save();
 
             if (! empty($countryIds)) {

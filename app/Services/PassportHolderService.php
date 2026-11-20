@@ -54,6 +54,25 @@ class PassportHolderService
         return DB::transaction(function () use ($data, $user) {
             $this->assertPassportNumberAvailable($data['passport_number'] ?? null, null);
 
+            $password = $data['password'];
+            unset($data['password']);
+            if ($user->hasRole('Agent')) {
+                $data['agent_id'] = $user->agent?->id;
+                if (! $data['agent_id']) {
+                    throw ValidationException::withMessages(['agent_id' => 'Your account is not linked to an agent profile.']);
+                }
+            }
+            if (User::where('phone', $data['phone'])->exists()) {
+                throw ValidationException::withMessages(['phone' => 'This mobile number already has a login account.']);
+            }
+            $accountUser = User::create([
+                'name' => $data['full_name'], 'phone' => $data['phone'], 'email' => $data['email'],
+                'password' => $password, 'branch_id' => $data['branch_id'], 'status' => $data['status'] === 'active' ? 'active' : 'inactive',
+                'must_change_password' => false,
+            ]);
+            $accountUser->assignRole('Passport Holder');
+            $data['user_id'] = $accountUser->id;
+
             $photo = $data['photo'] ?? null;
             unset($data['photo']);
 

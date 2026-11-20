@@ -22,4 +22,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware(['permission:user.create', 'permission:role.manage'])->name('users.create');
     Route::post('users', [AccessAdministrationController::class, 'storeUser'])
         ->middleware(['permission:user.create', 'permission:role.manage'])->name('users.store');
+    Route::get('users/{user}/edit', [AccessAdministrationController::class, 'editUser'])
+        ->middleware(['permission:user.edit', 'permission:role.manage'])->name('users.edit');
+    Route::put('users/{user}', [AccessAdministrationController::class, 'updateUser'])
+        ->middleware(['permission:user.edit', 'permission:role.manage'])->name('users.update');
+    Route::get('roles/{role}/edit', [AccessAdministrationController::class, 'editRole'])
+        ->middleware(['permission:role.edit', 'permission:role.manage'])->name('roles.edit');
+    Route::put('roles/{role}', [AccessAdministrationController::class, 'updateRole'])
+        ->middleware(['permission:role.edit', 'permission:role.manage'])->name('roles.update');
 });

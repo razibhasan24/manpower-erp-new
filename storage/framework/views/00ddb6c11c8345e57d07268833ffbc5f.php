@@ -66,6 +66,29 @@ endif;
 unset($__errorArgs, $__bag); ?>
     </div>
 
+    <?php if(!isset($agent)): ?>
+        <div class="col-md-4"><?php if (isset($component)) { $__componentOriginalc2fcfa88dc54fee60e0757a7e0572df1 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc2fcfa88dc54fee60e0757a7e0572df1 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.input','data' => ['type' => 'password','name' => 'password','label' => 'Login Password (min. 8 characters)','required' => true,'autocomplete' => 'new-password']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('input'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['type' => 'password','name' => 'password','label' => 'Login Password (min. 8 characters)','required' => true,'autocomplete' => 'new-password']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalc2fcfa88dc54fee60e0757a7e0572df1)): ?>
+<?php $attributes = $__attributesOriginalc2fcfa88dc54fee60e0757a7e0572df1; ?>
+<?php unset($__attributesOriginalc2fcfa88dc54fee60e0757a7e0572df1); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc2fcfa88dc54fee60e0757a7e0572df1)): ?>
+<?php $component = $__componentOriginalc2fcfa88dc54fee60e0757a7e0572df1; ?>
+<?php unset($__componentOriginalc2fcfa88dc54fee60e0757a7e0572df1); ?>
+<?php endif; ?></div>
+    <?php endif; ?>
+
     <div class="col-md-4">
         <?php if (isset($component)) { $__componentOriginalc2fcfa88dc54fee60e0757a7e0572df1 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc2fcfa88dc54fee60e0757a7e0572df1 = $attributes; } ?>
@@ -206,36 +229,6 @@ unset($__errorArgs, $__bag); ?>" required>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </select>
         <?php $__errorArgs = ['branch_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-            <div class="invalid-feedback"><?php echo e($message); ?></div>
-        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-    </div>
-
-    <div class="col-md-4">
-        <label for="user_id" class="form-label">Login User (optional)</label>
-        <select id="user_id" name="user_id" class="form-select <?php $__errorArgs = ['user_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>">
-            <option value="">-- Select --</option>
-            <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <option value="<?php echo e($option->id); ?>" <?php if((string) old('user_id', (string) ($agent->user_id ?? '')) === (string) $option->id): echo 'selected'; endif; ?>>
-                    <?php echo e($option->name); ?>
-
-                </option>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        </select>
-        <?php $__errorArgs = ['user_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
