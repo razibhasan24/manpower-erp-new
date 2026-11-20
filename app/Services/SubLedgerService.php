@@ -78,8 +78,10 @@ class SubLedgerService
 
         return $this->baseQuery($type, null)
             ->when($branchId, fn ($q) => $q->where('journal_entries.branch_id', $branchId))
-            ->selectRaw('journal_entry_lines.sub_ledger_id as party_id,
-                COALESCE(SUM(journal_entry_lines.debit),0) as total_debit,
+            // dueList is an aggregate query. Clear the detail columns selected
+            // by baseQuery() so ONLY_FULL_GROUP_BY can validate the grouping.
+            ->select('journal_entry_lines.sub_ledger_id as party_id')
+            ->selectRaw('COALESCE(SUM(journal_entry_lines.debit),0) as total_debit,
                 COALESCE(SUM(journal_entry_lines.credit),0) as total_credit,
                 COALESCE(SUM(journal_entry_lines.debit),0) - COALESCE(SUM(journal_entry_lines.credit),0) as balance')
             ->groupBy('journal_entry_lines.sub_ledger_id')

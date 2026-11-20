@@ -4,7 +4,7 @@
 |--------------------------------------------------------------------------
 | Sidebar menu (navigation only — no business logic)
 |--------------------------------------------------------------------------
-| The complete menu required by the master prompt: 22 groups / 186 items.
+| The complete menu required by the master prompt: 24 groups / 190 items.
 |
 | Each item is rendered only when:
 |   - its named route exists (Route::has), and
@@ -67,6 +67,24 @@ return [
                 ['label' => 'Passport Holder Payments', 'route' => 'modules.show', 'params' => ['module' => 'passport-holder-payments'], 'permission' => 'voucher.view'],
                 ['label' => 'Passport Holder Ledger', 'route' => 'reports.financial.sub-ledger.due-list', 'params' => ['type' => 'passport_holder'], 'permission' => ['report.view', 'voucher.view', 'ledger.view']],
                 ['label' => 'Passport Holder Reports', 'route' => 'reports.show', 'params' => ['report' => 'passport-holder'], 'permission' => ['report.view', 'passport-holder.view']],
+            ],
+        ],
+        [
+            'key' => 'student-packages',
+            'label' => 'Student Packages',
+            'icon' => 'graduation-cap',
+            'items' => [
+                ['label' => 'All Student Packages', 'route' => 'service-packages.index', 'params' => ['type' => 'student'], 'permission' => 'student-package.view'],
+                ['label' => 'Add Student Package', 'route' => 'service-packages.create', 'params' => ['type' => 'student'], 'permission' => 'student-package.create'],
+            ],
+        ],
+        [
+            'key' => 'hajj-umrah-packages',
+            'label' => 'Hajj & Umrah Packages',
+            'icon' => 'plane',
+            'items' => [
+                ['label' => 'All Hajj & Umrah Packages', 'route' => 'service-packages.index', 'params' => ['type' => 'hajj_umrah'], 'permission' => 'hajj-umrah-package.view'],
+                ['label' => 'Add Hajj & Umrah Package', 'route' => 'service-packages.create', 'params' => ['type' => 'hajj_umrah'], 'permission' => 'hajj-umrah-package.create'],
             ],
         ],
         [
@@ -151,6 +169,25 @@ return [
             ],
         ],
         [
+            'key' => 'visa',
+            'label' => 'Visa & Immigration',
+            'icon' => 'plane',
+            'items' => [
+                ['label' => 'Visa Lots', 'route' => 'modules.show', 'params' => ['module' => 'visa-lots'], 'permission' => 'visa.view'],
+                ['label' => 'Visa Applications', 'route' => 'visas.index', 'permission' => 'visa.view', 'active' => ['visas.*']],
+                ['label' => 'MOFA Processing', 'route' => 'visas.index', 'query' => ['mofa_status' => 'submitted'], 'permission' => 'visa.view'],
+                ['label' => 'Visa Submission', 'route' => 'visas.index', 'query' => ['status' => 'submitted'], 'permission' => 'visa.view'],
+                ['label' => 'Visa Approved', 'route' => 'visas.index', 'query' => ['status' => 'approved'], 'permission' => 'visa.view'],
+                ['label' => 'Visa Rejected', 'route' => 'visas.index', 'query' => ['status' => 'rejected'], 'permission' => 'visa.view'],
+                ['label' => 'Visa Returned', 'route' => 'visas.index', 'query' => ['status' => 'returned'], 'permission' => 'visa.view'],
+                ['label' => 'Visa Cancelled', 'route' => 'visas.index', 'query' => ['status' => 'cancelled'], 'permission' => 'visa.view'],
+                ['label' => 'Work Permit', 'route' => 'modules.show', 'params' => ['module' => 'work-permits'], 'permission' => 'visa.view'],
+                ['label' => 'Appointment Management', 'route' => 'modules.show', 'params' => ['module' => 'appointments'], 'permission' => 'visa.view'],
+                ['label' => 'Visa Documents', 'route' => 'modules.show', 'params' => ['module' => 'visa-documents'], 'permission' => 'visa.view'],
+                ['label' => 'Visa History', 'route' => 'reports.show', 'params' => ['report' => 'visa'], 'permission' => ['report.view', 'visa.view']],
+            ],
+        ],
+        [
             'key' => 'training',
             'label' => 'Training & Fingerprint',
             'icon' => 'graduation-cap',
@@ -178,22 +215,18 @@ return [
             ],
         ],
         [
-            'key' => 'visa',
-            'label' => 'Visa & Immigration',
-            'icon' => 'plane',
+            'key' => 'flight',
+            'label' => 'Flight Management',
+            'icon' => 'plane-takeoff',
             'items' => [
-                ['label' => 'Visa Lots', 'route' => 'modules.show', 'params' => ['module' => 'visa-lots'], 'permission' => 'visa.view'],
-                ['label' => 'Visa Applications', 'route' => 'visas.index', 'permission' => 'visa.view', 'active' => ['visas.*']],
-                ['label' => 'MOFA Processing', 'route' => 'visas.index', 'query' => ['mofa_status' => 'submitted'], 'permission' => 'visa.view'],
-                ['label' => 'Visa Submission', 'route' => 'visas.index', 'query' => ['status' => 'submitted'], 'permission' => 'visa.view'],
-                ['label' => 'Visa Approved', 'route' => 'visas.index', 'query' => ['status' => 'approved'], 'permission' => 'visa.view'],
-                ['label' => 'Visa Rejected', 'route' => 'visas.index', 'query' => ['status' => 'rejected'], 'permission' => 'visa.view'],
-                ['label' => 'Visa Returned', 'route' => 'visas.index', 'query' => ['status' => 'returned'], 'permission' => 'visa.view'],
-                ['label' => 'Visa Cancelled', 'route' => 'visas.index', 'query' => ['status' => 'cancelled'], 'permission' => 'visa.view'],
-                ['label' => 'Work Permit', 'route' => 'modules.show', 'params' => ['module' => 'work-permits'], 'permission' => 'visa.view'],
-                ['label' => 'Appointment Management', 'route' => 'modules.show', 'params' => ['module' => 'appointments'], 'permission' => 'visa.view'],
-                ['label' => 'Visa Documents', 'route' => 'modules.show', 'params' => ['module' => 'visa-documents'], 'permission' => 'visa.view'],
-                ['label' => 'Visa History', 'route' => 'reports.show', 'params' => ['report' => 'visa'], 'permission' => ['report.view', 'visa.view']],
+                ['label' => 'Flight Booking', 'route' => 'flights.index', 'permission' => 'flight.view', 'active' => ['flights.*']],
+                ['label' => 'Pending Tickets', 'route' => 'flights.index', 'query' => ['status' => 'pending'], 'permission' => 'flight.view'],
+                ['label' => 'Ticket Issued', 'route' => 'flights.index', 'query' => ['status' => 'ticket_issued'], 'permission' => 'flight.view'],
+                ['label' => 'Flight Rescheduling', 'route' => 'flights.index', 'query' => ['status' => 'rescheduled'], 'permission' => 'flight.view'],
+                ['label' => 'Flight Cancellation', 'route' => 'flights.index', 'query' => ['status' => 'cancelled'], 'permission' => 'flight.view'],
+                ['label' => 'Airline Management', 'route' => 'modules.show', 'params' => ['module' => 'airlines'], 'permission' => 'flight.view'],
+                ['label' => 'Travel Agency', 'route' => 'modules.show', 'params' => ['module' => 'travel-agencies'], 'permission' => 'flight.view'],
+                ['label' => 'Flight Reports', 'route' => 'reports.show', 'params' => ['report' => 'flight'], 'permission' => ['report.view', 'flight.view']],
             ],
         ],
         [
@@ -207,21 +240,6 @@ return [
                 ['label' => 'Pending Passport Return', 'route' => 'passport-returns.index', 'query' => ['status' => 'pending'], 'permission' => 'passport-return.view'],
                 ['label' => 'Visa Return', 'route' => 'visa-returns.index', 'permission' => 'visa-return.view', 'active' => ['visa-returns.*']],
                 ['label' => 'Return History', 'route' => 'reports.show', 'params' => ['report' => 'return'], 'permission' => ['report.view', 'passport-return.view']],
-            ],
-        ],
-        [
-            'key' => 'flight',
-            'label' => 'Flight Management',
-            'icon' => 'plane-takeoff',
-            'items' => [
-                ['label' => 'Flight Booking', 'route' => 'flights.index', 'permission' => 'flight.view', 'active' => ['flights.*']],
-                ['label' => 'Pending Tickets', 'route' => 'flights.index', 'query' => ['status' => 'pending'], 'permission' => 'flight.view'],
-                ['label' => 'Ticket Issued', 'route' => 'flights.index', 'query' => ['status' => 'ticket_issued'], 'permission' => 'flight.view'],
-                ['label' => 'Flight Rescheduling', 'route' => 'flights.index', 'query' => ['status' => 'rescheduled'], 'permission' => 'flight.view'],
-                ['label' => 'Flight Cancellation', 'route' => 'flights.index', 'query' => ['status' => 'cancelled'], 'permission' => 'flight.view'],
-                ['label' => 'Airline Management', 'route' => 'modules.show', 'params' => ['module' => 'airlines'], 'permission' => 'flight.view'],
-                ['label' => 'Travel Agency', 'route' => 'modules.show', 'params' => ['module' => 'travel-agencies'], 'permission' => 'flight.view'],
-                ['label' => 'Flight Reports', 'route' => 'reports.show', 'params' => ['report' => 'flight'], 'permission' => ['report.view', 'flight.view']],
             ],
         ],
         [

@@ -1,0 +1,17 @@
+@extends('layouts.app')
+@section('title', ($package->exists ? __('Edit') : __('Add')).' '.$title)
+@section('content')
+<div class="mb-4"><h1>{{ $package->exists ? __('Edit') : __('Add' ) }} {{ $title }}</h1></div>
+<div class="card"><div class="card-body"><form method="POST" action="{{ $package->exists ? route('service-packages.update', [$type, $package]) : route('service-packages.store', $type) }}">@csrf @if($package->exists)@method('PUT')@endif
+<div class="row g-3">
+<div class="col-md-4"><label class="form-label" for="code">{{ __('Package Code') }} *</label><input id="code" name="code" class="form-control" maxlength="40" required value="{{ old('code', $package->code) }}">@error('code')<div class="text-danger small">{{ $message }}</div>@enderror</div>
+<div class="col-md-8"><label class="form-label" for="name">{{ __('Package Name') }} *</label><input id="name" name="name" class="form-control" required value="{{ old('name', $package->name) }}">@error('name')<div class="text-danger small">{{ $message }}</div>@enderror</div>
+<div class="col-md-4"><label class="form-label" for="duration_days">{{ __('Duration (days)') }}</label><input id="duration_days" type="number" min="1" max="3650" name="duration_days" class="form-control" value="{{ old('duration_days', $package->duration_days) }}">@error('duration_days')<div class="text-danger small">{{ $message }}</div>@enderror</div>
+<div class="col-md-4"><label class="form-label" for="currency">{{ __('Currency') }} *</label><input id="currency" name="currency" class="form-control text-uppercase" minlength="3" maxlength="3" required value="{{ old('currency', $package->currency ?: 'BDT') }}">@error('currency')<div class="text-danger small">{{ $message }}</div>@enderror</div>
+<div class="col-md-4"><label class="form-label" for="price">{{ __('Package Price') }} *</label><input id="price" type="number" min="0" step="0.01" name="price" class="form-control" required value="{{ old('price', $package->price ?? '0.00') }}">@error('price')<div class="text-danger small">{{ $message }}</div>@enderror</div>
+<div class="col-12"><label class="form-label" for="description">{{ __('Description') }}</label><textarea id="description" name="description" rows="3" class="form-control">{{ old('description', $package->description) }}</textarea>@error('description')<div class="text-danger small">{{ $message }}</div>@enderror</div>
+<div class="col-12"><label class="form-label" for="inclusions">{{ __('Package Includes') }}</label><textarea id="inclusions" name="inclusions" rows="4" class="form-control" placeholder="{{ __('List services or inclusions, one per line') }}">{{ old('inclusions', $package->inclusions) }}</textarea>@error('inclusions')<div class="text-danger small">{{ $message }}</div>@enderror</div>
+<div class="col-12"><input type="hidden" name="is_active" value="0"><div class="form-check"><input id="is_active" type="checkbox" name="is_active" value="1" class="form-check-input" @checked(old('is_active', $package->is_active ?? true))><label for="is_active" class="form-check-label">{{ __('Active and available to agents') }}</label></div>@error('is_active')<div class="text-danger small">{{ $message }}</div>@enderror</div>
+</div><div class="d-flex gap-2 mt-4"><button class="btn btn-primary">{{ $package->exists ? __('Save Changes') : __('Add Package') }}</button><a class="btn btn-outline-secondary" href="{{ route('service-packages.index', $type) }}">{{ __('Cancel') }}</a></div>
+</form></div></div>
+@endsection

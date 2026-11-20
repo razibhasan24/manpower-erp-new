@@ -62,6 +62,8 @@ class RolePermissionSeeder extends Seeder
         'visitor' => ['view', 'create', 'edit', 'update', 'delete'],
         'audit-log' => ['view', 'export'],
         'document' => ['view', 'download', 'create', 'delete'],
+        'student-package' => ['view', 'create', 'edit', 'delete'],
+        'hajj-umrah-package' => ['view', 'create', 'edit', 'delete'],
     ];
 
     /**
@@ -99,6 +101,9 @@ class RolePermissionSeeder extends Seeder
             'report.view', 'voucher.view', 'ledger.view',
             'visitor.view', 'visitor.create', 'visitor.edit', 'visitor.update',
             'document.view', 'document.download',
+            'student-package.view', 'hajj-umrah-package.view',
+            'student-package.create', 'student-package.edit', 'student-package.delete',
+            'hajj-umrah-package.create', 'hajj-umrah-package.edit', 'hajj-umrah-package.delete',
         ],
         'Accounts Staff' => [
             'dashboard.view', 'accounting.view', 'accounting.manage',
@@ -111,6 +116,7 @@ class RolePermissionSeeder extends Seeder
             'recruitment.view', 'agent.view', 'passport-holder.view',
             'payroll.view', 'payroll.pay', 'payroll.approve',
             'document.view', 'document.download',
+            'student-package.view', 'hajj-umrah-package.view',
         ],
         'General Staff' => [
             'dashboard.view',
@@ -126,6 +132,7 @@ class RolePermissionSeeder extends Seeder
             // Agents see their own payments/ledger only, via
             // VoucherPolicy::viewSubLedger() gated by 'ledger.view'.
             'dashboard.view', 'agent.view',
+            'student-package.view', 'hajj-umrah-package.view',
             'passport-holder.view', 'passport-holder.create',
             'recruitment.view', 'document.view', 'document.download',
             'ledger.view', 'report.view',
