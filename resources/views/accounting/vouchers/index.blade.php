@@ -3,7 +3,7 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Vouchers</h1>
-    <a href="{{ route('accounting.vouchers.create') }}" class="btn btn-primary">New Voucher</a>
+    @can('create', \App\Models\Voucher::class)<a href="{{ route('accounting.vouchers.create') }}" class="btn btn-primary">New Voucher</a>@endcan
 </div>
 @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
@@ -11,7 +11,7 @@
 <form method="GET" class="row g-2 mb-3">
     <div class="col-md-3"><input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Voucher number..."></div>
     <div class="col-md-2"><select name="voucher_type" class="form-select"><option value="">All types</option>@foreach(['payment','receipt','journal','contra'] as $t)<option value="{{ $t }}" {{ request('voucher_type') === $t ? 'selected' : '' }}>{{ ucfirst($t) }}</option>@endforeach</select></div>
-    <div class="col-md-2"><select name="status" class="form-select"><option value="">All statuses</option>@foreach(['posted','reversed','draft'] as $s)<option value="{{ $s }}" {{ request('status') === $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>@endforeach</select></div>
+    <div class="col-md-2"><select name="status" class="form-select"><option value="">All statuses</option>@foreach(['draft','posted','reversed','cancelled'] as $s)<option value="{{ $s }}" {{ request('status') === $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>@endforeach</select></div>
     <div class="col-md-2"><input type="date" name="from" value="{{ request('from') }}" class="form-control"></div>
     <div class="col-md-2"><input type="date" name="to" value="{{ request('to') }}" class="form-control"></div>
     <div class="col-auto"><button class="btn btn-secondary" type="submit">Filter</button></div>

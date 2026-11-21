@@ -79,6 +79,8 @@ class SubLedgerService
 
         return $this->baseQuery($type, null)
             ->when($branchId, fn ($q) => $q->where('journal_entries.branch_id', $branchId))
+            ->whereNotNull('journal_entry_lines.sub_ledger_id')
+            ->where('journal_entry_lines.sub_ledger_id', '>', 0)
             // dueList is an aggregate query. Clear the detail columns selected
             // by baseQuery() so ONLY_FULL_GROUP_BY can validate the grouping.
             ->select('journal_entry_lines.sub_ledger_id as party_id')

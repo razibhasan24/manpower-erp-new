@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
 use App\Models\PassportHolder;
+use App\Models\Agent;
+use App\Models\Vendor;
 use App\Models\PaymentMode;
 use App\Models\Voucher;
 use App\Services\ChartOfAccountsService;
@@ -47,21 +49,79 @@ class SubLedgerController extends Controller
         $this->authorize('viewAny', \App\Models\Voucher::class);
 
         $rows = $this->ledgers->dueList($type, $request->integer('branch_id') ?: null);
+        if ($type === 'vendor') {
+            $vendors = Vendor::visibleTo($request->user())
+                ->where('status', 'active')
+                ->when($request->integer('branch_id'), fn ($query, $branchId) => $query->where('branch_id', $branchId))
+                ->get(['id', 'name']);
+            $knownIds = $rows->pluck('party_id')->map(fn ($id) => (int) $id)->all();
+            foreach ($vendors as $vendor) {
+                if (! in_array((int) $vendor->id, $knownIds, true)) {
+                    $rows->push((object) ['party_id' => $vendor->id, 'total_debit' => 0, 'total_credit' => 0, 'balance' => 0]);
+                }
+            }
+        }
         $partyNames = match ($type) {
             'agent' => \App\Models\Agent::visibleTo($request->user())->whereIn('id', $rows->pluck('party_id'))->pluck('name', 'id'),
             'passport_holder' => \App\Models\PassportHolder::visibleTo($request->user())->whereIn('id', $rows->pluck('party_id'))->pluck('full_name', 'id'),
+            'vendor' => Vendor::visibleTo($request->user())->whereIn('id', $rows->pluck('party_id'))->pluck('name', 'id'),
             default => collect(),
         };
 
         return view('reports.sub-ledgers.due-list', ['rows' => $rows, 'type' => $type, 'partyNames' => $partyNames]);
     }
 
+    public function createVendor(Request $request)
+    {
+        $this->authorize('create', Voucher::class);
+
+        return view('reports.sub-ledgers.vendors.create', [
+            'branches' => \App\Models\Branch::visibleTo($request->user())->orderBy('name')->get(),
+        ]);
+    }
+
+    public function storeVendor(Request $request)
+    {
+        $this->authorize('create', Voucher::class);
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'address' => ['nullable', 'string', 'max:2000'],
+            'branch_id' => ['nullable', 'integer', 'exists:branches,id'],
+        ]);
+        if (! empty($data['branch_id'])) {
+            \App\Models\Branch::visibleTo($request->user())->findOrFail($data['branch_id']);
+        }
+
+        $vendor = \Illuminate\Support\Facades\DB::transaction(function () use ($data, $request) {
+            $parent = $this->chart->requireByCode('2110');
+            $vendor = Vendor::create($data + ['created_by' => $request->user()->id]);
+            $account = \App\Models\Account::create([
+                'code' => '2110'.str_pad((string) $vendor->id, 6, '0', STR_PAD_LEFT),
+                'name' => 'Vendor Payable — '.$vendor->name,
+                'parent_id' => $parent->id,
+                'account_type_id' => $parent->account_type_id,
+                'normal_balance' => 'credit',
+                'status' => 'active',
+                'description' => 'Vendor payable account for vendor #'.$vendor->id,
+            ]);
+            $account->forceFill(['created_by' => $request->user()->id])->save();
+            $vendor->update(['payable_account_id' => $account->id]);
+
+            return $vendor;
+        });
+
+        return redirect()->route('reports.financial.sub-ledger.due-list', ['type' => 'vendor'])
+            ->with('success', "Vendor {$vendor->name} and payable account created.");
+    }
+
     public function transactionForm(Request $request, string $type, int $id, string $action)
     {
         $this->authorize('create', Voucher::class);
-        abort_unless($type === 'passport_holder' && in_array($action, ['receive', 'pay'], true), 404);
+        abort_unless(in_array($type, ['agent', 'passport_holder', 'vendor'], true) && in_array($action, ['receive', 'pay'], true), 404);
 
-        $party = PassportHolder::visibleTo($request->user())->findOrFail($id);
+        $party = $this->findParty($request, $type, $id);
         $balance = $this->ledgers->balance($type, $id);
         $amountAvailable = $action === 'receive' ? max($balance, 0) : max(-$balance, 0);
         $paymentModes = PaymentMode::with('account')
@@ -75,7 +135,7 @@ class SubLedgerController extends Controller
     public function storeTransaction(Request $request, string $type, int $id, string $action)
     {
         $this->authorize('create', Voucher::class);
-        abort_unless($type === 'passport_holder' && in_array($action, ['receive', 'pay'], true), 404);
+        abort_unless(in_array($type, ['agent', 'passport_holder', 'vendor'], true) && in_array($action, ['receive', 'pay'], true), 404);
 
         $data = $request->validate([
             'amount' => ['required', 'numeric', 'gt:0'],
@@ -84,7 +144,7 @@ class SubLedgerController extends Controller
             'narration' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $party = PassportHolder::visibleTo($request->user())->findOrFail($id);
+        $party = $this->findParty($request, $type, $id);
         $balance = $this->ledgers->balance($type, $id);
         $amountAvailable = $action === 'receive' ? max($balance, 0) : max(-$balance, 0);
         if ((float) $data['amount'] > $amountAvailable) {
@@ -95,10 +155,16 @@ class SubLedgerController extends Controller
         $mode = PaymentMode::with('account')->where('status', 'active')->findOrFail($data['payment_mode_id']);
         abort_unless($mode->account && $mode->account->status === 'active', 422, 'The selected Cash/Bank account is inactive.');
 
-        $receivable = $this->chart->requireByCode('1220');
+        $receivable = $type === 'agent'
+            ? $this->chart->requireByCode('1210')
+            : ($type === 'vendor'
+                ? ($party->payableAccount ?? $this->chart->requireByCode('2110'))
+                : $this->chart->requireByCode('1220'));
         $amount = round((float) $data['amount'], 2);
-        $narration = $data['narration'] ?: ucfirst($action) . " — Passport Holder: {$party->full_name}";
         $isReceipt = $action === 'receive';
+        $partyName = $type === 'passport_holder' ? $party->full_name : $party->name;
+        $typeLabel = ['agent' => 'Agent', 'passport_holder' => 'Passport Holder', 'vendor' => 'Vendor'][$type];
+        $narration = $data['narration'] ?: ucfirst($action) . ' — ' . $typeLabel . ": {$partyName}";
         $lines = $isReceipt
             ? [
                 ['account_id' => $mode->account_id, 'debit' => $amount, 'credit' => 0],
@@ -109,7 +175,7 @@ class SubLedgerController extends Controller
                 ['account_id' => $mode->account_id, 'debit' => 0, 'credit' => $amount],
             ];
 
-        $voucher = $this->vouchers->post([
+        $voucher = $this->vouchers->createDraft([
             'voucher_type' => $isReceipt ? 'receipt' : 'payment',
             'voucher_date' => $data['voucher_date'],
             'branch_id' => $party->branch_id,
@@ -118,6 +184,15 @@ class SubLedgerController extends Controller
         ]);
 
         return redirect()->route('accounting.vouchers.show', $voucher)
-            ->with('success', "{$voucher->voucher_number} posted successfully.");
+            ->with('success', "{$voucher->voucher_number} saved as draft and is waiting for approval.");
+    }
+
+    protected function findParty(Request $request, string $type, int $id): Agent|PassportHolder|Vendor
+    {
+        return match ($type) {
+            'agent' => Agent::visibleTo($request->user())->findOrFail($id),
+            'vendor' => Vendor::visibleTo($request->user())->findOrFail($id),
+            default => PassportHolder::visibleTo($request->user())->findOrFail($id),
+        };
     }
 }

@@ -1,14 +1,16 @@
 @extends('layouts.app')
 @php($isReceipt = $action === 'receive')
-@php($dueAmount = max((float) $balance, 0))
-@section('title', $isReceipt ? 'Receive from Passport Holder' : 'Pay Passport Holder')
+@php($dueAmount = $isReceipt ? max((float) $balance, 0) : max((float) -$balance, 0))
+@php($partyTypeLabel = ['agent' => 'Agent', 'passport_holder' => 'Passport Holder', 'vendor' => 'Vendor'][$type] ?? 'Party')
+@php($partyName = $type === 'passport_holder' ? $party->full_name : $party->name)
+@section('title', ($isReceipt ? 'Receive from ' : 'Pay ') . $partyTypeLabel)
 @section('content')
 <div class="d-flex justify-content-between align-items-start mb-3">
     <div>
-        <h1 class="mb-1">{{ $isReceipt ? 'Receive from Passport Holder' : 'Pay Passport Holder' }}</h1>
-        <div class="text-muted">{{ $party->full_name }} · Current balance: {{ number_format($balance, 2) }}</div>
+        <h1 class="mb-1">{{ $isReceipt ? 'Receive from ' : 'Pay ' }}{{ $partyTypeLabel }}</h1>
+        <div class="text-muted">{{ $partyName }} · Current balance: {{ number_format($balance, 2) }}</div>
     </div>
-    <a href="{{ route('reports.financial.sub-ledger.due-list', ['type' => 'passport_holder']) }}" class="btn btn-outline-secondary">Back to Due List</a>
+    <a href="{{ route('reports.financial.sub-ledger.due-list', ['type' => $type]) }}" class="btn btn-outline-secondary">Back to Due List</a>
 </div>
 @if($errors->any())
     <div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
@@ -17,11 +19,11 @@
     <form method="POST" action="{{ route('reports.financial.sub-ledger.transaction.store', ['type' => $type, 'id' => $id, 'action' => $action]) }}">
         @csrf
         <div class="mb-3">
-            <label class="form-label">Passport Holder</label>
-            <input class="form-control" value="{{ $party->full_name }}" readonly>
+            <label class="form-label">{{ $partyTypeLabel }}</label>
+            <input class="form-control" value="{{ $partyName }}" readonly>
         </div>
         <div class="mb-3">
-            <label class="form-label">Current Due Amount</label>
+            <label class="form-label">{{ $isReceipt ? 'Current Due Amount' : 'Current Credit Balance' }}</label>
             <input id="current_due" type="text" class="form-control" value="{{ number_format($dueAmount, 2, '.', '') }}" readonly>
         </div>
         <div class="mb-3">

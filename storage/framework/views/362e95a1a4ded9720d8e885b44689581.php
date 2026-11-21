@@ -1,6 +1,11 @@
 <?php $__env->startSection('title', 'Due List'); ?>
 <?php $__env->startSection('content'); ?>
 <h1 class="mb-3"><?php echo e(ucwords(str_replace('_', ' ', $type))); ?> Due List</h1>
+<?php if($type === 'vendor'): ?>
+    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('create', \App\Models\Voucher::class)): ?>
+        <div class="mb-3"><a href="<?php echo e(route('reports.financial.sub-ledger.vendor.create')); ?>" class="btn btn-primary">Create Vendor</a></div>
+    <?php endif; ?>
+<?php endif; ?>
 <div class="card"><div class="table-responsive">
 <table class="table table-striped mb-0">
     <thead><tr><th>Party ID</th><th class="text-end">Total Debit</th><th class="text-end">Total Credit</th><th class="text-end">Balance Due</th><th class="text-end">Actions</th></tr></thead>
@@ -10,8 +15,9 @@
             <td class="text-end"><?php echo e(number_format($row->total_credit, 2)); ?></td>
             <td class="text-end"><?php echo e(number_format($row->balance, 2)); ?></td>
             <td class="text-end">
-                <a href="<?php echo e(route('reports.financial.sub-ledger', ['type' => $type, 'id' => $row->party_id])); ?>" class="btn btn-sm btn-outline-primary">Ledger</a>
-                <?php if($type === 'passport_holder'): ?>
+                <?php if(!empty($row->party_id)): ?>
+                    <a href="<?php echo e(route('reports.financial.sub-ledger', ['type' => $type, 'id' => $row->party_id])); ?>" class="btn btn-sm btn-outline-primary">Ledger</a>
+                <?php if(in_array($type, ['agent', 'passport_holder', 'vendor'], true)): ?>
                     <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('create', \App\Models\Voucher::class)): ?>
                         <?php if($row->balance > 0): ?>
                             <a href="<?php echo e(route('reports.financial.sub-ledger.transaction.create', ['type' => $type, 'id' => $row->party_id, 'action' => 'receive'])); ?>" class="btn btn-sm btn-success">Receive</a>
@@ -19,6 +25,7 @@
                             <a href="<?php echo e(route('reports.financial.sub-ledger.transaction.create', ['type' => $type, 'id' => $row->party_id, 'action' => 'pay'])); ?>" class="btn btn-sm btn-outline-danger">Pay</a>
                         <?php endif; ?>
                     <?php endif; ?>
+                <?php endif; ?>
                 <?php endif; ?>
             </td></tr>
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>

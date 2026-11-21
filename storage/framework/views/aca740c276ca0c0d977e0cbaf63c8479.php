@@ -51,6 +51,7 @@
     <div class="card-body">
         <table class="table table-borderless mb-0">
             <tbody>
+        <tr><th scope="row" style="width: 220px;">SL</th><td><?php echo e($recruitment->passportHolder?->id ?? '—'); ?></td></tr>
         <tr><th scope="row" style="width: 220px;">Tracking Number</th><td><?php echo e($recruitment->tracking_number); ?></td></tr>
         <tr><th scope="row" style="width: 220px;">Passport Holder</th><td><?php echo e($recruitment->passportHolder?->full_name ?? "—"); ?></td></tr>
         <tr><th scope="row" style="width: 220px;">Agent</th><td><?php echo e($recruitment->agent?->name ?? "—"); ?></td></tr>

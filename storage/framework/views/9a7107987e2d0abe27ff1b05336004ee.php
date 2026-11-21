@@ -1,318 +1,46 @@
-
+<?php ($holder = $recruitment->passportHolder ?? null); ?>
 <div class="row g-3">
-
-    <div class="col-xl-3 col-lg-3 col-md-6">
-        <label for="passport_holder_id" class="form-label">Passport Holder</label>
-        <select id="passport_holder_id" name="passport_holder_id" class="form-select <?php $__errorArgs = ['passport_holder_id'];
+    <div class="col-12"><h5>Personal Information</h5></div>
+    <div class="col-md-3"><label class="form-label">SL</label><input class="form-control" value="<?php echo e($holder->id ?? ($nextPassportHolderId ?? 'Auto generated on save')); ?>" readonly></div>
+    <?php if(isset($recruitment)): ?><input type="hidden" name="passport_holder_id" value="<?php echo e($holder->id); ?>"><?php endif; ?>
+    <?php $__currentLoopData = ['passport_number'=>'Passport No.','nid'=>'NID No.','full_name'=>'Full Name','father_name'=>"Father's Name",'mother_name'=>"Mother's Name"]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $name=>$label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <div class="col-md-3"><label class="form-label"><?php echo e($label); ?> <?php if(in_array($name,['passport_number','full_name'])): ?>* <?php endif; ?></label><input name="<?php echo e($name); ?>" class="form-control <?php $__errorArgs = [$name];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+$message = $__bag->first($__errorArgs[0]); ?>is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" required>
-            <option value="">-- Select --</option>
-            <?php $__currentLoopData = $passportHolders; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <option value="<?php echo e($option->id); ?>" <?php if((string) old('passport_holder_id', (string) ($recruitment->passport_holder_id ?? '')) === (string) $option->id): echo 'selected'; endif; ?>><?php echo e($option->full_name); ?></option>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        </select>
-        <?php $__errorArgs = ['passport_holder_id'];
+unset($__errorArgs, $__bag); ?>" value="<?php echo e(old($name,$holder->$name ?? '')); ?>" <?php if(in_array($name,['passport_number','full_name'])): ?>required <?php endif; ?>><?php $__errorArgs = [$name];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-            <div class="invalid-feedback"><?php echo e($message); ?></div>
-        <?php unset($message);
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>
-    </div>
-
-    <div class="col-xl-3 col-lg-3 col-md-6">
-        <label for="agent_id" class="form-label">Agent</label>
-        <select id="agent_id" name="agent_id" class="form-select <?php $__errorArgs = ['agent_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>">
-            <option value="">-- Select --</option>
-            <?php $__currentLoopData = $agents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <option value="<?php echo e($option->id); ?>" <?php if((string) old('agent_id', (string) ($recruitment->agent_id ?? '')) === (string) $option->id): echo 'selected'; endif; ?>><?php echo e($option->name); ?></option>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        </select>
-        <?php $__errorArgs = ['agent_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-            <div class="invalid-feedback"><?php echo e($message); ?></div>
-        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-    </div>
-
-    <div class="col-xl-3 col-lg-3 col-md-6">
-        <label for="branch_id" class="form-label">Branch</label>
-        <select id="branch_id" name="branch_id" class="form-select <?php $__errorArgs = ['branch_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" required>
-            <option value="">-- Select --</option>
-            <?php $__currentLoopData = $branches; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <option value="<?php echo e($option->id); ?>" <?php if((string) old('branch_id', (string) ($recruitment->branch_id ?? '')) === (string) $option->id): echo 'selected'; endif; ?>><?php echo e($option->name); ?></option>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        </select>
-        <?php $__errorArgs = ['branch_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-            <div class="invalid-feedback"><?php echo e($message); ?></div>
-        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-    </div>
-
-    <div class="col-xl-3 col-lg-3 col-md-6">
-        <label for="country_id" class="form-label">Country</label>
-        <select id="country_id" name="country_id" class="form-select <?php $__errorArgs = ['country_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" required>
-            <option value="">-- Select --</option>
-            <?php $__currentLoopData = $countries; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <option value="<?php echo e($option->id); ?>" <?php if((string) old('country_id', (string) ($recruitment->country_id ?? '')) === (string) $option->id): echo 'selected'; endif; ?>><?php echo e($option->name); ?></option>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        </select>
-        <?php $__errorArgs = ['country_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-            <div class="invalid-feedback"><?php echo e($message); ?></div>
-        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-    </div>
-
-    <div class="col-xl-3 col-lg-3 col-md-6">
-        <label for="company_id" class="form-label">Company</label>
-        <select id="company_id" name="company_id" class="form-select <?php $__errorArgs = ['company_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" required>
-            <option value="">-- Select --</option>
-            <?php $__currentLoopData = $companies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <option value="<?php echo e($option->id); ?>" <?php if((string) old('company_id', (string) ($recruitment->company_id ?? '')) === (string) $option->id): echo 'selected'; endif; ?>><?php echo e($option->name); ?></option>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        </select>
-        <?php $__errorArgs = ['company_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-            <div class="invalid-feedback"><?php echo e($message); ?></div>
-        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-    </div>
-
-    <div class="col-xl-3 col-lg-3 col-md-6">
-        <label for="position_id" class="form-label">Position</label>
-        <select id="position_id" name="position_id" class="form-select <?php $__errorArgs = ['position_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" required>
-            <option value="">-- Select --</option>
-            <?php $__currentLoopData = $positions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <option value="<?php echo e($option->id); ?>" <?php if((string) old('position_id', (string) ($recruitment->position_id ?? '')) === (string) $option->id): echo 'selected'; endif; ?>><?php echo e($option->title); ?></option>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        </select>
-        <?php $__errorArgs = ['position_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-            <div class="invalid-feedback"><?php echo e($message); ?></div>
-        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-    </div>
-
-    <div class="col-xl-3 col-lg-3 col-md-6">
-        <?php if (isset($component)) { $__componentOriginalc2fcfa88dc54fee60e0757a7e0572df1 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalc2fcfa88dc54fee60e0757a7e0572df1 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.input','data' => ['type' => 'number','name' => 'expected_salary','label' => 'Expected Salary','value' => old('expected_salary', $recruitment->expected_salary ?? '')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('input'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['type' => 'number','name' => 'expected_salary','label' => 'Expected Salary','value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(old('expected_salary', $recruitment->expected_salary ?? ''))]); ?>
-<?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalc2fcfa88dc54fee60e0757a7e0572df1)): ?>
-<?php $attributes = $__attributesOriginalc2fcfa88dc54fee60e0757a7e0572df1; ?>
-<?php unset($__attributesOriginalc2fcfa88dc54fee60e0757a7e0572df1); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalc2fcfa88dc54fee60e0757a7e0572df1)): ?>
-<?php $component = $__componentOriginalc2fcfa88dc54fee60e0757a7e0572df1; ?>
-<?php unset($__componentOriginalc2fcfa88dc54fee60e0757a7e0572df1); ?>
-<?php endif; ?>
-        <?php $__errorArgs = ['expected_salary'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-            <div class="invalid-feedback d-block"><?php echo e($message); ?></div>
-        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-    </div>
-
-    <div class="col-xl-3 col-lg-3 col-md-6">
-        <label for="remarks" class="form-label">Remarks</label>
-        <textarea id="remarks" name="remarks" rows="3" class="form-control <?php $__errorArgs = ['remarks'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>"><?php echo e(old('remarks', $recruitment->remarks ?? '')); ?></textarea>
-        <?php $__errorArgs = ['remarks'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-            <div class="invalid-feedback"><?php echo e($message); ?></div>
-        <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-    </div>
-
-    <div class="col-12">
-        <label class="form-label">Documents (private storage - PDF/JPG/PNG, max 5 MB each)</label>
-
-        <div class="row g-3">
-
-            <div class="col-xl-3 col-lg-3 col-md-6">
-                <label for="documents_passport_scan" class="form-label">Passport Scan</label>
-                <input type="file" id="documents_passport_scan" name="documents[passport_scan]" accept=".pdf,image/jpeg,image/png" class="form-control <?php $__errorArgs = ['documents.passport_scan'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>">
-                <?php $__errorArgs = ['documents.passport_scan'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                    <div class="invalid-feedback"><?php echo e($message); ?></div>
-                <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-            </div>
-
-            <div class="col-xl-3 col-lg-3 col-md-6">
-                <label for="documents_nid_scan" class="form-label">NID Scan</label>
-                <input type="file" id="documents_nid_scan" name="documents[nid_scan]" accept=".pdf,image/jpeg,image/png" class="form-control <?php $__errorArgs = ['documents.nid_scan'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>">
-                <?php $__errorArgs = ['documents.nid_scan'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                    <div class="invalid-feedback"><?php echo e($message); ?></div>
-                <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-            </div>
-
-            <div class="col-xl-3 col-lg-3 col-md-6">
-                <label for="documents_photo" class="form-label">Photo</label>
-                <input type="file" id="documents_photo" name="documents[photo]" accept="image/jpeg,image/png" class="form-control <?php $__errorArgs = ['documents.photo'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>">
-                <?php $__errorArgs = ['documents.photo'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                    <div class="invalid-feedback"><?php echo e($message); ?></div>
-                <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-            </div>
-
-            <div class="col-xl-3 col-lg-3 col-md-6">
-                <label for="documents_other" class="form-label">Other Document</label>
-                <input type="file" id="documents_other" name="documents[other]" accept=".pdf,image/jpeg,image/png" class="form-control <?php $__errorArgs = ['documents.other'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>">
-                <?php $__errorArgs = ['documents.other'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                    <div class="invalid-feedback"><?php echo e($message); ?></div>
-                <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-            </div>
-
-        </div>
-    </div>
-
+unset($__errorArgs, $__bag); ?></div>
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    <div class="col-md-3"><label class="form-label">Agent *</label><select name="agent_id" class="form-select"><option value="">Select Agent</option><?php $__currentLoopData = $agents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $a): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($a->id); ?>" <?php if(old('agent_id',$recruitment->agent_id ?? $holder->agent_id ?? '')==$a->id): echo 'selected'; endif; ?>><?php echo e($a->name); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?></select></div>
+    <div class="col-md-3"><label class="form-label">Referer</label><input name="referer" class="form-control" value="<?php echo e(old('referer',$holder->referer ?? '')); ?>"></div>
+    <?php $__currentLoopData = [['country_id','Country',$countries,'name'],['company_id','Company',$companies,'name'],['position_id','Position',$positions,'title'],['branch_id','Branch',$branches,'name']]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as [$name,$label,$items,$display]): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <div class="col-md-3"><label class="form-label"><?php echo e($label); ?> *</label><select name="<?php echo e($name); ?>" class="form-select" required><option value="">Select <?php echo e($label); ?></option><?php $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($item->id); ?>" <?php if(old($name,$recruitment->$name ?? $holder->$name ?? '')==$item->id): echo 'selected'; endif; ?>><?php echo e($item->$display); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?></select></div>
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    <?php $__currentLoopData = ['phone'=>'Mobile Number','email'=>'E-mail','gender'=>'Gender','religion'=>'Religion','marital_status'=>'Marital Status','passport_issue_date'=>'Passport Issue Date','passport_expiry_date'=>'Passport Expiry Date','dob'=>'Date of Birth','height'=>'Height','weight'=>'Weight','village_road'=>'Village/Road/Moholla','post_office'=>'P.O.','police_station'=>'P.S.','district'=>'District','present_address'=>'Present Address']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $name=>$label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <div class="col-md-3"><label class="form-label"><?php echo e($label); ?></label><?php if($name==='gender'): ?><select name="gender" class="form-select"><option value="">Select Gender</option><?php $__currentLoopData = ['male'=>'Male','female'=>'Female','other'=>'Other']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $v=>$txt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($v); ?>" <?php if(old($name,$holder->gender ?? '')==$v): echo 'selected'; endif; ?>><?php echo e($txt); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?></select><?php elseif($name==='marital_status'): ?><select name="marital_status" class="form-select"><option value="">Select Status</option><?php $__currentLoopData = ['single','married','divorced','widowed']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $v): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($v); ?>" <?php if(old($name,$holder->marital_status ?? '')==$v): echo 'selected'; endif; ?>><?php echo e(ucfirst($v)); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?></select><?php else: ?><input name="<?php echo e($name); ?>" type="<?php echo e(in_array($name,['dob','passport_issue_date','passport_expiry_date'])?'date':'text'); ?>" class="form-control" value="<?php echo e(old($name, isset($holder->$name) ? (in_array($name,['dob','passport_issue_date','passport_expiry_date']) ? $holder->$name?->format('Y-m-d') : $holder->$name) : '')); ?>" <?php if($name==='passport_expiry_date'): ?>readonly <?php endif; ?>><?php endif; ?></div>
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    <div class="col-md-3"><label class="form-label">Passport Validity</label><select id="passport_validity" class="form-select"><option value="5">5 Years</option><option value="10" selected>10 Years</option></select></div>
+    <div class="col-md-3"><label class="form-label">Age</label><input id="age_display" class="form-control" readonly value="0 Years 0 Months 0 Days"></div>
+    <div class="col-12"><h5>Documents Uploads</h5></div>
+    <?php $__currentLoopData = ['photo'=>'Photo','passport_scan'=>'Passport Image','nid_scan'=>'NID Image']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type=>$label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><div class="col-md-4"><label class="form-label"><?php echo e($label); ?></label><input type="file" name="documents[<?php echo e($type); ?>]" class="form-control" accept=".pdf,.jpg,.jpeg,.png"></div><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    <div class="col-12"><label class="form-label">Remarks</label><textarea name="remarks" class="form-control"><?php echo e(old('remarks',$recruitment->remarks ?? '')); ?></textarea></div>
+    <div class="col-12"><h5>Language Proficiency</h5></div>
+    <?php $__currentLoopData = ['Understanding Bengali','Speaking in Bengali','Writing in Bengali','Understanding English','Speaking in English','Writing in English','Understanding Arabic','Speaking in Arabic','Writing in Arabic','Understanding Other Language']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i=>$language): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><div class="col-md-3"><label class="form-label"><?php echo e($language); ?></label><select name="language_proficiency[<?php echo e($i); ?>]" class="form-select"><?php $__currentLoopData = ['No','Low','Medium','High']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $level): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option <?php if(old("language_proficiency.$i",'Low')===$level): echo 'selected'; endif; ?>><?php echo e($level); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?></select></div><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    <div class="col-12"><h5>Experience & Education</h5></div>
+    <div class="col-md-3"><label class="form-label">Local Experience in Years</label><input type="number" min="0" name="local_experience_years" class="form-control" value="<?php echo e(old('local_experience_years',$recruitment->local_experience_years ?? 3)); ?>"></div>
+    <div class="col-md-3"><label class="form-label">Education Type</label><select name="education_type" class="form-select"><option>Basic/Technical</option><option>Special Training if any</option></select></div>
+    <?php $__currentLoopData = ['education_degree'=>'Degree/Certificate','education_school'=>'School/Board/University','education_grade'=>'Division/CGPA','education_year'=>'Year']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $name=>$label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><div class="col-md-3"><label class="form-label"><?php echo e($label); ?></label><input name="<?php echo e($name); ?>" class="form-control" value="<?php echo e(old($name,$recruitment->$name ?? '')); ?>"></div><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 </div>
+<script>
+(()=>{const issue=document.querySelector('[name="passport_issue_date"]'),expiry=document.querySelector('[name="passport_expiry_date"]'),valid=document.getElementById('passport_validity'),dob=document.querySelector('[name="dob"]'),age=document.getElementById('age_display');function syncExpiry(){if(!issue.value)return;const d=new Date(issue.value+'T00:00:00');d.setFullYear(d.getFullYear()+Number(valid.value));expiry.value=d.toISOString().slice(0,10)}function syncAge(){if(!dob.value){age.value='0 Years 0 Months 0 Days';return}let a=new Date(dob.value+'T00:00:00'),b=new Date(),y=b.getFullYear()-a.getFullYear(),m=b.getMonth()-a.getMonth(),d=b.getDate()-a.getDate();if(d<0){m--;d+=new Date(b.getFullYear(),b.getMonth(),0).getDate()}if(m<0){y--;m+=12}age.value=`${y} Years ${m} Months ${d} Days`}issue.addEventListener('change',syncExpiry);valid.addEventListener('change',syncExpiry);dob.addEventListener('change',syncAge);syncAge()})();
+</script>
 <?php /**PATH R:\xampp\htdocs\manpower-erp-new\resources\views/recruitments/_form.blade.php ENDPATH**/ ?>

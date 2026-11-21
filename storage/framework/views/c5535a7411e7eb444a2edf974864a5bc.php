@@ -2,7 +2,7 @@
 <?php $__env->startSection('content'); ?>
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Vouchers</h1>
-    <a href="<?php echo e(route('accounting.vouchers.create')); ?>" class="btn btn-primary">New Voucher</a>
+    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('create', \App\Models\Voucher::class)): ?><a href="<?php echo e(route('accounting.vouchers.create')); ?>" class="btn btn-primary">New Voucher</a><?php endif; ?>
 </div>
 <?php if(session('success')): ?>
     <div class="alert alert-success"><?php echo e(session('success')); ?></div>
@@ -10,7 +10,7 @@
 <form method="GET" class="row g-2 mb-3">
     <div class="col-md-3"><input type="text" name="search" value="<?php echo e(request('search')); ?>" class="form-control" placeholder="Voucher number..."></div>
     <div class="col-md-2"><select name="voucher_type" class="form-select"><option value="">All types</option><?php $__currentLoopData = ['payment','receipt','journal','contra']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($t); ?>" <?php echo e(request('voucher_type') === $t ? 'selected' : ''); ?>><?php echo e(ucfirst($t)); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?></select></div>
-    <div class="col-md-2"><select name="status" class="form-select"><option value="">All statuses</option><?php $__currentLoopData = ['posted','reversed','draft']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($s); ?>" <?php echo e(request('status') === $s ? 'selected' : ''); ?>><?php echo e(ucfirst($s)); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?></select></div>
+    <div class="col-md-2"><select name="status" class="form-select"><option value="">All statuses</option><?php $__currentLoopData = ['draft','posted','reversed','cancelled']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($s); ?>" <?php echo e(request('status') === $s ? 'selected' : ''); ?>><?php echo e(ucfirst($s)); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?></select></div>
     <div class="col-md-2"><input type="date" name="from" value="<?php echo e(request('from')); ?>" class="form-control"></div>
     <div class="col-md-2"><input type="date" name="to" value="<?php echo e(request('to')); ?>" class="form-control"></div>
     <div class="col-auto"><button class="btn btn-secondary" type="submit">Filter</button></div>

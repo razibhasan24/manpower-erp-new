@@ -67,14 +67,15 @@ class RecruitmentController extends Controller
     {
         $this->authorize('create', Recruitment::class);
 
-        $passportHolders = \App\Models\PassportHolder::query()->visibleTo($request->user())->where('status', 'active')->orderBy('full_name')->get();
         $agents = \App\Models\Agent::query()->visibleTo($request->user())->where('status', 'active')->orderBy('name')->get();
         $branches = \App\Models\Branch::query()->visibleTo($request->user())->where('status', 'active')->orderBy('name')->get();
         $countries = \App\Models\Country::query()->visibleTo($request->user())->where('status', 'active')->orderBy('name')->get();
         $companies = \App\Models\Company::query()->visibleTo($request->user())->where('status', 'active')->orderBy('name')->get();
         $positions = \App\Models\Position::query()->visibleTo($request->user())->where('status', 'active')->orderBy('title')->get();
 
-        return view('recruitments.create', ['passportHolders' => $passportHolders, 'agents' => $agents, 'branches' => $branches, 'countries' => $countries, 'companies' => $companies, 'positions' => $positions]);
+        $nextPassportHolderId = (int) (\App\Models\PassportHolder::withTrashed()->max('id') ?? 0) + 1;
+
+        return view('recruitments.create', compact('agents', 'branches', 'countries', 'companies', 'positions', 'nextPassportHolderId'));
     }
 
     public function store(StoreRecruitmentRequest $request)
@@ -96,14 +97,14 @@ class RecruitmentController extends Controller
     {
         $this->authorize('update', $recruitment);
 
-        $passportHolders = \App\Models\PassportHolder::query()->visibleTo($request->user())->where('status', 'active')->orderBy('full_name')->get();
         $agents = \App\Models\Agent::query()->visibleTo($request->user())->where('status', 'active')->orderBy('name')->get();
         $branches = \App\Models\Branch::query()->visibleTo($request->user())->where('status', 'active')->orderBy('name')->get();
         $countries = \App\Models\Country::query()->visibleTo($request->user())->where('status', 'active')->orderBy('name')->get();
         $companies = \App\Models\Company::query()->visibleTo($request->user())->where('status', 'active')->orderBy('name')->get();
         $positions = \App\Models\Position::query()->visibleTo($request->user())->where('status', 'active')->orderBy('title')->get();
 
-        return view('recruitments.edit', ['recruitment' => $recruitment, 'passportHolders' => $passportHolders, 'agents' => $agents, 'branches' => $branches, 'countries' => $countries, 'companies' => $companies, 'positions' => $positions]);
+        $recruitment->load('passportHolder');
+        return view('recruitments.edit', compact('recruitment', 'agents', 'branches', 'countries', 'companies', 'positions'));
     }
 
     public function update(UpdateRecruitmentRequest $request, Recruitment $recruitment)

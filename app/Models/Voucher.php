@@ -30,6 +30,11 @@ class Voucher extends Model
         'reversed_by',
         'reversal_voucher_id',
         'narration',
+        'draft_lines',
+        'payment_mode_id',
+        'payee',
+        'attachment_path',
+        'attachment_original_name',
     ];
 
     protected $casts = [
@@ -37,11 +42,17 @@ class Voucher extends Model
         'total_debit' => 'decimal:2',
         'total_credit' => 'decimal:2',
         'posted_at' => 'datetime',
+        'draft_lines' => 'array',
     ];
 
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
+    public function paymentMode(): BelongsTo
+    {
+        return $this->belongsTo(PaymentMode::class);
     }
 
     public function journalEntry(): HasOne

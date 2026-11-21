@@ -37,6 +37,7 @@ class PassportHolder extends Model
         'passport_issue_date',
         'passport_expiry_date',
         'photo_path',
+        'referer', 'religion', 'marital_status', 'height', 'weight', 'village_road', 'post_office', 'police_station', 'district',
         'status',
     ];
 

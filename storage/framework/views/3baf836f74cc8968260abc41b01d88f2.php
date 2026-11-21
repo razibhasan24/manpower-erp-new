@@ -1,13 +1,15 @@
 <?php ($isReceipt = $action === 'receive'); ?>
-<?php ($dueAmount = max((float) $balance, 0)); ?>
-<?php $__env->startSection('title', $isReceipt ? 'Receive from Passport Holder' : 'Pay Passport Holder'); ?>
+<?php ($dueAmount = $isReceipt ? max((float) $balance, 0) : max((float) -$balance, 0)); ?>
+<?php ($partyTypeLabel = $type === 'agent' ? 'Agent' : 'Passport Holder'); ?>
+<?php ($partyName = $type === 'agent' ? $party->name : $party->full_name); ?>
+<?php $__env->startSection('title', ($isReceipt ? 'Receive from ' : 'Pay ') . $partyTypeLabel); ?>
 <?php $__env->startSection('content'); ?>
 <div class="d-flex justify-content-between align-items-start mb-3">
     <div>
-        <h1 class="mb-1"><?php echo e($isReceipt ? 'Receive from Passport Holder' : 'Pay Passport Holder'); ?></h1>
-        <div class="text-muted"><?php echo e($party->full_name); ?> · Current balance: <?php echo e(number_format($balance, 2)); ?></div>
+        <h1 class="mb-1"><?php echo e($isReceipt ? 'Receive from ' : 'Pay '); ?><?php echo e($partyTypeLabel); ?></h1>
+        <div class="text-muted"><?php echo e($partyName); ?> · Current balance: <?php echo e(number_format($balance, 2)); ?></div>
     </div>
-    <a href="<?php echo e(route('reports.financial.sub-ledger.due-list', ['type' => 'passport_holder'])); ?>" class="btn btn-outline-secondary">Back to Due List</a>
+    <a href="<?php echo e(route('reports.financial.sub-ledger.due-list', ['type' => $type])); ?>" class="btn btn-outline-secondary">Back to Due List</a>
 </div>
 <?php if($errors->any()): ?>
     <div class="alert alert-danger"><ul class="mb-0"><?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><li><?php echo e($error); ?></li><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?></ul></div>
@@ -16,11 +18,11 @@
     <form method="POST" action="<?php echo e(route('reports.financial.sub-ledger.transaction.store', ['type' => $type, 'id' => $id, 'action' => $action])); ?>">
         <?php echo csrf_field(); ?>
         <div class="mb-3">
-            <label class="form-label">Passport Holder</label>
-            <input class="form-control" value="<?php echo e($party->full_name); ?>" readonly>
+            <label class="form-label"><?php echo e($partyTypeLabel); ?></label>
+            <input class="form-control" value="<?php echo e($partyName); ?>" readonly>
         </div>
         <div class="mb-3">
-            <label class="form-label">Current Due Amount</label>
+            <label class="form-label"><?php echo e($isReceipt ? 'Current Due Amount' : 'Current Credit Balance'); ?></label>
             <input id="current_due" type="text" class="form-control" value="<?php echo e(number_format($dueAmount, 2, '.', '')); ?>" readonly>
         </div>
         <div class="mb-3">

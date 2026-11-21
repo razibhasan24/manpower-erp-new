@@ -40,6 +40,7 @@ class Recruitment extends Model
         'total_cost',
         'advance_amount',
         'remaining_due',
+        'local_experience_years', 'education_type', 'education_degree', 'education_school', 'education_grade', 'education_year', 'language_proficiency',
     ];
 
     protected $casts = [
@@ -54,6 +55,7 @@ class Recruitment extends Model
         'total_cost' => 'decimal:2',
         'advance_amount' => 'decimal:2',
         'remaining_due' => 'decimal:2',
+        'language_proficiency' => 'array',
     ];
 
     public function passportHolder(): BelongsTo

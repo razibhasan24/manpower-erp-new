@@ -6,6 +6,7 @@ use App\Models\Account;
 use App\Models\JournalEntry;
 use App\Models\JournalEntryLine;
 use App\Models\Payroll;
+use App\Models\PaymentMode;
 use App\Models\Voucher;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -134,6 +135,188 @@ class VoucherService
 
             return $voucher->fresh(['journalEntry.lines']);
         });
+    }
+
+    /** Store a balanced voucher without creating journal entries or affecting ledgers. */
+    public function createDraft(array $data): Voucher
+    {
+        $lines = $data['lines'] ?? [];
+        if (! $this->balanceCheck($lines)) {
+            throw ValidationException::withMessages(['lines' => 'Voucher lines must balance: debit total must equal credit total.']);
+        }
+        $this->assertPostingAccounts($lines);
+        $this->assertVoucherFormat($data['voucher_type'], $lines);
+
+        $voucher = Voucher::create([
+            'voucher_number' => $this->nextVoucherNumber($data['voucher_type'], $data['voucher_date']),
+            'voucher_type' => $data['voucher_type'],
+            'voucher_date' => $data['voucher_date'],
+            'branch_id' => $data['branch_id'] ?? Auth::user()?->branch_id,
+            'payment_mode_id' => $data['payment_mode_id'] ?? null,
+            'reference_type' => $data['reference_type'] ?? null,
+            'reference_id' => $data['reference_id'] ?? null,
+            'total_debit' => $this->sumSide($lines, 'debit'),
+            'total_credit' => $this->sumSide($lines, 'credit'),
+            'narration' => $data['narration'] ?? null,
+            'payee' => $data['payee'] ?? null,
+            'draft_lines' => array_values($lines),
+            'status' => 'draft',
+        ]);
+        $voucher->forceFill(['created_by' => Auth::id(), 'updated_by' => Auth::id()])->save();
+
+        return $voucher;
+    }
+
+    /** Update an unapproved voucher while keeping it out of the ledger. */
+    public function updateDraft(Voucher $voucher, array $data): Voucher
+    {
+        return DB::transaction(function () use ($voucher, $data) {
+            $voucher = Voucher::query()->lockForUpdate()->findOrFail($voucher->id);
+            if ($voucher->status !== 'draft') {
+                throw ValidationException::withMessages(['voucher' => 'Only draft vouchers can be edited.']);
+            }
+            $lines = $data['lines'] ?? [];
+            if (! $this->balanceCheck($lines)) {
+                throw ValidationException::withMessages(['lines' => 'Voucher lines must balance: debit total must equal credit total.']);
+            }
+            $this->assertPostingAccounts($lines);
+            $this->assertVoucherFormat($data['voucher_type'], $lines);
+            $voucher->update([
+                'voucher_type' => $data['voucher_type'],
+                'voucher_date' => $data['voucher_date'],
+                'branch_id' => $data['branch_id'] ?? $voucher->branch_id,
+                'payment_mode_id' => $data['payment_mode_id'] ?? null,
+                'reference_type' => $data['reference_type'] ?? null,
+                'reference_id' => $data['reference_id'] ?? null,
+                'total_debit' => $this->sumSide($lines, 'debit'),
+                'total_credit' => $this->sumSide($lines, 'credit'),
+                'narration' => $data['narration'] ?? null,
+                'payee' => $data['payee'] ?? null,
+                'draft_lines' => array_values($lines),
+            ]);
+            $voucher->forceFill(['updated_by' => Auth::id()])->save();
+            return $voucher->fresh();
+        });
+    }
+
+    /** Approval is the only manual-voucher path that creates journal entries. */
+    public function approveDraft(Voucher $voucher): Voucher
+    {
+        return DB::transaction(function () use ($voucher) {
+            $voucher = Voucher::query()->lockForUpdate()->findOrFail($voucher->id);
+            if ($voucher->status !== 'draft') {
+                throw ValidationException::withMessages(['voucher' => 'Only draft vouchers can be approved.']);
+            }
+            $lines = $voucher->draft_lines ?? [];
+            if (! $this->balanceCheck($lines)) {
+                throw ValidationException::withMessages(['lines' => 'This draft is not balanced and cannot be approved.']);
+            }
+            $this->assertPostingAccounts($lines);
+            $this->assertVoucherFormat($voucher->voucher_type, $lines);
+            $this->assertReferenceNotPosted($voucher->reference_type, $voucher->reference_id);
+
+            $entry = JournalEntry::create([
+                'voucher_id' => $voucher->id,
+                'entry_date' => $voucher->voucher_date,
+                'narration' => $voucher->narration,
+                'branch_id' => $voucher->branch_id,
+                'created_by' => Auth::id(),
+            ]);
+            $entry->forceFill(['created_by' => Auth::id()])->save();
+            foreach ($lines as $line) {
+                JournalEntryLine::create([
+                    'journal_entry_id' => $entry->id,
+                    'account_id' => $line['account_id'],
+                    'debit' => $this->money($line['debit'] ?? 0),
+                    'credit' => $this->money($line['credit'] ?? 0),
+                    'sub_ledger_type' => $line['sub_ledger_type'] ?? null,
+                    'sub_ledger_id' => $line['sub_ledger_id'] ?? null,
+                    'narration' => $line['narration'] ?? $voucher->narration,
+                ]);
+            }
+            $voucher->update([
+                'status' => 'posted',
+                'posted_by' => Auth::id(),
+                'posted_at' => now(),
+                'draft_lines' => null,
+            ]);
+            $voucher->forceFill(['updated_by' => Auth::id()])->save();
+
+            return $voucher->fresh(['journalEntry.lines.account']);
+        });
+    }
+
+    public function rejectDraft(Voucher $voucher): Voucher
+    {
+        return DB::transaction(function () use ($voucher) {
+            $voucher = Voucher::query()->lockForUpdate()->findOrFail($voucher->id);
+            if ($voucher->status !== 'draft') {
+                throw ValidationException::withMessages(['voucher' => 'Only draft vouchers can be rejected.']);
+            }
+            $voucher->update(['status' => 'cancelled']);
+            $voucher->forceFill(['updated_by' => Auth::id()])->save();
+            return $voucher->fresh();
+        });
+    }
+
+    /** Financial operation form submits a draft; actual posting waits for approval. */
+    public function createDraftOperation(string $operation, array $data): Voucher
+    {
+        if (! in_array($operation, self::OPERATIONS, true)) {
+            throw ValidationException::withMessages(['operation' => 'Unknown financial operation.']);
+        }
+        if ($operation === 'adjustment') {
+            return $this->createDraft(array_merge($data, ['voucher_type' => 'journal']));
+        }
+        $debitAccount = $this->resolveAccount($data, 'debit');
+        $creditAccount = $this->resolveAccount($data, 'credit');
+        $amount = $this->money($data['amount'] ?? 0);
+        if ($amount <= 0) {
+            throw ValidationException::withMessages(['amount' => 'Amount must be greater than zero.']);
+        }
+        $subType = $data['sub_ledger_type'] ?? null;
+        $subId = $data['sub_ledger_id'] ?? null;
+        return $this->createDraft([
+            'voucher_type' => self::OPERATION_VOUCHER_TYPE[$operation],
+            'voucher_date' => $data['voucher_date'],
+            'branch_id' => $data['branch_id'] ?? Auth::user()?->branch_id,
+            'narration' => $data['narration'] ?? $operation,
+            'lines' => [
+                ['account_id' => $debitAccount->id, 'debit' => $amount, 'credit' => 0, 'sub_ledger_type' => $subType, 'sub_ledger_id' => $subId],
+                ['account_id' => $creditAccount->id, 'debit' => 0, 'credit' => $amount, 'sub_ledger_type' => $subType, 'sub_ledger_id' => $subId],
+            ],
+        ]);
+    }
+
+    protected function assertPostingAccounts(array $lines): void
+    {
+        foreach ($lines as $index => $line) {
+            $account = Account::query()->where('status', 'active')->find($line['account_id'] ?? null);
+            if (! $account) {
+                throw ValidationException::withMessages(["lines.{$index}.account_id" => 'Select an active posting account.']);
+            }
+        }
+    }
+
+    protected function assertVoucherFormat(string $type, array $lines): void
+    {
+        $accounts = Account::whereIn('id', collect($lines)->pluck('account_id')->filter())->get()->keyBy('id');
+        $cashBankIds = PaymentMode::where('status', 'active')->pluck('account_id')->map(fn ($id) => (int) $id)->all();
+        $isCashBank = fn ($line) => in_array((int) ($line['account_id'] ?? 0), $cashBankIds, true);
+
+        if ($type === 'contra') {
+            foreach ($lines as $index => $line) {
+                if (! $isCashBank($line)) {
+                    throw ValidationException::withMessages(["lines.{$index}.account_id" => 'Contra vouchers can only transfer between Cash / Bank accounts.']);
+                }
+            }
+        }
+        if ($type === 'payment' && ! collect($lines)->contains(fn ($line) => (float) ($line['credit'] ?? 0) > 0 && $isCashBank($line))) {
+            throw ValidationException::withMessages(['lines' => 'A payment voucher must credit a Cash / Bank account.']);
+        }
+        if ($type === 'receipt' && ! collect($lines)->contains(fn ($line) => (float) ($line['debit'] ?? 0) > 0 && $isCashBank($line))) {
+            throw ValidationException::withMessages(['lines' => 'A receipt voucher must debit a Cash / Bank account.']);
+        }
     }
 
     /**

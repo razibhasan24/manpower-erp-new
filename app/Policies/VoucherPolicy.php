@@ -33,7 +33,14 @@ class VoucherPolicy
 
     public function view(User $user, Voucher $voucher): bool
     {
-        return $this->finance($user) && $this->inBranch($user, $voucher->branch_id);
+        $canView = $this->finance($user)
+            || ($voucher->status === 'draft' && (
+                $user->can('voucher.approve')
+                || $user->can('voucher.edit')
+                || (int) $voucher->created_by === (int) $user->id
+            ));
+
+        return $canView && $this->inBranch($user, $voucher->branch_id);
     }
 
     public function create(User $user): bool
@@ -44,7 +51,9 @@ class VoucherPolicy
     public function update(User $user, Voucher $voucher): bool
     {
         // Posted vouchers are immutable — there is no update path at all.
-        return false;
+        return ($user->hasRole('Super Admin') || $user->can('voucher.edit'))
+            && $voucher->status === 'draft'
+            && $this->inBranch($user, $voucher->branch_id);
     }
 
     public function delete(User $user, Voucher $voucher): bool
@@ -57,6 +66,20 @@ class VoucherPolicy
     {
         return ($user->hasRole('Super Admin') || $user->can('voucher.reverse'))
             && $voucher->status === 'posted'
+            && $this->inBranch($user, $voucher->branch_id);
+    }
+
+    public function approve(User $user, Voucher $voucher): bool
+    {
+        return ($user->hasRole('Super Admin') || $user->can('voucher.approve'))
+            && $voucher->status === 'draft'
+            && $this->inBranch($user, $voucher->branch_id);
+    }
+
+    public function reject(User $user, Voucher $voucher): bool
+    {
+        return ($user->hasRole('Super Admin') || $user->can('voucher.reject'))
+            && $voucher->status === 'draft'
             && $this->inBranch($user, $voucher->branch_id);
     }
 

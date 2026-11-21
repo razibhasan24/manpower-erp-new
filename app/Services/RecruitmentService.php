@@ -86,9 +86,15 @@ class RecruitmentService
 
             unset($data['documents']);
 
-            $passportHolder = PassportHolder::query()
-                ->whereKey((int) $data['passport_holder_id'])
-                ->firstOrFail();
+            $holderFields = ['full_name','father_name','mother_name','dob','gender','phone','email','present_address','nid','passport_number','passport_issue_date','passport_expiry_date','agent_id','branch_id','country_id','company_id','position_id','referer','religion','marital_status','height','weight','village_road','post_office','police_station','district'];
+            $holderData = array_intersect_key($data, array_flip($holderFields));
+            $holderData['status'] = 'active';
+            $holderData['created_by'] = $user->id;
+            $holderData['updated_by'] = $user->id;
+            $passportHolder = PassportHolder::create($holderData);
+            unset($data['passport_holder_id']);
+            $data['passport_holder_id'] = $passportHolder->id;
+            foreach (['full_name','father_name','mother_name','dob','gender','phone','email','present_address','nid','passport_number','passport_issue_date','passport_expiry_date','referer','religion','marital_status','height','weight','village_road','post_office','police_station','district'] as $field) unset($data[$field]);
 
             $this->assertNoActiveDuplicate($passportHolder);
 
@@ -177,6 +183,11 @@ class RecruitmentService
             $files = $data['documents'] ?? [];
 
             unset($data['documents']);
+
+            $holderFields = ['full_name','father_name','mother_name','dob','gender','phone','email','present_address','nid','passport_number','passport_issue_date','passport_expiry_date','agent_id','branch_id','country_id','company_id','position_id','referer','religion','marital_status','height','weight','village_road','post_office','police_station','district'];
+            $holderData = array_intersect_key($data, array_flip($holderFields));
+            $recruitment->passportHolder->update($holderData);
+            foreach ($holderFields as $field) unset($data[$field]);
 
             // Protect workflow-managed and financial fields.
             unset(
