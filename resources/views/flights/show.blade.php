@@ -21,6 +21,7 @@
 <dt class="col-sm-4">Departure Date</dt><dd class="col-sm-8">{{ $record->departure_date ?? '—' }}</dd>
 <dt class="col-sm-4">Departure Airport</dt><dd class="col-sm-8">{{ $record->departure_airport ?? '—' }}</dd>
 <dt class="col-sm-4">Arrival Airport</dt><dd class="col-sm-8">{{ $record->arrival_airport ?? '—' }}</dd>
+@if($record->hotel_name)<dt class="col-sm-4">Hotel</dt><dd class="col-sm-8">{{ $record->hotel_name }} · {{ $record->hotel_check_in?->format('d M Y') }} – {{ $record->hotel_check_out?->format('d M Y') }}</dd>@endif
 <dt class="col-sm-4">Ticket Number</dt><dd class="col-sm-8">{{ $record->ticket_number ?? '—' }}</dd>
 <dt class="col-sm-4">Status</dt><dd class="col-sm-8">{{ $record->status ?? '—' }}</dd>
 @isset($record->ticket_path)<dt class="col-sm-4">Ticket</dt><dd class="col-sm-8"><a href="{{ route('flights.download', [$record, 'ticket_path']) }}">{{ __('Download') }}</a></dd>@endisset
@@ -30,7 +31,7 @@
 
 @if($recruitment)
     <h5>{{ __('Workflow History') }}</h5>
-    <x-workflow-timeline :recruitment="$recruitment" />
+    <x-workflow-timeline :recruitment="$recruitment" :stages="\App\Services\WorkflowService::stagesFor($recruitment)" />
 @endif
 <hr>
 <h5>{{ __('Change Status') }}</h5>

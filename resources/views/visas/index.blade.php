@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>{{ __('Visa & MOFA') }}</h1>
     @can('visa.create')
-        <x-button href="{{ route('visas.create') }}">{{ __('New Record') }}</x-button>
+        <x-button href="{{ route('visas.create', request()->only('service_type')) }}">{{ __('New Record') }}</x-button>
     @endcan
 </div>
 <x-filter-bar

@@ -47,10 +47,16 @@ class WorkflowService
         'post_arrival',
     ];
 
+    public const STUDENT_STAGES = ['registration', 'selection', 'university_management', 'offer_letter', 'admission', 'medical', 'police_clearance', 'visa_processing', 'flight_booking', 'post_arrival'];
+    public const HAJJ_UMRAH_STAGES = ['registration', 'visa_processing', 'flight_booking', 'post_arrival'];
+
     /** Statuses each stage may use (Phase 01 section 7). */
     public const STAGE_STATUSES = [
         'registration' => ['pending', 'approved', 'rejected', 'returned', 'cancelled', 'completed'],
         'selection' => ['pending', 'approved', 'rejected', 'returned', 'cancelled', 'completed'],
+        'university_management' => ['pending', 'completed', 'returned', 'cancelled'],
+        'offer_letter' => ['pending', 'issued', 'rejected', 'returned', 'cancelled'],
+        'admission' => ['pending', 'admitted', 'rejected', 'returned', 'cancelled'],
         'delegation' => ['pending', 'approved', 'rejected', 'returned', 'cancelled', 'completed'],
         'medical' => ['pending', 'fit', 'unfit', 'expired', 'cancelled'],
         'police_clearance' => ['pending', 'cleared', 'uncleared', 'returned', 'cancelled'],
@@ -72,6 +78,8 @@ class WorkflowService
      */
     public const STATUS_PERMISSIONS = [
         'approved' => 'recruitment.approve',
+        'issued' => 'recruitment.approve',
+        'admitted' => 'recruitment.approve',
         'completed' => 'recruitment.approve',
         'fit' => 'recruitment.approve',
         'cleared' => 'recruitment.approve',
@@ -99,13 +107,22 @@ class WorkflowService
     {
         return [
             'selection' => fn (Recruitment $r) => $r->passport_holder_id !== null,
+            'university_management' => fn (Recruitment $r) => $r->university_id !== null,
+            'offer_letter' => fn (Recruitment $r) => $r->documents()->where('type', 'offer_letter')->exists(),
+            'admission' => fn (Recruitment $r) => $r->documents()->where('type', 'admission')->exists(),
             'delegation' => fn (Recruitment $r) => $r->selection !== null && $r->selection->status === 'approved',
-            'medical' => fn (Recruitment $r) => $r->delegation !== null && $r->delegation->status === 'approved',
+            'medical' => fn (Recruitment $r) => $r->service_type === 'student'
+                ? $r->stageHistories()->where('stage', 'admission')->where('status', 'admitted')->exists()
+                : ($r->delegation !== null && $r->delegation->status === 'approved'),
             'police_clearance' => fn (Recruitment $r) => $r->medical !== null && $r->medical->result === 'fit',
             'training' => fn (Recruitment $r) => $r->policeClearance !== null && $r->policeClearance->status === 'cleared',
             'fingerprint' => fn (Recruitment $r) => $r->training !== null && $r->training->result === 'passed',
             'manpower_approval' => fn (Recruitment $r) => $r->fingerprint !== null && in_array($r->fingerprint->status, ['submitted', 'completed', 'approved'], true),
-            'visa_processing' => fn (Recruitment $r) => $r->manpowerApproval !== null && $r->manpowerApproval->status === 'approved',
+            'visa_processing' => fn (Recruitment $r) => match ($r->service_type) {
+                'student' => $r->medical !== null && $r->medical->result === 'fit' && $r->policeClearance !== null && $r->policeClearance->status === 'cleared',
+                'hajj_umrah' => true,
+                default => $r->manpowerApproval !== null && $r->manpowerApproval->status === 'approved',
+            },
             'mofa_processing' => fn (Recruitment $r) => $r->visa !== null && in_array($r->visa->status, ['submitted', 'approved'], true),
             'work_permit' => fn (Recruitment $r) => $r->visa !== null && $r->visa->mofa_status === 'approved',
             'appointment' => fn (Recruitment $r) => $r->visa !== null && $r->visa->workPermit !== null,
@@ -129,7 +146,8 @@ class WorkflowService
             throw new AuthorizationException('A user is required to change a workflow stage.');
         }
 
-        if (! in_array($stage, self::STAGES, true)) {
+        $stages = self::stagesFor($recruitment);
+        if (! in_array($stage, $stages, true)) {
             throw new InvalidArgumentException("Unknown workflow stage: {$stage}.");
         }
 
@@ -138,7 +156,7 @@ class WorkflowService
             throw new InvalidArgumentException("Status '{$status}' is not valid for stage '{$stage}'.");
         }
 
-        $allowed = $this->allowedTransitions($recruitment->current_stage, $recruitment->current_status);
+        $allowed = $this->allowedTransitions($recruitment->current_stage, $recruitment->current_status, $recruitment);
         $isAllowed = collect($allowed)->contains(
             fn ($t) => $t['stage'] === $stage && $t['status'] === $status
         );
@@ -204,14 +222,15 @@ class WorkflowService
      *
      * @return array<int, array{stage: string, status: string}>
      */
-    public function allowedTransitions(string $stage, string $status): array
+    public function allowedTransitions(string $stage, string $status, ?Recruitment $recruitment = null): array
     {
-        if (! in_array($stage, self::STAGES, true)) {
+        $stages = self::stagesFor($recruitment);
+        if (! in_array($stage, $stages, true)) {
             return [];
         }
 
         $out = [];
-        $index = array_search($stage, self::STAGES, true);
+        $index = array_search($stage, $stages, true);
         $statuses = self::STAGE_STATUSES[$stage];
 
         // Any other status within the same stage.
@@ -222,14 +241,14 @@ class WorkflowService
         }
 
         // Forward to the next stage (enters at its first status).
-        if ($index !== false && $index < count(self::STAGES) - 1) {
-            $next = self::STAGES[$index + 1];
+        if ($index !== false && $index < count($stages) - 1) {
+            $next = $stages[$index + 1];
             $out[] = ['stage' => $next, 'status' => self::STAGE_STATUSES[$next][0]];
         }
 
         // Send back to any earlier stage as "returned".
         for ($i = 0; $i < $index; $i++) {
-            $prev = self::STAGES[$i];
+            $prev = $stages[$i];
             if (in_array('returned', self::STAGE_STATUSES[$prev], true)) {
                 $out[] = ['stage' => $prev, 'status' => 'returned'];
             }
@@ -242,6 +261,15 @@ class WorkflowService
     public static function stages(): array
     {
         return self::STAGES;
+    }
+
+    public static function stagesFor(?Recruitment $recruitment): array
+    {
+        return match ($recruitment?->service_type) {
+            'student' => self::STUDENT_STAGES,
+            'hajj_umrah' => self::HAJJ_UMRAH_STAGES,
+            default => self::STAGES,
+        };
     }
 
     /** @return string[] */

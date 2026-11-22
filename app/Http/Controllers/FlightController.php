@@ -27,7 +27,7 @@ class FlightController extends Controller
     public function create(Request $request)
     {
         $this->authorize('create', Flight::class);
-        $recruitments = \App\Models\Recruitment::visibleTo($request->user())->orderByDesc('id')->limit(200)->get();
+        $recruitments = \App\Models\Recruitment::visibleTo($request->user())->when($request->filled('service_type'), fn ($query) => $query->where('service_type', $request->string('service_type')))->orderByDesc('id')->limit(200)->get();
         $airlines = \App\Models\Airline::orderBy('name')->get();
         $travelAgencies = \App\Models\TravelAgency::orderBy('name')->get();
         return view('flights.create', array_merge(['recruitments' => $recruitments], ['airlines' => $airlines, 'travelAgencies' => $travelAgencies]));

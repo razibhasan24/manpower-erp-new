@@ -14,6 +14,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/recruitments/{recruitment}/approve',[RecruitmentController::class, 'approve'])->name('recruitments.approve');
     Route::get('recruitments/tracking', [RecruitmentController::class, 'tracking'])->middleware('permission:recruitment.view')->name('recruitments.tracking');
     Route::get('recruitments/{recruitment}', [RecruitmentController::class, 'show'])->middleware('permission:recruitment.view')->name('recruitments.show');
+    Route::post('recruitments/{recruitment}/student-stage', [RecruitmentController::class, 'completeStudentStage'])->middleware('permission:recruitment.edit')->name('recruitments.student-stage');
+    Route::get('recruitments/{recruitment}/downloads/{format}', [RecruitmentController::class, 'downloadFormat'])
+        ->whereIn('format', ['cv', 'entry-form', 'id-card'])
+        ->middleware('permission:recruitment.view')->name('recruitments.download-format');
     Route::get('recruitments/{recruitment}/edit', [RecruitmentController::class, 'edit'])->middleware('permission:recruitment.edit')->name('recruitments.edit');
     Route::put('recruitments/{recruitment}', [RecruitmentController::class, 'update'])->middleware('permission:recruitment.edit')->name('recruitments.update');
     Route::delete('recruitments/{recruitment}', [RecruitmentController::class, 'destroy'])->middleware('permission:recruitment.delete')->name('recruitments.destroy');

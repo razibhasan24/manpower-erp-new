@@ -18,6 +18,7 @@ class Recruitment extends Model
 
     protected $fillable = [
         'tracking_number',
+        'service_type', 'service_package_id', 'quoted_amount', 'quoted_currency', 'university_id',
         'passport_holder_id',
         'agent_id',
         'branch_id',
@@ -44,6 +45,7 @@ class Recruitment extends Model
     ];
 
     protected $casts = [
+        'quoted_amount' => 'decimal:2',
         'expected_salary' => 'decimal:2',
         'salary' => 'decimal:2',
         'company_service_charge' => 'decimal:2',
@@ -61,6 +63,16 @@ class Recruitment extends Model
     public function passportHolder(): BelongsTo
     {
         return $this->belongsTo(PassportHolder::class, 'passport_holder_id');
+    }
+
+    public function servicePackage(): BelongsTo
+    {
+        return $this->belongsTo(ServicePackage::class);
+    }
+
+    public function university(): BelongsTo
+    {
+        return $this->belongsTo(University::class);
     }
 
     public function agent(): BelongsTo

@@ -30,7 +30,7 @@ class PostArrivalController extends Controller
     public function create(Request $request)
     {
         $this->authorize('create', PostArrival::class);
-        $recruitments = \App\Models\Recruitment::visibleTo($request->user())->orderByDesc('id')->limit(200)->get();
+        $recruitments = \App\Models\Recruitment::visibleTo($request->user())->when($request->filled('service_type'), fn ($query) => $query->where('service_type', $request->string('service_type')))->orderByDesc('id')->limit(200)->get();
         return view('post-arrivals.create', compact('recruitments'));
     }
 

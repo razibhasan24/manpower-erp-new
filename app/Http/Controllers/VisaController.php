@@ -28,7 +28,7 @@ class VisaController extends Controller
     public function create(Request $request)
     {
         $this->authorize('create', Visa::class);
-        $recruitments = \App\Models\Recruitment::visibleTo($request->user())->orderByDesc('id')->limit(200)->get();
+        $recruitments = \App\Models\Recruitment::visibleTo($request->user())->when($request->filled('service_type'), fn ($query) => $query->where('service_type', $request->string('service_type')))->orderByDesc('id')->limit(200)->get();
         $visaLots = \App\Models\VisaLot::orderBy('lot_number')->get();
         return view('visas.create', array_merge(['recruitments' => $recruitments], ['visaLots' => $visaLots]));
     }

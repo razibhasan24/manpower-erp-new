@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Recruitments</h1>
+    <h1 class="h3 mb-0">{{ $serviceType === 'student' ? 'Student Registrations' : ($serviceType === 'hajj_umrah' ? 'Hajj & Umrah Registrations' : 'Recruitments') }}</h1>
     @can('recruitment.create')
         <x-button href="{{ route('recruitments.create') }}">New Recruitment</x-button>
     @endcan
@@ -12,6 +12,7 @@
 
 <x-filter-bar>
     <form method="GET" action="{{ route('recruitments.index') }}" class="row g-2 align-items-end">
+                @if($serviceType)<input type="hidden" name="service_type" value="{{ $serviceType }}">@endif
                 <div class="col-md-4">
                     <input type="search" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search...">
                 </div>
@@ -67,13 +68,20 @@
 <x-table>
     <table class="table table-striped table-hover mb-0">
         <thead>
-            <tr><th>Tracking Number</th><th>Passport Holder</th><th>Agent</th><th>Country</th><th>Stage</th><th>Current Status</th><th>Actions</th></tr>
+            <tr><th>Tracking Number</th><th>Type</th><th>Package / Due</th><th>Passport Holder</th><th>Agent</th><th>Country</th><th>Stage</th><th>Current Status</th><th>Actions</th></tr>
         </thead>
         <tbody>
             @forelse ($items as $item)
                 <tr>
-                    <td><a href="{{ route('recruitments.show', $item) }}">{{ $item->tracking_number }}</a></td><td>{{ $item->passportHolder?->full_name ?? '—' }}</td><td>{{ $item->agent?->name ?? '—' }}</td><td>{{ $item->country?->name ?? '—' }}</td><td>{{ ucwords(str_replace('_', ' ', $item->current_stage)) }}</td><td><x-badge>{{ $item->current_status }}</x-badge></td>
+                    <td><a href="{{ route('recruitments.show', $item) }}">{{ $item->tracking_number }}</a></td><td>{{ match($item->service_type) {'student' => 'Student', 'hajj_umrah' => 'Hajj / Umrah', default => 'Overseas'} }}</td><td>{{ $item->servicePackage?->name ?? '—' }} @if($item->quoted_amount !== null)<div class="small text-muted">Due: {{ $item->quoted_currency }} {{ number_format((float) $item->remaining_due, 2) }}</div>@endif</td><td>{{ $item->passportHolder?->full_name ?? '—' }}</td><td>{{ $item->agent?->name ?? '—' }}</td><td>{{ $item->country?->name ?? '—' }}</td><td>{{ ucwords(str_replace('_', ' ', $item->current_stage)) }}</td><td><x-badge>{{ $item->current_status }}</x-badge></td>
                     <td class="text-nowrap">
+                        @can('recruitment.view')
+                            <div class="btn-group btn-group-sm me-1" role="group" aria-label="Download candidate formats">
+                                <a href="{{ route('recruitments.download-format', [$item, 'cv']) }}" class="btn btn-outline-dark" title="Download CV">CV</a>
+                                <a href="{{ route('recruitments.download-format', [$item, 'entry-form']) }}" class="btn btn-outline-dark" title="Download barcode entry form">Entry</a>
+                                <a href="{{ route('recruitments.download-format', [$item, 'id-card']) }}" class="btn btn-outline-dark" title="Download ID card">ID Card</a>
+                            </div>
+                        @endcan
                         @if ($item->selection)
                             @can('selection.view')
                                 <x-button href="{{ route('selections.show', $item->selection) }}" class="btn-sm btn-outline-success" title="View Selection &amp; Grading">Selection &amp; Grading</x-button>
@@ -96,7 +104,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="7" class="text-center text-muted py-4">No recruitments found. Adjust the filters or create a new one.</td></tr>
+                <tr><td colspan="9" class="text-center text-muted py-4">No registrations found. Adjust the filters or create a new one.</td></tr>
             @endforelse
         </tbody>
     </table>

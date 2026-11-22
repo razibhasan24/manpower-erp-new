@@ -27,7 +27,7 @@ class PoliceClearanceController extends Controller
     public function create(Request $request)
     {
         $this->authorize('create', PoliceClearance::class);
-        $recruitments = \App\Models\Recruitment::visibleTo($request->user())->orderByDesc('id')->limit(200)->get();
+        $recruitments = \App\Models\Recruitment::visibleTo($request->user())->when($request->filled('service_type'), fn ($query) => $query->where('service_type', $request->string('service_type')))->where('service_type', '!=', 'hajj_umrah')->orderByDesc('id')->limit(200)->get();
         return view('police-clearances.create', compact('recruitments'));
     }
 
@@ -50,7 +50,7 @@ class PoliceClearanceController extends Controller
     public function edit(PoliceClearance $policeClearance)
     {
         $this->authorize('update', $policeClearance);
-        $recruitments = \App\Models\Recruitment::visibleTo(auth()->user())->orderByDesc('id')->limit(200)->get();
+        $recruitments = \App\Models\Recruitment::visibleTo(auth()->user())->where('service_type', '!=', 'hajj_umrah')->orderByDesc('id')->limit(200)->get();
         return view('police-clearances.edit', ['record' => $policeClearance, 'recruitments' => $recruitments]);
     }
 

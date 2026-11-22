@@ -21,7 +21,7 @@ class MedicalService
     /** Scoped list query: isolation is enforced here, never in the view (Phase 01 section 8.3). */
     public function scopedQuery(User $user)
     {
-        $query = Medical::query()->with(['recruitment.passportHolder', 'recruitment.agent'])->latest();
+        $query = Medical::query()->with(['recruitment.passportHolder', 'recruitment.agent'])->when(request()->filled('service_type'), fn ($q) => $q->whereHas('recruitment', fn ($r) => $r->where('service_type', request('service_type'))))->latest();
         if (method_exists(Medical::class, 'scopeVisibleTo')) {
             $query->visibleTo($user);
         }
@@ -31,6 +31,9 @@ class MedicalService
     public function create(array $data, ?User $user = null): Medical
     {
         return DB::transaction(function () use ($data, $user) {
+            if (Recruitment::whereKey($data['recruitment_id'])->where('service_type', 'hajj_umrah')->exists()) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['recruitment_id' => 'Medical is not part of the Hajj and Umrah workflow.']);
+            }
             $record = Medical::create($this->attributes($data, $user));
             $this->storeFiles($record, $data);
             $recruitment = $record->recruitment;

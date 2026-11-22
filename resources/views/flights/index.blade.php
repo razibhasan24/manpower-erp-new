@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>{{ __('Flight Booking') }}</h1>
     @can('flight.create')
-        <x-button href="{{ route('flights.create') }}">{{ __('New Record') }}</x-button>
+        <x-button href="{{ route('flights.create', request()->only('service_type')) }}">{{ __('New Record') }}</x-button>
     @endcan
 </div>
 <x-filter-bar :statuses="$statuses" />

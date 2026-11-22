@@ -21,6 +21,9 @@ class FlightService
     /** Flight records span two workflow stages: booking, then ticket issued. */
     protected function flightWorkflowTarget(string $status, Recruitment $recruitment): array
     {
+        if (in_array($recruitment->service_type, ['student', 'hajj_umrah'], true)) {
+            return ['flight_booking', $status === 'ticket_issued' ? 'completed' : ($status === 'rescheduled' ? 'pending' : $status)];
+        }
         if (in_array($status, ['ticket_issued', 'rescheduled'], true)) {
             return ['ticket_issued', $status];
         }
@@ -33,7 +36,7 @@ class FlightService
     /** Scoped list query: isolation is enforced here, never in the view (Phase 01 section 8.3). */
     public function scopedQuery(User $user)
     {
-        $query = Flight::query()->with(['recruitment.passportHolder', 'recruitment.agent'])->latest();
+        $query = Flight::query()->with(['recruitment.passportHolder', 'recruitment.agent'])->when(request()->filled('service_type'), fn ($q) => $q->whereHas('recruitment', fn ($r) => $r->where('service_type', request('service_type'))))->latest();
         if (method_exists(Flight::class, 'scopeVisibleTo')) {
             $query->visibleTo($user);
         }
@@ -92,7 +95,7 @@ class FlightService
 
     protected function attributes(array $data, ?User $user, ?Flight $existing = null): array
     {
-        $allowed = ['recruitment_id', 'airline_id', 'flight_number', 'travel_agency_id', 'departure_date', 'departure_airport', 'arrival_airport', 'ticket_number', 'status', 'remarks'];
+        $allowed = ['recruitment_id', 'airline_id', 'flight_number', 'travel_agency_id', 'departure_date', 'departure_airport', 'arrival_airport', 'hotel_name', 'hotel_check_in', 'hotel_check_out', 'ticket_number', 'status', 'remarks'];
         $attrs = array_intersect_key($data, array_flip($allowed));
         if ($existing === null && $user) {
             $attrs['created_by'] = $user->id;

@@ -46,6 +46,7 @@ class SelectionController extends Controller
                     );
                 });
             })
+            ->when($request->filled('service_type'), fn ($query) => $query->whereHas('recruitment', fn ($recruitmentQuery) => $recruitmentQuery->where('service_type', $request->string('service_type'))))
             ->paginate(15)
             ->withQueryString();
 
@@ -60,6 +61,8 @@ class SelectionController extends Controller
         $this->authorize('create', Selection::class);
 
         $recruitments = Recruitment::visibleTo($request->user())
+            ->whereIn('service_type', ['overseas', 'student'])
+            ->when($request->filled('service_type'), fn ($query) => $query->where('service_type', $request->string('service_type')))
             ->with(['agent', 'passportHolder'])
             ->orderByDesc('id')
             ->limit(200)
@@ -111,6 +114,8 @@ class SelectionController extends Controller
         $this->authorize('update', $selection);
 
         $recruitments = Recruitment::visibleTo(auth()->user())
+            ->whereIn('service_type', ['overseas', 'student'])
+            ->when(request()->filled('service_type'), fn ($query) => $query->where('service_type', request()->string('service_type')))
             ->with(['agent', 'passportHolder'])
             ->orderByDesc('id')
             ->limit(200)

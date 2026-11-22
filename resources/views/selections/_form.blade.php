@@ -22,7 +22,7 @@
             <option value="">-- {{ __('Select recruitment') }} --</option>
 
             @foreach ($recruitments as $recruitment)
-                <option value="{{ $recruitment->id }}" data-agent-id="{{ $recruitment->agent_id }}" data-agent-name="{{ $recruitment->agent?->name }}" data-holder-id="{{ $recruitment->passport_holder_id }}" data-holder-name="{{ $recruitment->passportHolder?->full_name }}" @selected(old('recruitment_id', $record?->recruitment_id) == $recruitment->id)>
+                <option value="{{ $recruitment->id }}" data-service-type="{{ $recruitment->service_type }}" data-agent-id="{{ $recruitment->agent_id }}" data-agent-name="{{ $recruitment->agent?->name }}" data-holder-id="{{ $recruitment->passport_holder_id }}" data-holder-name="{{ $recruitment->passportHolder?->full_name }}" @selected(old('recruitment_id', $record?->recruitment_id) == $recruitment->id)>
                     {{ $recruitment->tracking_number }}
                     — {{ $recruitment->passportHolder?->full_name ?? 'N/A' }}
                 </option>
@@ -126,6 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const advance = document.getElementById('advance_amount');
     const total = document.getElementById('total_amount');
     const due = document.getElementById('remaining_due_display');
+    const financeSection = document.getElementById('selection-finance-section');
 
     function updateParty() {
         const option = recruitment.options[recruitment.selectedIndex];
@@ -143,16 +144,23 @@ document.addEventListener('DOMContentLoaded', function () {
         due.value = Math.max(0, sum - advanceValue).toFixed(2);
         advance.max = sum.toFixed(2);
     }
+    function syncFinanceSection() {
+        const packageType = recruitment.options[recruitment.selectedIndex]?.dataset.serviceType;
+        financeSection.classList.toggle('d-none', ['student', 'hajj_umrah'].includes(packageType));
+    }
     recruitment.addEventListener('change', updateParty);
+    recruitment.addEventListener('change', syncFinanceSection);
     partyType.addEventListener('change', updateParty);
     [...costFields, 'advance_amount'].forEach(id => document.getElementById(id)?.addEventListener('input', updateAmounts));
     updateParty();
+    syncFinanceSection();
     updateAmounts();
 });
 </script>
 
 <hr>
 
+<div id="selection-finance-section">
 <h5>{{ __('Financial Responsibility (decided at Selection)') }}</h5>
 
 <div class="row g-3">
@@ -206,6 +214,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </div>
 <p class="form-text">Agent / Passport Holder due = Company Service Charge + Agent Charge + Visa Cost + Medical Cost + Training Cost + Other Costs − Advance. Overseas salary is shown separately and is not added to due.</p>
+
+</div>
 
 <hr>
 

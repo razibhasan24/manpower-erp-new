@@ -42,6 +42,10 @@ class SelectionService
     public function create(array $data, ?User $user = null): Selection
     {
         return DB::transaction(function () use ($data, $user) {
+            $recruitment = Recruitment::findOrFail($data['recruitment_id']);
+            if (! in_array($recruitment->service_type, ['overseas', 'student'], true)) {
+                throw ValidationException::withMessages(['recruitment_id' => 'Hajj and Umrah registrations move directly from registration to visa.']);
+            }
             $record = Selection::create($this->attributes($data, $user));
             $this->storeFiles($record, $data);
             $recruitment = $record->recruitment;
@@ -56,6 +60,11 @@ class SelectionService
     /** Save the selection cost and post its receivable and any advance to accounting. */
     protected function postSelectionFinance(Selection $selection, Recruitment $recruitment, array $data): void
     {
+        // Package dues for students and Hajj/Umrah are posted at registration.
+        if (in_array($recruitment->service_type, ['student', 'hajj_umrah'], true)) {
+            return;
+        }
+
         $costKeys = ['company_service_charge', 'agent_charge', 'medical_cost', 'training_cost', 'visa_cost', 'other_cost'];
         $allFinanceKeys = array_merge(['salary'], $costKeys);
         $total = round(array_sum(array_map(
@@ -156,6 +165,9 @@ class SelectionService
     public function update(Selection $selection, array $data, ?User $user = null): Selection
     {
         return DB::transaction(function () use ($selection, $data, $user) {
+            if ($selection->recruitment && $selection->recruitment->service_type === 'hajj_umrah') {
+                throw ValidationException::withMessages(['recruitment_id' => 'Selection is not part of the Hajj and Umrah workflow.']);
+            }
             $selection->update($this->attributes($data, $user, $selection));
             $this->storeFiles($selection, $data);
             $financeKeys = ['salary', 'financial_responsible_type', 'company_service_charge', 'agent_charge', 'medical_cost', 'training_cost', 'visa_cost', 'other_cost', 'advance_amount'];

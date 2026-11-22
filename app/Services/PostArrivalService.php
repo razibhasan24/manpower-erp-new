@@ -23,7 +23,7 @@ class PostArrivalService
     /** Scoped list query: isolation is enforced here, never in the view (Phase 01 section 8.3). */
     public function scopedQuery(User $user)
     {
-        $query = PostArrival::query()->with(['recruitment.passportHolder', 'recruitment.agent'])->latest();
+        $query = PostArrival::query()->with(['recruitment.passportHolder', 'recruitment.agent'])->when(request()->filled('service_type'), fn ($q) => $q->whereHas('recruitment', fn ($r) => $r->where('service_type', request('service_type'))))->latest();
         if (method_exists(PostArrival::class, 'scopeVisibleTo')) {
             $query->visibleTo($user);
         }

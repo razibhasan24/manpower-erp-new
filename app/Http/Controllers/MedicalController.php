@@ -27,7 +27,7 @@ class MedicalController extends Controller
     public function create(Request $request)
     {
         $this->authorize('create', Medical::class);
-        $recruitments = \App\Models\Recruitment::visibleTo($request->user())->orderByDesc('id')->limit(200)->get();
+        $recruitments = \App\Models\Recruitment::visibleTo($request->user())->when($request->filled('service_type'), fn ($query) => $query->where('service_type', $request->string('service_type')))->where('service_type', '!=', 'hajj_umrah')->orderByDesc('id')->limit(200)->get();
         $medicalCentres = \App\Models\MedicalCentre::orderBy('name')->get();
         return view('medicals.create', array_merge(['recruitments' => $recruitments], ['medicalCentres' => $medicalCentres]));
     }
@@ -51,7 +51,7 @@ class MedicalController extends Controller
     public function edit(Medical $medical)
     {
         $this->authorize('update', $medical);
-        $recruitments = \App\Models\Recruitment::visibleTo(auth()->user())->orderByDesc('id')->limit(200)->get();
+        $recruitments = \App\Models\Recruitment::visibleTo(auth()->user())->where('service_type', '!=', 'hajj_umrah')->orderByDesc('id')->limit(200)->get();
         $medicalCentres = \App\Models\MedicalCentre::orderBy('name')->get();
         return view('medicals.edit', array_merge(['record' => $medical, 'recruitments' => $recruitments], ['medicalCentres' => $medicalCentres]));
     }

@@ -26,7 +26,7 @@ class VisaService
     /** Scoped list query: isolation is enforced here, never in the view (Phase 01 section 8.3). */
     public function scopedQuery(User $user)
     {
-        $query = Visa::query()->with(['recruitment.passportHolder', 'recruitment.agent'])->latest();
+        $query = Visa::query()->with(['recruitment.passportHolder', 'recruitment.agent'])->when(request()->filled('service_type'), fn ($q) => $q->whereHas('recruitment', fn ($r) => $r->where('service_type', request('service_type'))))->latest();
         if (method_exists(Visa::class, 'scopeVisibleTo')) {
             $query->visibleTo($user);
         }
@@ -118,6 +118,9 @@ class VisaService
     /** MOFA is a stage on the visa (Phase 01 section 6.3), never a separate candidate record. */
     public function updateMofa(Visa $visa, array $data, ?User $user = null): Visa
     {
+        if (in_array($visa->recruitment?->service_type, ['student', 'hajj_umrah'], true)) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['visa' => 'MOFA is not a separate stage in the Student or Hajj/Umrah workflow.']);
+        }
         return DB::transaction(function () use ($visa, $data, $user) {
             // MOFA is its own record (mofa_processes) in Group A; the visa keeps a mirrored mofa_status.
             MofaProcess::create([
@@ -135,6 +138,9 @@ class VisaService
 
     public function storeWorkPermit(Visa $visa, array $data, ?User $user = null): WorkPermit
     {
+        if (in_array($visa->recruitment?->service_type, ['student', 'hajj_umrah'], true)) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['visa' => 'Work permits are not part of the Student or Hajj/Umrah workflow.']);
+        }
         return DB::transaction(function () use ($visa, $data, $user) {
             $permit = WorkPermit::updateOrCreate(['visa_id' => $visa->id], array_diff_key($data, ['status' => true]));
             $this->stepWorkflow($visa->recruitment, 'work_permit', 'approved', $data['remarks'] ?? null, $user);
@@ -144,6 +150,9 @@ class VisaService
 
     public function storeAppointment(Visa $visa, array $data, ?User $user = null): Appointment
     {
+        if (in_array($visa->recruitment?->service_type, ['student', 'hajj_umrah'], true)) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['visa' => 'Appointments are not part of the Student or Hajj/Umrah workflow.']);
+        }
         return DB::transaction(function () use ($visa, $data, $user) {
             $appointment = Appointment::create(array_merge($data, ['visa_id' => $visa->id]));
             $this->stepWorkflow($visa->recruitment, 'appointment', $data['status'] ?? 'confirmed', $data['remarks'] ?? null, $user);

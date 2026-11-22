@@ -2,7 +2,7 @@
 
 <?php $__env->startSection('content'); ?>
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Recruitments</h1>
+    <h1 class="h3 mb-0"><?php echo e($serviceType === 'student' ? 'Student Registrations' : ($serviceType === 'hajj_umrah' ? 'Hajj & Umrah Registrations' : 'Recruitments')); ?></h1>
     <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('recruitment.create')): ?>
         <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561 = $attributes; } ?>
@@ -37,6 +37,7 @@
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
     <form method="GET" action="<?php echo e(route('recruitments.index')); ?>" class="row g-2 align-items-end">
+                <?php if($serviceType): ?><input type="hidden" name="service_type" value="<?php echo e($serviceType); ?>"><?php endif; ?>
                 <div class="col-md-4">
                     <input type="search" name="search" value="<?php echo e(request('search')); ?>" class="form-control" placeholder="Search...">
                 </div>
@@ -110,12 +111,12 @@
 <?php $component->withAttributes([]); ?>
     <table class="table table-striped table-hover mb-0">
         <thead>
-            <tr><th>Tracking Number</th><th>Passport Holder</th><th>Agent</th><th>Country</th><th>Stage</th><th>Current Status</th><th>Actions</th></tr>
+            <tr><th>Tracking Number</th><th>Type</th><th>Package / Due</th><th>Passport Holder</th><th>Agent</th><th>Country</th><th>Stage</th><th>Current Status</th><th>Actions</th></tr>
         </thead>
         <tbody>
             <?php $__empty_1 = true; $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr>
-                    <td><a href="<?php echo e(route('recruitments.show', $item)); ?>"><?php echo e($item->tracking_number); ?></a></td><td><?php echo e($item->passportHolder?->full_name ?? '—'); ?></td><td><?php echo e($item->agent?->name ?? '—'); ?></td><td><?php echo e($item->country?->name ?? '—'); ?></td><td><?php echo e(ucwords(str_replace('_', ' ', $item->current_stage))); ?></td><td><?php if (isset($component)) { $__componentOriginal2ddbc40e602c342e508ac696e52f8719 = $component; } ?>
+                    <td><a href="<?php echo e(route('recruitments.show', $item)); ?>"><?php echo e($item->tracking_number); ?></a></td><td><?php echo e(match($item->service_type) {'student' => 'Student', 'hajj_umrah' => 'Hajj / Umrah', default => 'Overseas'}); ?></td><td><?php echo e($item->servicePackage?->name ?? '—'); ?> <?php if($item->quoted_amount !== null): ?><div class="small text-muted">Due: <?php echo e($item->quoted_currency); ?> <?php echo e(number_format((float) $item->remaining_due, 2)); ?></div><?php endif; ?></td><td><?php echo e($item->passportHolder?->full_name ?? '—'); ?></td><td><?php echo e($item->agent?->name ?? '—'); ?></td><td><?php echo e($item->country?->name ?? '—'); ?></td><td><?php echo e(ucwords(str_replace('_', ' ', $item->current_stage))); ?></td><td><?php if (isset($component)) { $__componentOriginal2ddbc40e602c342e508ac696e52f8719 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal2ddbc40e602c342e508ac696e52f8719 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.badge','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('badge'); ?>
@@ -135,6 +136,13 @@
 <?php unset($__componentOriginal2ddbc40e602c342e508ac696e52f8719); ?>
 <?php endif; ?></td>
                     <td class="text-nowrap">
+                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('recruitment.view')): ?>
+                            <div class="btn-group btn-group-sm me-1" role="group" aria-label="Download candidate formats">
+                                <a href="<?php echo e(route('recruitments.download-format', [$item, 'cv'])); ?>" class="btn btn-outline-dark" title="Download CV">CV</a>
+                                <a href="<?php echo e(route('recruitments.download-format', [$item, 'entry-form'])); ?>" class="btn btn-outline-dark" title="Download barcode entry form">Entry</a>
+                                <a href="<?php echo e(route('recruitments.download-format', [$item, 'id-card'])); ?>" class="btn btn-outline-dark" title="Download ID card">ID Card</a>
+                            </div>
+                        <?php endif; ?>
                         <?php if($item->selection): ?>
                             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('selection.view')): ?>
                                 <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
@@ -229,7 +237,7 @@
                     </td>
                 </tr>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                <tr><td colspan="7" class="text-center text-muted py-4">No recruitments found. Adjust the filters or create a new one.</td></tr>
+                <tr><td colspan="9" class="text-center text-muted py-4">No registrations found. Adjust the filters or create a new one.</td></tr>
             <?php endif; ?>
         </tbody>
     </table>

@@ -22,6 +22,7 @@ class Flight extends Model
         'departure_date',
         'departure_airport',
         'arrival_airport',
+        'hotel_name', 'hotel_check_in', 'hotel_check_out',
         'ticket_number',
         'ticket_path',
         'noc_path',
@@ -30,6 +31,8 @@ class Flight extends Model
 
     protected $casts = [
         'departure_date' => 'datetime',
+        'hotel_check_in' => 'date',
+        'hotel_check_out' => 'date',
     ];
 
     public function recruitment(): BelongsTo

@@ -10,6 +10,10 @@ use App\Models\Branch;
 use App\Models\PassportHolder;
 use App\Models\RecruitmentDocument;
 use App\Models\TrackingNumber;
+use App\Models\ServicePackage;
+use App\Models\Voucher;
+use App\Services\ChartOfAccountsService;
+use App\Services\VoucherService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +21,10 @@ use Illuminate\Validation\ValidationException;
 
 class RecruitmentService
 {
+    use \App\Services\Concerns\WorkflowStepper;
+
+    public function __construct(protected WorkflowService $workflow) {}
+
     public const ACTIVE_STATUSES = [
         'pending',
         'approved',
@@ -32,6 +40,7 @@ class RecruitmentService
             ->with([
                 'passportHolder',
                 'agent',
+                'servicePackage',
                 'branch',
                 'country',
                 'company',
@@ -52,6 +61,10 @@ class RecruitmentService
 
         if (! empty($filters['current_stage'])) {
             $query->where('current_stage', $filters['current_stage']);
+        }
+
+        if (! empty($filters['service_type'])) {
+            $query->where('service_type', $filters['service_type']);
         }
 
         if (! empty($filters['active'])) {
@@ -85,6 +98,21 @@ class RecruitmentService
             $files = $data['documents'] ?? [];
 
             unset($data['documents']);
+            $serviceType = $data['service_type'] ?? 'overseas';
+            $package = null;
+            if ($serviceType !== 'overseas') {
+                $package = ServicePackage::query()->whereKey($data['service_package_id'] ?? null)
+                    ->where('type', $serviceType)->where('is_active', true)->firstOrFail();
+                if ($package->currency !== 'BDT') {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'service_package_id' => 'Registration due posting currently requires a BDT package price.',
+                    ]);
+                }
+                $data['quoted_amount'] = $package->price;
+                $data['quoted_currency'] = $package->currency;
+                $data['total_cost'] = $package->price;
+                $data['remaining_due'] = $package->price;
+            }
 
             $holderFields = ['full_name','father_name','mother_name','dob','gender','phone','email','present_address','nid','passport_number','passport_issue_date','passport_expiry_date','agent_id','branch_id','country_id','company_id','position_id','referer','religion','marital_status','height','weight','village_road','post_office','police_station','district'];
             $holderData = array_intersect_key($data, array_flip($holderFields));
@@ -102,9 +130,16 @@ class RecruitmentService
                 ->whereKey((int) $data['branch_id'])
                 ->firstOrFail();
 
-            // Financial responsibility is decided during Selection.
-            $data['financial_responsible_type'] = null;
-            $data['financial_responsible_id'] = null;
+            // Package registrations assign the package due immediately to
+            // the introducing agent, or to the passport holder if there is none.
+            if ($serviceType === 'overseas') {
+                $data['financial_responsible_type'] = null;
+                $data['financial_responsible_id'] = null;
+            } else {
+                $responsible = $passportHolder->agent_id ? 'agent' : 'passport_holder';
+                $data['financial_responsible_type'] = $responsible;
+                $data['financial_responsible_id'] = $responsible === 'agent' ? $passportHolder->agent_id : $passportHolder->id;
+            }
 
             // Generate tracking number.
             [$trackingNumber, $sequence] =
@@ -123,6 +158,24 @@ class RecruitmentService
                 'created_by' => $user->id,
                 'updated_by' => $user->id,
             ])->save();
+
+            if ($package && (float) $package->price > 0) {
+                $chart = app(ChartOfAccountsService::class);
+                $receivable = $chart->requireByCode($recruitment->financial_responsible_type === 'agent' ? '1210' : '1220');
+                $income = $chart->requireByCode('4100');
+                app(VoucherService::class)->post([
+                    'voucher_type' => 'journal',
+                    'voucher_date' => now()->toDateString(),
+                    'branch_id' => $recruitment->branch_id,
+                    'reference_type' => Recruitment::class,
+                    'reference_id' => $recruitment->id,
+                    'narration' => "{$package->name} registration due: {$recruitment->tracking_number}",
+                    'lines' => [
+                        ['account_id' => $receivable->id, 'debit' => $package->price, 'credit' => 0, 'sub_ledger_type' => $recruitment->financial_responsible_type, 'sub_ledger_id' => $recruitment->financial_responsible_id],
+                        ['account_id' => $income->id, 'debit' => 0, 'credit' => $package->price],
+                    ],
+                ]);
+            }
 
             // Save tracking number.
             TrackingNumber::create([
@@ -221,6 +274,30 @@ class RecruitmentService
         });
     }
 
+    public function completeStudentStage(Recruitment $recruitment, array $data, User $user): Recruitment
+    {
+        return DB::transaction(function () use ($recruitment, $data, $user) {
+            $stage = $data['stage'];
+            $status = match ($stage) {
+                'university_management' => 'completed',
+                'offer_letter' => 'issued',
+                'admission' => 'admitted',
+            };
+
+            if ($stage === 'university_management') {
+                $recruitment->update(['university_id' => $data['university_id']]);
+            }
+
+            if (in_array($stage, ['offer_letter', 'admission'], true) && ($data['document'] ?? null) instanceof UploadedFile) {
+                $this->storeDocument($recruitment, $data['document'], $stage, $user, $stage);
+            }
+
+            $this->stepWorkflow($recruitment, $stage, $status, $data['remarks'] ?? null, $user);
+
+            return $recruitment->fresh(['passportHolder', 'agent', 'servicePackage', 'university', 'stageHistories', 'documents']);
+        });
+    }
+
     /**
      * Delete means cancel.
      * Recruitment records are never hard-deleted here.
@@ -281,7 +358,8 @@ class RecruitmentService
         Recruitment $recruitment,
         UploadedFile $file,
         string $type,
-        User $user
+        User $user,
+        ?string $stage = null
     ): RecruitmentDocument {
 
         $path = $file->store(
@@ -292,7 +370,7 @@ class RecruitmentService
         return RecruitmentDocument::create([
             'recruitment_id' => $recruitment->id,
             'type' => $type,
-            'stage' => $recruitment->current_stage ?? 'registration',
+            'stage' => $stage ?? ($recruitment->current_stage ?? 'registration'),
             'file_path' => $path,
             'original_name' => $file->getClientOriginalName(),
             'mime_type' => $file->getMimeType(),
