@@ -7,7 +7,7 @@
         <h1 class="h3 mb-0">Passport Holders</h1>
 
         @can('passport-holder.create')
-            <x-button href="{{ route('passport-holders.create') }}" variant="dark" size="sm">
+            <x-button href="{{ route('passport-holders.create') }}" variant="success" size="sm">
                 <i class="fas fa-plus me-1"></i> New Passport Holder
             </x-button>
         @endcan

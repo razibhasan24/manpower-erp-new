@@ -1,41 +1,316 @@
 @php($holder = $recruitment->passportHolder ?? null)
 @php($serviceType = old('service_type', request('service_type', $recruitment->service_type ?? 'overseas')))
+
 <div class="row g-3">
-    @if(!isset($recruitment))
-        <div class="col-12"><h5>Registration Type &amp; Package</h5></div>
-        <div class="col-md-4"><label class="form-label">Registration Type *</label><select name="service_type" id="service_type" class="form-select" required><option value="overseas" @selected($serviceType==='overseas')>Overseas Employment</option><option value="student" @selected($serviceType==='student')>Student</option><option value="hajj_umrah" @selected($serviceType==='hajj_umrah')>Hajj &amp; Umrah</option></select></div>
-        <div class="col-md-4 package-field"><label class="form-label">Package *</label><select name="service_package_id" id="service_package_id" class="form-select"><option value="">Select Package</option>@foreach($packages ?? [] as $package)<option value="{{ $package->id }}" data-type="{{ $package->type }}" data-price="{{ $package->price }}" data-currency="{{ $package->currency }}" @selected(old('service_package_id', '')==$package->id)>{{ $package->name }} ({{ $package->code }}) · {{ $package->currency }} {{ number_format((float) $package->price, 2) }}</option>@endforeach</select></div>
-        <div class="col-md-4 package-field"><label class="form-label">Quoted Cost / Registration Due</label><input id="package_quote" class="form-control" readonly></div>
-    @else
-        <div class="col-12"><h5>Registration Type: {{ ucfirst(str_replace('_', ' ', $serviceType)) }} @if($recruitment->servicePackage) · {{ $recruitment->servicePackage->name }} ({{ $recruitment->quoted_currency }} {{ number_format((float) $recruitment->quoted_amount, 2) }}) @endif</h5></div>
+    {{-- ✅ Registration Type & Package Section --}}
+    <div class="col-12">
+        <div class="bg-light rounded p-3 border mb-2">
+            <h5 class="mb-3 text-primary"><i class="bi bi-briefcase me-2"></i> Registration Type & Package</h5>
+            @if (!isset($recruitment))
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Registration Type <span class="text-danger">*</span></label>
+                        <select name="service_type" id="service_type" class="form-select" required>
+                            <option value="overseas" @selected($serviceType === 'overseas')>Overseas Employment</option>
+                            <option value="student" @selected($serviceType === 'student')>Student</option>
+                            <option value="hajj_umrah" @selected($serviceType === 'hajj_umrah')>Hajj & Umrah</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 package-field">
+                        <label class="form-label fw-semibold">Package <span class="text-danger">*</span></label>
+                        <select name="service_package_id" id="service_package_id" class="form-select">
+                            <option value="">Select Package</option>
+                            @foreach ($packages ?? [] as $package)
+                                <option value="{{ $package->id }}" data-type="{{ $package->type }}"
+                                    data-price="{{ $package->price }}" data-currency="{{ $package->currency }}"
+                                    @selected(old('service_package_id', '') == $package->id)>
+                                    {{ $package->name }} ({{ $package->code }}) · {{ $package->currency }}
+                                    {{ number_format((float) $package->price, 2) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4 package-field">
+                        <label class="form-label fw-semibold">Quoted Cost / Registration Due</label>
+                        <input id="package_quote" class="form-control bg-white" readonly
+                            placeholder="Auto calculated...">
+                    </div>
+                </div>
+            @else
+                <div class="alert alert-info mb-0 border-0 d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                    <div>
+                        <strong>Registration Type:</strong> {{ ucfirst(str_replace('_', ' ', $serviceType)) }}
+                        @if ($recruitment->servicePackage)
+                            · <strong>Package:</strong> {{ $recruitment->servicePackage->name }}
+                            ({{ $recruitment->quoted_currency }}
+                            {{ number_format((float) $recruitment->quoted_amount, 2) }})
+                        @endif
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- ✅ Personal Information Section --}}
+    <div class="col-12">
+        <h5 class="section-heading animated-red-border">
+            <i class="bi bi-person me-2"></i>
+            Personal Information
+        </h5>
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label fw-semibold">SL</label>
+        <input class="form-control bg-light" value="{{ $holder->id ?? ($nextPassportHolderId ?? 'Auto generated') }}"
+            readonly>
+    </div>
+    @if (isset($recruitment))
+        <input type="hidden" name="passport_holder_id" value="{{ $holder->id }}">
     @endif
-    <div class="col-12"><h5>Personal Information</h5></div>
-    <div class="col-md-3"><label class="form-label">SL</label><input class="form-control" value="{{ $holder->id ?? ($nextPassportHolderId ?? 'Auto generated on save') }}" readonly></div>
-    @if(isset($recruitment))<input type="hidden" name="passport_holder_id" value="{{ $holder->id }}">@endif
-    @foreach(['passport_number'=>'Passport No.','nid'=>'NID No.','full_name'=>'Full Name','father_name'=>"Father's Name",'mother_name'=>"Mother's Name"] as $name=>$label)
-        <div class="col-md-3"><label class="form-label">{{ $label }} @if(in_array($name,['passport_number','full_name']))* @endif</label><input name="{{ $name }}" class="form-control @error($name)is-invalid @enderror" value="{{ old($name,$holder->$name ?? '') }}" @if(in_array($name,['passport_number','full_name']))required @endif>@error($name)<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+
+    @foreach (['passport_number' => 'Passport No.', 'nid' => 'NID No.', 'full_name' => 'Full Name', 'father_name' => "Father's Name", 'mother_name' => "Mother's Name"] as $name => $label)
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">{{ $label }} @if (in_array($name, ['passport_number', 'full_name']))
+                    <span class="text-danger">*</span>
+                @endif
+            </label>
+            <input name="{{ $name }}" class="form-control @error($name) is-invalid @enderror"
+                value="{{ old($name, $holder->$name ?? '') }}" @if (in_array($name, ['passport_number', 'full_name'])) required @endif>
+            @error($name)
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
     @endforeach
-    <div class="col-md-3"><label class="form-label">Agent <span id="agent-required">*</span></label><select name="agent_id" id="agent_id" class="form-select"><option value="">No Agent (charge passport holder)</option>@foreach($agents as $a)<option value="{{ $a->id }}" @selected(old('agent_id',$recruitment->agent_id ?? $holder->agent_id ?? '')==$a->id)>{{ $a->name }}</option>@endforeach</select><div class="form-text">If an agent is selected, package due is recorded under that agent. Otherwise it is recorded under the passport holder.</div></div>
-    <div class="col-md-3"><label class="form-label">Referer</label><input name="referer" class="form-control" value="{{ old('referer',$holder->referer ?? '') }}"></div>
-    @foreach([['country_id','Country',$countries,'name'],['company_id','Company',$companies,'name'],['position_id','Position',$positions,'title'],['branch_id','Branch',$branches,'name']] as [$name,$label,$items,$display])
-        <div class="col-md-3"><label class="form-label">{{ $label }} <span class="overseas-required">*</span></label><select name="{{ $name }}" class="form-select" @required($name==='branch_id' || $name==='country_id' || $serviceType==='overseas')><option value="">Select {{ $label }}</option>@foreach($items as $item)<option value="{{ $item->id }}" @selected(old($name,$recruitment->$name ?? $holder->$name ?? '')==$item->id)>{{ $item->$display }}</option>@endforeach</select></div>
+
+    <div class="col-md-3">
+        <label class="form-label fw-semibold">Agent <span id="agent-required" class="text-danger">*</span></label>
+        <select name="agent_id" id="agent_id" class="form-select">
+            <option value="">No Agent (charge passport holder)</option>
+            @foreach ($agents as $a)
+                <option value="{{ $a->id }}" @selected(old('agent_id', $recruitment->agent_id ?? ($holder->agent_id ?? '')) == $a->id)>{{ $a->name }}</option>
+            @endforeach
+        </select>
+        <div class="form-text small text-muted">If an agent is selected, package due is recorded under that agent.</div>
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label fw-semibold">Referer</label>
+        <input name="referer" class="form-control" value="{{ old('referer', $holder->referer ?? '') }}">
+    </div>
+
+    @foreach ([['country_id', 'Country', $countries, 'name'], ['company_id', 'Company', $companies, 'name'], ['position_id', 'Position', $positions, 'title'], ['branch_id', 'Branch', $branches, 'name']] as [$name, $label, $items, $display])
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">{{ $label }} <span
+                    class="overseas-required text-danger">*</span></label>
+            <select name="{{ $name }}" class="form-select @error($name) is-invalid @enderror"
+                @required($name === 'branch_id' || $name === 'country_id' || $serviceType === 'overseas')>
+                <option value="">Select {{ $label }}</option>
+                @foreach ($items as $item)
+                    <option value="{{ $item->id }}" @selected(old($name, $recruitment->$name ?? ($holder->$name ?? '')) == $item->id)>{{ $item->$display }}</option>
+                @endforeach
+            </select>
+            @error($name)
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
     @endforeach
-    @foreach(['phone'=>'Mobile Number','email'=>'E-mail','gender'=>'Gender','religion'=>'Religion','marital_status'=>'Marital Status','passport_issue_date'=>'Passport Issue Date','passport_expiry_date'=>'Passport Expiry Date','dob'=>'Date of Birth','height'=>'Height','weight'=>'Weight','village_road'=>'Village/Road/Moholla','post_office'=>'P.O.','police_station'=>'P.S.','district'=>'District','present_address'=>'Present Address'] as $name=>$label)
-        <div class="col-md-3"><label class="form-label">{{ $label }}</label>@if($name==='gender')<select name="gender" class="form-select"><option value="">Select Gender</option>@foreach(['male'=>'Male','female'=>'Female','other'=>'Other'] as $v=>$txt)<option value="{{ $v }}" @selected(old($name,$holder->gender ?? '')==$v)>{{ $txt }}</option>@endforeach</select>@elseif($name==='marital_status')<select name="marital_status" class="form-select"><option value="">Select Status</option>@foreach(['single','married','divorced','widowed'] as $v)<option value="{{ $v }}" @selected(old($name,$holder->marital_status ?? '')==$v)>{{ ucfirst($v) }}</option>@endforeach</select>@else<input name="{{ $name }}" type="{{ in_array($name,['dob','passport_issue_date','passport_expiry_date'])?'date':'text' }}" class="form-control" value="{{ old($name, isset($holder->$name) ? (in_array($name,['dob','passport_issue_date','passport_expiry_date']) ? $holder->$name?->format('Y-m-d') : $holder->$name) : '') }}" @if($name==='passport_expiry_date')readonly @endif>@endif</div>
+
+    @foreach (['phone' => 'Mobile Number', 'email' => 'E-mail', 'gender' => 'Gender', 'religion' => 'Religion', 'marital_status' => 'Marital Status', 'passport_issue_date' => 'Passport Issue Date', 'passport_expiry_date' => 'Passport Expiry Date', 'dob' => 'Date of Birth', 'height' => 'Height', 'weight' => 'Weight', 'village_road' => 'Village/Road/Moholla', 'post_office' => 'P.O.', 'police_station' => 'P.S.', 'district' => 'District', 'present_address' => 'Present Address'] as $name => $label)
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">{{ $label }} @if ($name === 'phone' && !isset($recruitment))
+                    <span class="text-danger">*</span>
+                @endif
+            </label>
+
+            @if ($name === 'gender')
+                <select name="gender" class="form-select @error($name) is-invalid @enderror">
+                    <option value="">Select Gender</option>
+                    @foreach (['male' => 'Male', 'female' => 'Female', 'other' => 'Other'] as $v => $txt)
+                        <option value="{{ $v }}" @selected(old($name, $holder->gender ?? '') == $v)>{{ $txt }}</option>
+                    @endforeach
+                </select>
+            @elseif($name === 'marital_status')
+                <select name="marital_status" class="form-select @error($name) is-invalid @enderror">
+                    <option value="">Select Status</option>
+                    @foreach (['single', 'married', 'divorced', 'widowed'] as $v)
+                        <option value="{{ $v }}" @selected(old($name, $holder->marital_status ?? '') == $v)>{{ ucfirst($v) }}</option>
+                    @endforeach
+                </select>
+            @else
+                <input name="{{ $name }}"
+                    type="{{ in_array($name, ['dob', 'passport_issue_date', 'passport_expiry_date']) ? 'date' : 'text' }}"
+                    class="form-control @error($name) is-invalid @enderror"
+                    value="{{ old($name, isset($holder->$name) ? (in_array($name, ['dob', 'passport_issue_date', 'passport_expiry_date']) ? $holder->$name?->format('Y-m-d') : $holder->$name) : '') }}"
+                    @if ($name === 'phone' && !isset($recruitment)) required @endif @if ($name === 'passport_expiry_date') readonly @endif>
+            @endif
+            @error($name)
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
     @endforeach
-    <div class="col-md-3"><label class="form-label">Passport Validity</label><select id="passport_validity" class="form-select"><option value="5">5 Years</option><option value="10" selected>10 Years</option></select></div>
-    <div class="col-md-3"><label class="form-label">Age</label><input id="age_display" class="form-control" readonly value="0 Years 0 Months 0 Days"></div>
-    <div class="col-12"><h5>Documents Uploads</h5></div>
-    @foreach(['photo'=>'Photo','passport_scan'=>'Passport Image','nid_scan'=>'NID Image'] as $type=>$label)<div class="col-md-4"><label class="form-label">{{ $label }}</label><input type="file" name="documents[{{ $type }}]" class="form-control" accept=".pdf,.jpg,.jpeg,.png"></div>@endforeach
-    <div class="col-12"><label class="form-label">Remarks</label><textarea name="remarks" class="form-control">{{ old('remarks',$recruitment->remarks ?? '') }}</textarea></div>
-    <div class="col-12"><h5>Language Proficiency</h5></div>
-    @foreach(['Understanding Bengali','Speaking in Bengali','Writing in Bengali','Understanding English','Speaking in English','Writing in English','Understanding Arabic','Speaking in Arabic','Writing in Arabic','Understanding Other Language'] as $i=>$language)<div class="col-md-3"><label class="form-label">{{ $language }}</label><select name="language_proficiency[{{ $i }}]" class="form-select">@foreach(['No','Low','Medium','High'] as $level)<option @selected(old("language_proficiency.$i",'Low')===$level)>{{ $level }}</option>@endforeach</select></div>@endforeach
-    <div class="col-12"><h5>Experience & Education</h5></div>
-    <div class="col-md-3"><label class="form-label">Local Experience in Years</label><input type="number" min="0" name="local_experience_years" class="form-control" value="{{ old('local_experience_years',$recruitment->local_experience_years ?? 3) }}"></div>
-    <div class="col-md-3"><label class="form-label">Education Type</label><select name="education_type" class="form-select"><option>Basic/Technical</option><option>Special Training if any</option></select></div>
-    @foreach(['education_degree'=>'Degree/Certificate','education_school'=>'School/Board/University','education_grade'=>'Division/CGPA','education_year'=>'Year'] as $name=>$label)<div class="col-md-3"><label class="form-label">{{ $label }}</label><input name="{{ $name }}" class="form-control" value="{{ old($name,$recruitment->$name ?? '') }}"></div>@endforeach
+
+    <div class="col-md-3">
+        <label class="form-label fw-semibold">Passport Validity</label>
+        <select id="passport_validity" class="form-select">
+            <option value="5">5 Years</option>
+            <option value="10" selected>10 Years</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label fw-semibold">Age</label>
+        <input id="age_display" class="form-control bg-light" readonly value="0 Years 0 Months 0 Days">
+    </div>
+
+    {{-- ✅ Documents Section --}}
+    <div class="col-12">
+        <h5 class="section-heading animated-red-border"><i class="bi bi-file-earmark-arrow-up me-2"></i>
+            Documents Uploads</h5>
+    </div>
+
+    @foreach (['photo' => 'Photo', 'passport_scan' => 'Passport Image', 'nid_scan' => 'NID Image'] as $type => $label)
+        <div class="col-md-4">
+            <label class="form-label fw-semibold">{{ $label }}</label>
+            <input type="file" name="documents[{{ $type }}]"
+                class="form-control @error('documents.' . $type) is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+            @error('documents.' . $type)
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+    @endforeach
+
+    <div class="col-12 mt-3">
+        <label class="form-label fw-semibold">Remarks</label>
+        <textarea name="remarks" class="form-control" rows="2" placeholder="Any additional notes...">{{ old('remarks', $recruitment->remarks ?? '') }}</textarea>
+    </div>
+
+    {{-- ✅ Language Proficiency Section --}}
+    <div class="col-12">
+        <h5 class="section-heading animated-red-border"><i class="bi bi-translate me-2"></i> Language
+            Proficiency</h5>
+    </div>
+
+    @foreach (['Understanding Bengali', 'Speaking in Bengali', 'Writing in Bengali', 'Understanding English', 'Speaking in English', 'Writing in English', 'Understanding Other Language'] as $i => $language)
+        <div class="col-md-4">
+            <label class="form-label text-muted small mb-1">{{ $language }}</label>
+            <select name="language_proficiency[{{ $i }}]" class="form-select form-select-sm">
+                @foreach (['No', 'Low', 'Medium', 'High'] as $level)
+                    <option @selected(old("language_proficiency.$i", 'Low') === $level)>{{ $level }}</option>
+                @endforeach
+            </select>
+        </div>
+    @endforeach
+
+    {{-- ✅ Experience & Education Section --}}
+    <div class="col-12">
+        <h5 class="section-heading animated-red-border"><i class="bi bi-mortarboard me-2"></i> Experience &
+            Education</h5>
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label fw-semibold">Local Experience in Years</label>
+        <input type="number" min="0" name="local_experience_years" class="form-control"
+            value="{{ old('local_experience_years', $recruitment->local_experience_years ?? 3) }}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label fw-semibold">Education Type</label>
+        <select name="education_type" class="form-select">
+            <option>Basic/Technical</option>
+            <option>Special Training if any</option>
+        </select>
+    </div>
+
+    @foreach (['education_degree' => 'Degree/Certificate', 'education_school' => 'School/Board/University', 'education_grade' => 'Division/CGPA', 'education_year' => 'Year'] as $name => $label)
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">{{ $label }}</label>
+            <input name="{{ $name }}" class="form-control"
+                value="{{ old($name, $recruitment->$name ?? '') }}">
+        </div>
+    @endforeach
 </div>
+
 <script>
-(()=>{const issue=document.querySelector('[name="passport_issue_date"]'),expiry=document.querySelector('[name="passport_expiry_date"]'),valid=document.getElementById('passport_validity'),dob=document.querySelector('[name="dob"]'),age=document.getElementById('age_display');function syncExpiry(){if(!issue.value)return;const d=new Date(issue.value+'T00:00:00');d.setFullYear(d.getFullYear()+Number(valid.value));expiry.value=d.toISOString().slice(0,10)}function syncAge(){if(!dob.value){age.value='0 Years 0 Months 0 Days';return}let a=new Date(dob.value+'T00:00:00'),b=new Date(),y=b.getFullYear()-a.getFullYear(),m=b.getMonth()-a.getMonth(),d=b.getDate()-a.getDate();if(d<0){m--;d+=new Date(b.getFullYear(),b.getMonth(),0).getDate()}if(m<0){y--;m+=12}age.value=`${y} Years ${m} Months ${d} Days`}issue.addEventListener('change',syncExpiry);valid.addEventListener('change',syncExpiry);dob.addEventListener('change',syncAge);syncAge()})();
-(()=>{const type=document.getElementById('service_type'),packageSelect=document.getElementById('service_package_id'),quote=document.getElementById('package_quote'),agent=document.getElementById('agent_id');if(!type||!packageSelect)return;function sync(){const packageMode=type.value!=='overseas';document.querySelectorAll('.package-field').forEach(el=>el.classList.toggle('d-none',!packageMode));packageSelect.required=packageMode;agent.required=type.value==='overseas';document.getElementById('agent-required').classList.toggle('d-none',!agent.required);document.querySelectorAll('.overseas-required').forEach(el=>el.classList.toggle('d-none',type.value!=='overseas'&&!['branch_id','country_id'].includes(el.closest('.col-md-3')?.querySelector('select')?.name)));[...packageSelect.options].forEach(option=>{if(!option.value)return;option.hidden=option.dataset.type!==type.value});if(packageSelect.selectedOptions[0]?.dataset.type!==type.value)packageSelect.value='';const option=packageSelect.selectedOptions[0];quote.value=option?`${option.dataset.currency} ${Number(option.dataset.price).toFixed(2)}`:''}type.addEventListener('change',sync);packageSelect.addEventListener('change',sync);sync()})();
+    // ✅ Passport Expiry & Age Calculation Logic
+    (() => {
+        const issue = document.querySelector('[name="passport_issue_date"]'),
+            expiry = document.querySelector('[name="passport_expiry_date"]'),
+            valid = document.getElementById('passport_validity'),
+            dob = document.querySelector('[name="dob"]'),
+            age = document.getElementById('age_display');
+
+        function syncExpiry() {
+            if (!issue.value) return;
+            const d = new Date(issue.value + 'T00:00:00');
+            d.setFullYear(d.getFullYear() + Number(valid.value));
+            expiry.value = d.toISOString().slice(0, 10);
+        }
+
+        function syncAge() {
+            if (!dob.value) {
+                age.value = '0 Years 0 Months 0 Days';
+                return;
+            }
+            let a = new Date(dob.value + 'T00:00:00'),
+                b = new Date(),
+                y = b.getFullYear() - a.getFullYear(),
+                m = b.getMonth() - a.getMonth(),
+                d = b.getDate() - a.getDate();
+            if (d < 0) {
+                m--;
+                d += new Date(b.getFullYear(), b.getMonth(), 0).getDate();
+            }
+            if (m < 0) {
+                y--;
+                m += 12;
+            }
+            age.value = `${y} Years ${m} Months ${d} Days`;
+        }
+
+        if (issue && valid) {
+            issue.addEventListener('change', syncExpiry);
+            valid.addEventListener('change', syncExpiry);
+        }
+        if (dob) {
+            dob.addEventListener('change', syncAge);
+            syncAge();
+        }
+    })();
+
+    // ✅ Package & Registration Type Toggle Logic
+    (() => {
+        const type = document.getElementById('service_type'),
+            packageSelect = document.getElementById('service_package_id'),
+            quote = document.getElementById('package_quote'),
+            agent = document.getElementById('agent_id');
+
+        if (!type || !packageSelect) return;
+
+        function sync() {
+            const packageMode = type.value !== 'overseas';
+
+            document.querySelectorAll('.package-field').forEach(el => el.classList.toggle('d-none', !packageMode));
+            packageSelect.required = packageMode;
+            agent.required = type.value === 'overseas';
+            document.getElementById('agent-required').classList.toggle('d-none', !agent.required);
+
+            document.querySelectorAll('.overseas-required').forEach(el => {
+                el.classList.toggle('d-none', type.value !== 'overseas' && !['branch_id', 'country_id']
+                    .includes(el.closest('.col-md-3')?.querySelector('select')?.name));
+            });
+
+            [...packageSelect.options].forEach(option => {
+                if (!option.value) return;
+                option.hidden = option.dataset.type !== type.value;
+            });
+
+            if (packageSelect.selectedOptions[0]?.dataset.type !== type.value) packageSelect.value = '';
+
+            const option = packageSelect.selectedOptions[0];
+            quote.value = option ? `${option.dataset.currency} ${Number(option.dataset.price).toFixed(2)}` : '';
+        }
+
+        type.addEventListener('change', sync);
+        packageSelect.addEventListener('change', sync);
+        sync();
+    })();
 </script>

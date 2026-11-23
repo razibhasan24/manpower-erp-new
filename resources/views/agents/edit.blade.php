@@ -19,7 +19,7 @@
 
                 @include('agents._form')
 
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 mt-4">
                     <x-button type="submit" variant="success">
                         <i class="fas fa-save me-1"></i> Update Agent
                     </x-button>

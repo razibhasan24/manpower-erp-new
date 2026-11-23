@@ -1,24 +1,241 @@
-{{--
-    x-button
-    Props:
-      - type: 'submit' | 'button' | 'reset' (default 'submit')
-      - variant: Bootstrap colour — 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' | 'outline-*' (default 'primary')
-      - href: when set, renders an <a> instead of a <button>
-      - size: 'sm' | 'lg' | null
-      - confirm: when set, shows a JS confirm dialog with this message before submitting/navigating
-    Slot: the button label (HTML allowed).
---}}
-@props(['type' => 'submit', 'variant' => 'warning', 'href' => null, 'size' => null, 'confirm' => null])
+@once
+    @push('styles')
+        <style>
+            /* Main Button */
+            .btn-modern {
+                position: relative;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 7px;
+
+                padding: 9px 18px;
+                border: 1px solid transparent;
+                border-radius: 8px !important;
+
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: .2px;
+
+                text-decoration: none !important;
+                cursor: pointer;
+                overflow: hidden;
+
+                transition: all .25s ease-in-out;
+            }
+
+            /* Hover Animation */
+            .btn-modern:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 14px rgba(0, 0, 0, .16);
+                filter: brightness(.95);
+            }
+
+            /* Click Animation */
+            .btn-modern:active {
+                transform: translateY(0) scale(.96);
+                box-shadow: none;
+            }
+
+            /* Focus Animation */
+            .btn-modern:focus-visible {
+                outline: 3px solid rgba(37, 99, 235, .25);
+                outline-offset: 3px;
+            }
+
+            /* PRIMARY */
+            .btn-modern.btn-primary {
+                background: #2563eb;
+                border-color: #2563eb;
+                color: #fff;
+            }
+
+            /* SUCCESS */
+            .btn-modern.btn-success {
+                background: #16a34a;
+                border-color: #16a34a;
+                color: #fff;
+            }
+
+            /* DANGER */
+            .btn-modern.btn-danger {
+                background: #dc2626;
+                border-color: #dc2626;
+                color: #fff;
+            }
+
+            /* WARNING */
+            .btn-modern.btn-warning {
+                background: #f59e0b;
+                border-color: #f59e0b;
+                color: #fff;
+            }
+
+            /* INFO */
+            .btn-modern.btn-info {
+                background: #0891b2;
+                border-color: #0891b2;
+                color: #fff;
+            }
+
+            /* SECONDARY */
+            .btn-modern.btn-secondary {
+                background: #64748b;
+                border-color: #64748b;
+                color: #fff;
+            }
+
+            /* DARK */
+            .btn-modern.btn-dark {
+                background: #1e293b;
+                border-color: #1e293b;
+                color: #fff;
+            }
+
+            /* LIGHT */
+            .btn-modern.btn-light {
+                background: #f1f5f9;
+                border-color: #e2e8f0;
+                color: #334155;
+            }
+
+            /* OUTLINE BUTTONS */
+            .btn-modern[class*="btn-outline-"] {
+                background: transparent;
+            }
+
+            .btn-modern.btn-outline-primary {
+                color: #2563eb;
+                border-color: #2563eb;
+            }
+
+            .btn-modern.btn-outline-success {
+                color: #16a34a;
+                border-color: #16a34a;
+            }
+
+            .btn-modern.btn-outline-danger {
+                color: #dc2626;
+                border-color: #dc2626;
+            }
+
+            .btn-modern.btn-outline-warning {
+                color: #d97706;
+                border-color: #d97706;
+            }
+
+            .btn-modern.btn-outline-info {
+                color: #0891b2;
+                border-color: #0891b2;
+            }
+
+            .btn-modern.btn-outline-secondary {
+                color: #64748b;
+                border-color: #64748b;
+            }
+
+            .btn-modern.btn-outline-dark {
+                color: #1e293b;
+                border-color: #1e293b;
+            }
+
+            /* Outline Hover */
+            .btn-modern.btn-outline-primary:hover,
+            .btn-modern.btn-outline-success:hover,
+            .btn-modern.btn-outline-danger:hover,
+            .btn-modern.btn-outline-warning:hover,
+            .btn-modern.btn-outline-info:hover,
+            .btn-modern.btn-outline-secondary:hover,
+            .btn-modern.btn-outline-dark:hover {
+                color: #fff;
+            }
+
+            /* SMALL BUTTON */
+            .btn-modern.btn-sm {
+                padding: 6px 12px;
+                font-size: 12px;
+                border-radius: 7px !important;
+            }
+
+            /* LARGE BUTTON */
+            .btn-modern.btn-lg {
+                padding: 12px 24px;
+                font-size: 15px;
+                border-radius: 10px !important;
+            }
+
+            /* DISABLED BUTTON */
+            .btn-modern:disabled,
+            .btn-modern.disabled {
+                opacity: .55;
+                cursor: not-allowed;
+                transform: none !important;
+                box-shadow: none !important;
+                filter: none !important;
+                pointer-events: none;
+            }
+
+            /* BUTTON ICON */
+            .btn-modern i {
+                transition: transform .25s ease;
+            }
+
+            .btn-modern:hover i {
+                transform: scale(1.12);
+            }
+
+            /* REDUCED MOTION */
+            @media (prefers-reduced-motion: reduce) {
+
+                .btn-modern,
+                .btn-modern i {
+                    transition: none;
+                }
+
+                .btn-modern:hover,
+                .btn-modern:active {
+                    transform: none;
+                }
+            }
+
+            /* MOBILE RESPONSIVE */
+            @media (max-width: 576px) {
+                .btn-modern {
+                    padding: 8px 13px;
+                    font-size: 12px;
+                }
+
+                .btn-modern.btn-lg {
+                    padding: 10px 18px;
+                }
+            }
+        </style>
+    @endpush
+@endonce
+
+
+
+
+@props([
+    'type' => 'submit',
+    'variant' => 'warning',
+    'href' => null,
+    'size' => null,
+    'confirm' => null,
+])
 
 @php
-    $classes = 'btn btn-' . $variant . ($size ? ' btn-' . $size : '');
-    $attrs = $confirm ? 'onclick="return confirm(' . json_encode($confirm) . ')"' : '';
+    $classes = 'btn btn-modern btn-' . $variant . ($size ? ' btn-' . $size : '');
+
+    $confirmAttribute = $confirm ? ['onclick' => 'return confirm(' . json_encode($confirm) . ')'] : [];
 @endphp
 
 @if ($href)
-    <a href="{{ $href }}" {{ $attributes->merge(['class' => $classes]) }}
-        {!! $attrs !!}>{{ $slot }}</a>
+    <a href="{{ $href }}" {{ $attributes->merge(['class' => $classes])->merge($confirmAttribute) }}>
+        {{ $slot }}
+    </a>
 @else
-    <button type="{{ $type }}" {{ $attributes->merge(['class' => $classes]) }}
-        {!! $attrs !!}>{{ $slot }}</button>
+    <button type="{{ $type }}" {{ $attributes->merge(['class' => $classes])->merge($confirmAttribute) }}>
+        {{ $slot }}
+    </button>
 @endif

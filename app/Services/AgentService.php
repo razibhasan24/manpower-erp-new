@@ -69,6 +69,8 @@ class AgentService
                 $this->syncCountries($agent, $countryIds, $user);
             }
 
+            DB::afterCommit(fn () => app(SmsService::class)->agentCreated($agent));
+
             return $agent->fresh(['countries']);
         });
     }

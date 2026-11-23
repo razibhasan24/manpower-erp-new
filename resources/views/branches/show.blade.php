@@ -20,7 +20,7 @@
                 </x-button>
             @endcan
 
-            <x-button href="{{ route('branches.index') }}" variant="secondary" size="sm">
+            <x-button href="{{ route('branches.index') }}" variant="dark" size="sm">
                 <i class="fas fa-arrow-left"></i> Back to list
             </x-button>
         </div>

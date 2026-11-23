@@ -213,6 +213,8 @@ class WorkflowService
                 'user_agent' => request()->userAgent(),
             ]);
 
+            DB::afterCommit(fn () => app(SmsService::class)->workflow($recruitment, $history));
+
             return $history;
         });
     }
@@ -349,6 +351,8 @@ public function recordInitialRegistration(
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
         ]);
+
+        DB::afterCommit(fn () => app(SmsService::class)->registration($lockedRecruitment));
 
         return $history;
     });

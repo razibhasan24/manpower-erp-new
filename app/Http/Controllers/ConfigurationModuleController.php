@@ -64,8 +64,14 @@ class ConfigurationModuleController extends Controller
             ],
             'invoice-settings' => $this->invoiceDetails(),
             'notification-settings' => [
+                'items' => [
+                    __('SMS driver') => config('services.sms.driver'),
+                    __('SMS sender ID') => config('services.sms.sender') ?: '—',
+                    __('SMS gateway endpoint') => config('services.sms.endpoint') ? parse_url(config('services.sms.endpoint'), PHP_URL_HOST) : '—',
+                    __('Automatic workflow SMS') => config('services.sms.driver') === 'http' && config('services.sms.endpoint') ? __('Enabled') : __('Not connected'),
+                ],
                 'notifications' => $notifications->for($request->user()),
-                'notice' => __('Notifications are generated from current records. Saved notification preferences and scheduled reminders are not configured.'),
+                'notice' => __('SMS is sent to the phone entered on registration for every workflow status change, and to the agent phone when an agent account is created. Configure SMS_HTTP_ENDPOINT, SMS_HTTP_TOKEN and SMS_SENDER_ID in .env for your gateway, then clear the config cache. SMS credentials are not displayed here.'),
             ],
             'workflow-settings' => [
                 'stages' => WorkflowService::STAGES,

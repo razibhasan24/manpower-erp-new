@@ -27,7 +27,7 @@ class StoreRecruitmentRequest extends FormRequest
             'full_name' => ['required', 'string', 'max:255'], 'nid' => ['nullable', 'string', 'max:50'],
             'father_name' => ['nullable', 'string', 'max:255'], 'mother_name' => ['nullable', 'string', 'max:255'],
             'dob' => ['required', 'date', 'before:today'], 'gender' => ['required', 'in:male,female,other'],
-            'phone' => ['nullable', 'string', 'max:30'], 'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['required', 'string', 'min:8', 'max:30'], 'email' => ['nullable', 'email', 'max:255'],
             'passport_issue_date' => ['required', 'date'], 'passport_expiry_date' => ['required', 'date', 'after:passport_issue_date'],
             'religion' => ['required', 'string', 'max:50'], 'marital_status' => ['nullable', 'string', 'max:30'],
             'referer' => ['nullable', 'string', 'max:255'], 'height' => ['nullable', 'string', 'max:30'], 'weight' => ['nullable', 'string', 'max:30'],

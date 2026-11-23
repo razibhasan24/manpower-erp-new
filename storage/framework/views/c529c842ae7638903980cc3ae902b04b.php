@@ -7,14 +7,14 @@
         <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('passport-holder.create')): ?>
             <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['href' => ''.e(route('passport-holders.create')).'','variant' => 'dark','size' => 'sm']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['href' => ''.e(route('passport-holders.create')).'','variant' => 'success','size' => 'sm']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('button'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['href' => ''.e(route('passport-holders.create')).'','variant' => 'dark','size' => 'sm']); ?>
+<?php $component->withAttributes(['href' => ''.e(route('passport-holders.create')).'','variant' => 'success','size' => 'sm']); ?>
                 <i class="fas fa-plus me-1"></i> New Passport Holder
              <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
