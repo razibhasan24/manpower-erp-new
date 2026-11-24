@@ -16,6 +16,17 @@ Route::middleware(['auth', 'permission:flight.create'])->group(function () {
     Route::post('travel-agencies', [FlightSupportController::class, 'storeTravelAgency'])->name('travel-agencies.store');
 });
 
+Route::middleware(['auth', 'permission:flight.edit'])->group(function () {
+    Route::get('airlines/{airline}/edit', [FlightSupportController::class, 'editAirline'])->whereNumber('airline')->name('airlines.edit');
+    Route::put('airlines/{airline}', [FlightSupportController::class, 'updateAirline'])->whereNumber('airline')->name('airlines.update');
+    Route::get('travel-agencies/{travelAgency}/edit', [FlightSupportController::class, 'editTravelAgency'])->whereNumber('travelAgency')->name('travel-agencies.edit');
+    Route::put('travel-agencies/{travelAgency}', [FlightSupportController::class, 'updateTravelAgency'])->whereNumber('travelAgency')->name('travel-agencies.update');
+});
+Route::middleware(['auth', 'permission:flight.edit'])->group(function () {
+    Route::delete('airlines/{airline}', [FlightSupportController::class, 'destroyAirline'])->whereNumber('airline')->name('airlines.destroy');
+    Route::delete('travel-agencies/{travelAgency}', [FlightSupportController::class, 'destroyTravelAgency'])->whereNumber('travelAgency')->name('travel-agencies.destroy');
+});
+
 Route::middleware(['auth', 'permission:flight.create'])->group(function () {
     Route::get('flights/create', [FlightController::class, 'create'])->name('flights.create');
     Route::post('flights', [FlightController::class, 'store'])->name('flights.store');

@@ -11,6 +11,20 @@ Route::middleware(['auth', 'permission:visa.view'])->group(function () {
     Route::get('visa-documents', [VisaRegisterController::class, 'documents'])->name('visa-register.documents');
 });
 
+Route::middleware(['auth', 'permission:visa.edit'])->group(function () {
+    Route::get('work-permits/create', [VisaRegisterController::class, 'createWorkPermit'])->name('work-permits.create');
+    Route::post('work-permits', [VisaRegisterController::class, 'storeWorkPermit'])->name('work-permits.store');
+    Route::get('work-permits/{workPermit}/edit', [VisaRegisterController::class, 'editWorkPermit'])->whereNumber('workPermit')->name('work-permits.edit');
+    Route::put('work-permits/{workPermit}', [VisaRegisterController::class, 'updateWorkPermit'])->whereNumber('workPermit')->name('work-permits.update');
+    Route::delete('work-permits/{workPermit}', [VisaRegisterController::class, 'destroyWorkPermit'])->whereNumber('workPermit')->name('work-permits.destroy');
+
+    Route::get('appointments/create', [VisaRegisterController::class, 'createAppointment'])->name('appointments.create');
+    Route::post('appointments', [VisaRegisterController::class, 'storeAppointment'])->name('appointments.store');
+    Route::get('appointments/{appointment}/edit', [VisaRegisterController::class, 'editAppointment'])->whereNumber('appointment')->name('appointments.edit');
+    Route::put('appointments/{appointment}', [VisaRegisterController::class, 'updateAppointment'])->whereNumber('appointment')->name('appointments.update');
+    Route::delete('appointments/{appointment}', [VisaRegisterController::class, 'destroyAppointment'])->whereNumber('appointment')->name('appointments.destroy');
+});
+
 Route::middleware(['auth', 'permission:visa.create'])->group(function () {
     Route::get('visa-lots/create', [VisaRegisterController::class, 'createLot'])->name('visa-register.lots.create');
     Route::post('visa-lots', [VisaRegisterController::class, 'storeLot'])->name('visa-register.lots.store');

@@ -1,0 +1,13 @@
+@extends('layouts.app')
+@section('title', isset($workPermit) ? __('Edit Work Permit') : __('Add Work Permit'))
+@section('content')
+<h1 class="mb-3">{{ isset($workPermit) ? __('Edit Work Permit') : __('Add Work Permit') }}</h1>
+<div class="card"><div class="card-body"><form method="POST" action="{{ isset($workPermit) ? route('work-permits.update', $workPermit) : route('work-permits.store') }}">@csrf @if(isset($workPermit))@method('PUT')@endif
+<div class="row g-3">
+<div class="col-md-6"><label class="form-label" for="visa_id">{{ __('Visa / Candidate') }} *</label><select class="form-select @error('visa_id') is-invalid @enderror" name="visa_id" id="visa_id" required><option value="">{{ __('Select visa') }}</option>@foreach($visas as $visa)<option value="{{ $visa->id }}" @selected(old('visa_id', $workPermit->visa_id ?? request('visa_id')) == $visa->id)>{{ $visa->recruitment?->tracking_number }} — {{ $visa->recruitment?->passportHolder?->full_name }}</option>@endforeach</select>@error('visa_id')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+<div class="col-md-6"><label class="form-label" for="permit_number">{{ __('Permit Number') }}</label><input class="form-control @error('permit_number') is-invalid @enderror" name="permit_number" id="permit_number" maxlength="255" value="{{ old('permit_number', $workPermit->permit_number ?? '') }}">@error('permit_number')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+<div class="col-md-6"><label class="form-label" for="issue_date">{{ __('Issue Date') }}</label><input type="date" class="form-control @error('issue_date') is-invalid @enderror" name="issue_date" id="issue_date" value="{{ old('issue_date', isset($workPermit) ? $workPermit->issue_date?->format('Y-m-d') : '') }}">@error('issue_date')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+<div class="col-md-6"><label class="form-label" for="expiry_date">{{ __('Expiry Date') }}</label><input type="date" class="form-control @error('expiry_date') is-invalid @enderror" name="expiry_date" id="expiry_date" value="{{ old('expiry_date', isset($workPermit) ? $workPermit->expiry_date?->format('Y-m-d') : '') }}">@error('expiry_date')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+<div class="col-12"><label class="form-label" for="remarks">{{ __('Remarks') }}</label><textarea class="form-control" name="remarks" id="remarks" rows="3">{{ old('remarks', $workPermit->remarks ?? '') }}</textarea></div>
+</div><div class="d-flex gap-2 mt-4"><button class="btn btn-success">{{ __('Save') }}</button><a class="btn btn-secondary" href="{{ route('visa-register.work-permits') }}">{{ __('Cancel') }}</a></div></form></div></div>
+@endsection

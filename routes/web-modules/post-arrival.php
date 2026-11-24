@@ -30,6 +30,18 @@ Route::middleware(['auth', 'permission:post-arrival.create'])->group(function ()
     Route::get('follow-ups/create', [PostArrivalRegistersController::class, 'createFollowUp'])->name('follow-ups.create');
     Route::post('follow-ups', [PostArrivalRegistersController::class, 'storeFollowUp'])->name('follow-ups.store');
 });
+Route::middleware(['auth', 'permission:post-arrival.edit'])->group(function () {
+    Route::delete('airport-pickup/{postArrival}', [PostArrivalController::class, 'removeAirportPickup'])->whereNumber('postArrival')->name('airport-pickup.destroy');
+    Route::delete('employer-information/{postArrival}', [PostArrivalController::class, 'removeRegisterField'])->defaults('field', 'employer-information')->whereNumber('postArrival')->name('employer-information.destroy');
+    Route::delete('accommodation/{postArrival}', [PostArrivalController::class, 'removeRegisterField'])->defaults('field', 'accommodation')->whereNumber('postArrival')->name('accommodation.destroy');
+    Route::delete('candidate-feedback/{postArrival}', [PostArrivalController::class, 'removeRegisterField'])->defaults('field', 'candidate-feedback')->whereNumber('postArrival')->name('candidate-feedback.destroy');
+    Route::get('post-arrival-complaints/{complaint}/edit', [PostArrivalRegistersController::class, 'editComplaint'])->whereNumber('complaint')->name('post-arrival-complaints.edit');
+    Route::put('post-arrival-complaints/{complaint}', [PostArrivalRegistersController::class, 'updateComplaint'])->whereNumber('complaint')->name('post-arrival-complaints.update');
+    Route::delete('post-arrival-complaints/{complaint}', [PostArrivalRegistersController::class, 'destroyComplaint'])->whereNumber('complaint')->name('post-arrival-complaints.destroy');
+    Route::get('follow-ups/{support}/edit', [PostArrivalRegistersController::class, 'editFollowUp'])->whereNumber('support')->name('follow-ups.edit');
+    Route::put('follow-ups/{support}', [PostArrivalRegistersController::class, 'updateFollowUp'])->whereNumber('support')->name('follow-ups.update');
+    Route::delete('follow-ups/{support}', [PostArrivalRegistersController::class, 'destroyFollowUp'])->whereNumber('support')->name('follow-ups.destroy');
+});
 Route::middleware(['auth', 'permission:post-arrival.view'])->group(function () {
     Route::get('post-arrivals', [PostArrivalController::class, 'index'])->name('post-arrivals.index');
     Route::get('post-arrivals/{postArrival}', [PostArrivalController::class, 'show'])->name('post-arrivals.show')->whereNumber('postArrival');

@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>{{ __('Flight Booking') }}</h1>
     @can('flight.create')
-        <x-button href="{{ route('flights.create', request()->only('service_type')) }}">{{ __('New Record') }}</x-button>
+        <x-button variant="success" href="{{ route('flights.create', request()->only('service_type')) }}">{{ __('New Record') }}</x-button>
     @endcan
 </div>
 <x-filter-bar :statuses="$statuses" />
@@ -22,9 +22,9 @@
                 <td><x-badge :status="$record->status" /></td>
                 <td>{{ $record->updated_at?->format('Y-m-d') }}</td>
                 <td class="text-nowrap">
-                    <x-button href="{{ route('flights.show', $record) }}" variant="secondary" size="sm">{{ __('View') }}</x-button>
+                    <x-button href="{{ route('flights.show', $record) }}" variant="primary" size="sm">{{ __('View') }}</x-button>
                     @can('flight.edit')
-                    <x-button href="{{ route('flights.edit', $record) }}" variant="secondary" size="sm">{{ __('Edit') }}</x-button>
+                    <x-button href="{{ route('flights.edit', $record) }}" variant="danger" size="sm">{{ __('Edit') }}</x-button>
                     @endcan
                 </td>
             </tr>

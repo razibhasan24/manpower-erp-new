@@ -34,7 +34,7 @@ class RolePermissionSeeder extends Seeder
         'medical' => ['view', 'create', 'edit', 'approve', 'reject', 'return', 'download'],
         'medical-centre' => ['view', 'create', 'edit', 'delete'],
         'police-clearance' => ['view', 'create', 'edit', 'approve', 'reject', 'return', 'download'],
-        'training' => ['view', 'create', 'edit', 'approve', 'reject', 'return', 'download'],
+        'training' => ['view', 'create', 'edit', 'delete', 'approve', 'reject', 'return', 'download'],
         'training-centre' => ['view', 'create', 'edit', 'delete'],
         'training-course' => ['view', 'create', 'edit', 'delete'],
         'fingerprint' => ['view', 'create', 'edit', 'approve', 'reject', 'return', 'download'],

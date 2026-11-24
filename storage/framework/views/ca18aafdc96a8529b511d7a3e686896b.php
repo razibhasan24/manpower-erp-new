@@ -1,70 +1,172 @@
 <?php echo csrf_field(); ?>
-        <div class="mb-3">
-            <label for="recruitment_id" class="form-label">Recruitment</label>
-            <select name="recruitment_id" id="recruitment_id" class="form-select" required>
-                <option value="">-- { __('Select recruitment') } --</option>
-                <?php $__currentLoopData = $recruitments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $recruitment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <option value="<?php echo e($recruitment->id); ?>" <?php if(old('recruitment_id', $record->recruitment_id ?? null) == $recruitment->id): echo 'selected'; endif; ?>><?php echo e($recruitment->tracking_number); ?> — <?php echo e($recruitment->passportHolder?->full_name); ?></option>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            </select>
-            <?php $__errorArgs = ['recruitment_id'];
+
+<div class="row g-4">
+    
+    <div class="col-md-8">
+        <label for="recruitment_id" class="form-label fw-semibold">Recruitment <span class="text-danger">*</span></label>
+        <select name="recruitment_id" id="recruitment_id" class="form-select <?php $__errorArgs = ['recruitment_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <div class="text-danger small"><?php echo e($message); ?></div> <?php unset($message);
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+            required>
+            <option value="">-- <?php echo e(__('Select recruitment')); ?> --</option>
+            <?php $__currentLoopData = $recruitments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $recruitment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e($recruitment->id); ?>" <?php if(old('recruitment_id', $record->recruitment_id ?? null) == $recruitment->id): echo 'selected'; endif; ?>>
+                    <?php echo e($recruitment->tracking_number); ?> — <?php echo e($recruitment->passportHolder?->full_name); ?>
+
+                </option>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </select>
+        <?php $__errorArgs = ['recruitment_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+            <div class="invalid-feedback"><?php echo e($message); ?></div>
+        <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
-        </div>
-        <div class="mb-3"><label for="status" class="form-label">Status</label><select name="status" id="status" class="form-select">
-                    <option value="pending" <?php if(old('status', $record->status ?? '') == 'pending'): echo 'selected'; endif; ?>>Pending</option>
-                    <option value="approved" <?php if(old('status', $record->status ?? '') == 'approved'): echo 'selected'; endif; ?>>Approved</option>
-                    <option value="rejected" <?php if(old('status', $record->status ?? '') == 'rejected'): echo 'selected'; endif; ?>>Rejected</option>
-                    <option value="returned" <?php if(old('status', $record->status ?? '') == 'returned'): echo 'selected'; endif; ?>>Returned</option>
-                    <option value="cancelled" <?php if(old('status', $record->status ?? '') == 'cancelled'): echo 'selected'; endif; ?>>Cancelled</option>
-                </select><?php $__errorArgs = ['status'];
+    </div>
+
+    
+    <div class="col-md-4">
+        <label for="status" class="form-label fw-semibold">Status</label>
+        <select name="status" id="status" class="form-select <?php $__errorArgs = ['status'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <div class="text-danger small"><?php echo e($message); ?></div> <?php unset($message);
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?></div>
-        <div class="mb-3"><label for="remarks" class="form-label">Remarks</label><textarea name="remarks" id="remarks" class="form-control" rows="3"><?php echo e(old('remarks', $record->remarks ?? '')); ?></textarea><?php $__errorArgs = ['remarks'];
+unset($__errorArgs, $__bag); ?>">
+            <option value="pending" <?php if(old('status', $record->status ?? '') == 'pending'): echo 'selected'; endif; ?>>Pending</option>
+            <option value="approved" <?php if(old('status', $record->status ?? '') == 'approved'): echo 'selected'; endif; ?>>Approved</option>
+            <option value="rejected" <?php if(old('status', $record->status ?? '') == 'rejected'): echo 'selected'; endif; ?>>Rejected</option>
+            <option value="returned" <?php if(old('status', $record->status ?? '') == 'returned'): echo 'selected'; endif; ?>>Returned</option>
+            <option value="cancelled" <?php if(old('status', $record->status ?? '') == 'cancelled'): echo 'selected'; endif; ?>>Cancelled</option>
+        </select>
+        <?php $__errorArgs = ['status'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <div class="text-danger small"><?php echo e($message); ?></div> <?php unset($message);
+$message = $__bag->first($__errorArgs[0]); ?>
+            <div class="invalid-feedback"><?php echo e($message); ?></div>
+        <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?></div>
-        <div class="mb-3"><label for="document" class="form-label">Delegation Document</label><input type="file" name="document" id="document_path" class="form-control" accept=".pdf,.jpg,.jpeg,.png"><?php $__errorArgs = ['document'];
+unset($__errorArgs, $__bag); ?>
+    </div>
+
+    
+    <div class="col-12">
+        <label for="remarks" class="form-label fw-semibold">Remarks</label>
+        <textarea name="remarks" id="remarks" rows="3" class="form-control <?php $__errorArgs = ['remarks'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <div class="text-danger small"><?php echo e($message); ?></div> <?php unset($message);
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?> <?php if(isset($record->document_path)): ?><div class="mt-1"><a href="<?php echo e(route('delegations.download', [$record, 'document_path'])); ?>"><?php echo e(__('Download current file')); ?></a></div><?php endif; ?></div>
-        <div class="mb-3"><label for="e_duty_document" class="form-label">E-Duty Document</label><input type="file" name="e_duty_document" id="e_duty_document_path" class="form-control" accept=".pdf,.jpg,.jpeg,.png"><?php $__errorArgs = ['e_duty_document'];
+unset($__errorArgs, $__bag); ?>"
+            placeholder="<?php echo e(__('Write any additional notes here...')); ?>"><?php echo e(old('remarks', $record->remarks ?? '')); ?></textarea>
+        <?php $__errorArgs = ['remarks'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <div class="text-danger small"><?php echo e($message); ?></div> <?php unset($message);
+$message = $__bag->first($__errorArgs[0]); ?>
+            <div class="invalid-feedback"><?php echo e($message); ?></div>
+        <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?> <?php if(isset($record->e_duty_document_path)): ?><div class="mt-1"><a href="<?php echo e(route('delegations.download', [$record, 'e_duty_document_path'])); ?>"><?php echo e(__('Download current file')); ?></a></div><?php endif; ?></div>
-<div class="d-flex gap-2">
+unset($__errorArgs, $__bag); ?>
+    </div>
+
+    
+    <div class="col-md-6">
+        <label for="document_path" class="form-label fw-semibold">Delegation Document</label>
+        <input type="file" name="document" id="document_path"
+            class="form-control <?php $__errorArgs = ['document'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" accept=".pdf,.jpg,.jpeg,.png">
+        <?php $__errorArgs = ['document'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+            <div class="invalid-feedback"><?php echo e($message); ?></div>
+        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+
+        <?php if(isset($record->document_path)): ?>
+            <div class="mt-2">
+                <a href="<?php echo e(route('delegations.download', [$record, 'document_path'])); ?>"
+                    class="text-decoration-none small fw-medium">
+                    <i class="bi bi-download me-1"></i> <?php echo e(__('Download current file')); ?>
+
+                </a>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    
+    <div class="col-md-6">
+        <label for="e_duty_document_path" class="form-label fw-semibold">E-Duty Document</label>
+        <input type="file" name="e_duty_document" id="e_duty_document_path"
+            class="form-control <?php $__errorArgs = ['e_duty_document'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" accept=".pdf,.jpg,.jpeg,.png">
+        <?php $__errorArgs = ['e_duty_document'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+            <div class="invalid-feedback"><?php echo e($message); ?></div>
+        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+
+        <?php if(isset($record->e_duty_document_path)): ?>
+            <div class="mt-2">
+                <a href="<?php echo e(route('delegations.download', [$record, 'e_duty_document_path'])); ?>"
+                    class="text-decoration-none small fw-medium">
+                    <i class="bi bi-download me-1"></i> <?php echo e(__('Download current file')); ?>
+
+                </a>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+
+<div class="d-flex gap-2 mt-4 pt-3 border-top">
     <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['type' => 'submit']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['type' => 'submit','variant' => 'success','class' => 'px-4']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('button'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['type' => 'submit']); ?><?php echo e(__('Save')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['type' => 'submit','variant' => 'success','class' => 'px-4']); ?><?php echo e(__('Save')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561)): ?>
 <?php $attributes = $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561; ?>
@@ -76,14 +178,14 @@ unset($__errorArgs, $__bag); ?> <?php if(isset($record->e_duty_document_path)): 
 <?php endif; ?>
     <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['href' => ''.e(route('delegations.index')).'','variant' => 'secondary']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['href' => ''.e(route('delegations.index')).'','variant' => 'danger']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('button'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['href' => ''.e(route('delegations.index')).'','variant' => 'secondary']); ?><?php echo e(__('Cancel')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['href' => ''.e(route('delegations.index')).'','variant' => 'danger']); ?><?php echo e(__('Cancel')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561)): ?>
 <?php $attributes = $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561; ?>

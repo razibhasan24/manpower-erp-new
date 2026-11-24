@@ -1,39 +1,148 @@
 @extends('layouts.app')
+
 @section('title', __('Police Clearance'))
+
+@push('styles')
+    <style>
+        /* Custom Pagination Design */
+        .custom-pagination .pagination {
+            gap: 8px;
+            margin-bottom: 0;
+        }
+
+        .custom-pagination .page-item .page-link {
+            border-radius: 8px !important;
+            border: 1px solid #e5e7eb;
+            color: #374151;
+            padding: 0.5rem 0.85rem;
+            font-weight: 500;
+            margin-left: 0 !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none !important;
+        }
+
+        .custom-pagination .page-item.active .page-link {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+            color: #ffffff;
+        }
+
+        .custom-pagination .page-item.disabled .page-link {
+            color: #9ca3af;
+            background-color: #ffffff;
+            border-color: #e5e7eb;
+        }
+
+        .custom-pagination .page-link:hover:not(.active) {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        /* ✅ FIX: Laravel এর ডিফল্ট Showing টেক্সট হাইড করা হচ্ছে */
+        .custom-pagination nav>div>div:first-child {
+            display: none !important;
+        }
+
+        /* ✅ FIX: পেজিনেশন বাটনগুলোকে ডান দিকে রাখার জন্য */
+        .custom-pagination nav>div {
+            justify-content: flex-end !important;
+        }
+    </style>
+@endpush
+
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>{{ __('Police Clearance') }}</h1>
-    @can('police-clearance.create')
-        <x-button href="{{ route('police-clearances.create', request()->only('service_type')) }}">{{ __('New Record') }}</x-button>
-    @endcan
-</div>
-<x-filter-bar :statuses="$statuses" />
-<div class="row mb-3">
-    <div class="col-md-4"><x-stat-card :title="__('Total')" :value="$records->total()" /></div>
-</div>
-<div class="table-responsive">
-    <table class="table table-striped align-middle">
-        <thead><tr><th>{{ __('Tracking') }}</th><th>{{ __('Candidate') }}</th><th>{{ __('Status') }}</th><th>{{ __('Updated') }}</th><th>{{ __('Actions') }}</th></tr></thead>
-        <tbody>
-        @forelse($records as $record)
-            <tr>
-                <td>{{ $record->recruitment?->tracking_number ?? '—' }}</td>
-                <td>{{ $record->recruitment?->passportHolder?->full_name ?? '—' }}</td>
-                <td><x-badge :status="$record->status" /></td>
-                <td>{{ $record->updated_at?->format('Y-m-d') }}</td>
-                <td class="text-nowrap">
-                    <x-button href="{{ route('police-clearances.show', $record) }}" variant="secondary" size="sm">{{ __('View') }}</x-button>
-                    @can('police-clearance.edit')
-                    <x-button href="{{ route('police-clearances.edit', $record) }}" variant="secondary" size="sm">{{ __('Edit') }}</x-button>
-                    @endcan
-                </td>
-            </tr>
-        @empty
-            <tr><td colspan="5" class="text-center text-muted">{{ __('No records found.') }}</td></tr>
-        @endforelse
-        </tbody>
-    </table>
-</div>
-{{ $records->links() }}
-<p class="text-muted small">{{ __(':count records', ['count' => $records->total()]) }}</p>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1">{{ __('Police Clearance') }}</h1>
+            <p class="text-muted small mb-0">{{ __('Manage and track police clearance records.') }}</p>
+        </div>
+        @can('police-clearance.create')
+            <x-button variant="success" size="sm" class="px-3"
+                href="{{ route('police-clearances.create', request()->only('service_type')) }}">
+                <i class="bi bi-plus-lg me-1"></i> {{ __('New Record') }}
+            </x-button>
+        @endcan
+    </div>
+
+    {{-- Filter Bar --}}
+    <x-filter-bar :statuses="$statuses" />
+
+    {{-- Stat Card --}}
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <x-stat-card :title="__('Total Records')" :value="$records->total()" />
+        </div>
+    </div>
+
+    {{-- Table Card --}}
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-light text-muted small text-uppercase">
+                    <tr>
+                        <th class="ps-4 py-3 fw-semibold">{{ __('Tracking') }}</th>
+                        <th class="py-3 fw-semibold">{{ __('Candidate') }}</th>
+                        <th class="py-3 fw-semibold">{{ __('Status') }}</th>
+                        <th class="py-3 fw-semibold">{{ __('Updated') }}</th>
+                        <th class="text-end pe-4 py-3 fw-semibold">{{ __('Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($records as $record)
+                        <tr>
+                            <td class="ps-4 fw-medium text-dark">{{ $record->recruitment?->tracking_number ?? '—' }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {{ $record->recruitment?->passportHolder?->full_name ?? '—' }}
+                                </div>
+                            </td>
+                            <td><x-badge :status="$record->status" /></td>
+                            <td class="text-secondary">{{ $record->updated_at?->format('M d, Y') }}</td>
+                            <td class="text-end pe-4 text-nowrap">
+                                <div class="d-flex justify-content-end align-items-center gap-2">
+                                    <x-button href="{{ route('police-clearances.show', $record) }}" variant="primary"
+                                        size="sm" class="px-3">
+                                        {{ __('View') }}
+                                    </x-button>
+                                    @can('police-clearance.edit')
+                                        <x-button href="{{ route('police-clearances.edit', $record) }}" variant="warning"
+                                            size="sm" class="px-3">
+                                            {{ __('Edit') }}
+                                        </x-button>
+                                    @endcan
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="text-muted">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"
+                                        fill="currentColor" class="bi bi-folder-x mb-3 opacity-50" viewBox="0 0 16 16">
+                                        <path
+                                            d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181L15.546 8H14.54l.265-2.91A1 1 0 0 0 13.81 4H2.19a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.658-7.23ZM1.53 8.182l.682 7.5A2 2 0 0 0 4.205 17h9.59a2 2 0 0 0 1.992-1.818l.682-7.5H1.53Z" />
+                                    </svg>
+                                    <h6 class="fw-bold mb-1">{{ __('No records found') }}</h6>
+                                    <p class="small mb-0">{{ __('Create a new record to get started.') }}</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- ✅ Custom Pagination --}}
+        <div class="card-body border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="text-muted small">
+                Showing {{ $records->firstItem() ?? 0 }}–{{ $records->lastItem() ?? 0 }} of {{ $records->total() }}
+                results
+            </div>
+            <div class="custom-pagination">
+                {{ $records->appends(request()->query())->links('pagination::bootstrap-5') }}
+            </div>
+        </div>
+    </div>
 @endsection

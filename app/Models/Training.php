@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\HasDataIsolation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -45,6 +46,16 @@ class Training extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(TrainingCourse::class, 'course_id');
+    }
+
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(TrainingAttendance::class);
+    }
+
+    public function certificates(): HasMany
+    {
+        return $this->hasMany(TrainingCertificate::class);
     }
 
     /**

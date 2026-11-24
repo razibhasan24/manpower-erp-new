@@ -59,6 +59,28 @@ class PostArrivalController extends Controller
         return $this->storeRegister($request, 'airport-pickup');
     }
 
+    public function removeAirportPickup(Request $request, PostArrival $postArrival)
+    {
+        abort_unless(PostArrival::visibleTo($request->user())->whereKey($postArrival->id)->where('airport_pickup', true)->exists(), 404);
+        $this->authorize('update', $postArrival);
+        $postArrival->update(['airport_pickup' => false, 'updated_by' => $request->user()->id]);
+        return redirect()->route('airport-pickup.index')->with('success', __('Airport pickup removed. Arrival record was kept.'));
+    }
+
+    public function removeRegisterField(Request $request, PostArrival $postArrival, string $field)
+    {
+        $fields = [
+            'employer-information' => 'employer_contact',
+            'accommodation' => 'accommodation',
+            'candidate-feedback' => 'feedback',
+        ];
+        abort_unless(isset($fields[$field]), 404);
+        abort_unless(PostArrival::visibleTo($request->user())->whereKey($postArrival->id)->whereNotNull($fields[$field])->exists(), 404);
+        $this->authorize('update', $postArrival);
+        $postArrival->update([$fields[$field] => null, 'updated_by' => $request->user()->id]);
+        return redirect()->route($field.'.index')->with('success', __('Register entry removed. The arrival record was kept.'));
+    }
+
     public function storeEmployerInformation(Request $request)
     {
         return $this->storeRegister($request, 'employer-information');

@@ -1,0 +1,4 @@
+<?php $__env->startSection('title', __('Add Training Attendance')); ?>
+<?php $__env->startSection('content'); ?><h1 class="mb-3"><?php echo e(__('Add Training Attendance')); ?></h1><form method="POST" action="<?php echo e(route('training-attendance.store')); ?>"><?php echo $__env->make('training-attendance._form', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?></form><?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH R:\xampp\htdocs\manpower-erp-new\resources\views/training-attendance/create.blade.php ENDPATH**/ ?>

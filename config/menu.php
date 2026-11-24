@@ -213,7 +213,7 @@ return [
                 ['label' => 'Training Centers', 'route' => 'training-centres.index', 'permission' => 'training-centre.view', 'active' => ['training-centres.*']],
                 ['label' => 'Training Courses', 'route' => 'training-courses.index', 'permission' => 'training-course.view', 'active' => ['training-courses.*']],
                 ['label' => 'Training Applications', 'route' => 'trainings.index', 'permission' => 'training.view', 'active' => ['trainings.*']],
-                ['label' => 'Training Attendance', 'route' => 'modules.show', 'params' => ['module' => 'training-attendance'], 'permission' => 'training.view'],
+                ['label' => 'Training Attendance', 'route' => 'modules.show', 'params' => ['module' => 'training-attendance'], 'permission' => 'attendance.view'],
                 ['label' => 'Training Results', 'route' => 'trainings.index', 'query' => ['results' => '1'], 'permission' => 'training.view'],
                 ['label' => 'Training Certificates', 'route' => 'modules.show', 'params' => ['module' => 'training-certificates'], 'permission' => 'training.view'],
                 ['label' => 'Fingerprint Appointments', 'route' => 'fingerprints.index', 'permission' => 'fingerprint.view', 'active' => ['fingerprints.*']],

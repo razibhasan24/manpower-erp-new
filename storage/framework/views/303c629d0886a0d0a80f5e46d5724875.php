@@ -22,7 +22,7 @@
             <option value="">-- <?php echo e(__('Select recruitment')); ?> --</option>
 
             <?php $__currentLoopData = $recruitments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $recruitment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <option value="<?php echo e($recruitment->id); ?>" data-agent-id="<?php echo e($recruitment->agent_id); ?>" data-agent-name="<?php echo e($recruitment->agent?->name); ?>" data-holder-id="<?php echo e($recruitment->passport_holder_id); ?>" data-holder-name="<?php echo e($recruitment->passportHolder?->full_name); ?>" <?php if(old('recruitment_id', $record?->recruitment_id) == $recruitment->id): echo 'selected'; endif; ?>>
+                <option value="<?php echo e($recruitment->id); ?>" data-service-type="<?php echo e($recruitment->service_type); ?>" data-agent-id="<?php echo e($recruitment->agent_id); ?>" data-agent-name="<?php echo e($recruitment->agent?->name); ?>" data-holder-id="<?php echo e($recruitment->passport_holder_id); ?>" data-holder-name="<?php echo e($recruitment->passportHolder?->full_name); ?>" <?php if(old('recruitment_id', $record?->recruitment_id) == $recruitment->id): echo 'selected'; endif; ?>>
                     <?php echo e($recruitment->tracking_number); ?>
 
                     — <?php echo e($recruitment->passportHolder?->full_name ?? 'N/A'); ?>
@@ -187,6 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const advance = document.getElementById('advance_amount');
     const total = document.getElementById('total_amount');
     const due = document.getElementById('remaining_due_display');
+    const financeSection = document.getElementById('selection-finance-section');
 
     function updateParty() {
         const option = recruitment.options[recruitment.selectedIndex];
@@ -204,16 +205,23 @@ document.addEventListener('DOMContentLoaded', function () {
         due.value = Math.max(0, sum - advanceValue).toFixed(2);
         advance.max = sum.toFixed(2);
     }
+    function syncFinanceSection() {
+        const packageType = recruitment.options[recruitment.selectedIndex]?.dataset.serviceType;
+        financeSection.classList.toggle('d-none', ['student', 'hajj_umrah'].includes(packageType));
+    }
     recruitment.addEventListener('change', updateParty);
+    recruitment.addEventListener('change', syncFinanceSection);
     partyType.addEventListener('change', updateParty);
     [...costFields, 'advance_amount'].forEach(id => document.getElementById(id)?.addEventListener('input', updateAmounts));
     updateParty();
+    syncFinanceSection();
     updateAmounts();
 });
 </script>
 
 <hr>
 
+<div id="selection-finance-section">
 <h5><?php echo e(__('Financial Responsibility (decided at Selection)')); ?></h5>
 
 <div class="row g-3">
@@ -272,6 +280,8 @@ document.addEventListener('DOMContentLoaded', function () {
 </div>
 <p class="form-text">Agent / Passport Holder due = Company Service Charge + Agent Charge + Visa Cost + Medical Cost + Training Cost + Other Costs − Advance. Overseas salary is shown separately and is not added to due.</p>
 
+</div>
+
 <hr>
 
 <div class="d-flex gap-2">
@@ -300,14 +310,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['href' => ''.e(route('selections.index')).'','variant' => 'secondary']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['href' => ''.e(route('selections.index')).'','variant' => 'danger']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('button'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['href' => ''.e(route('selections.index')).'','variant' => 'secondary']); ?>
+<?php $component->withAttributes(['href' => ''.e(route('selections.index')).'','variant' => 'danger']); ?>
         <?php echo e(__('Cancel')); ?>
 
      <?php echo $__env->renderComponent(); ?>

@@ -148,19 +148,22 @@
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
+        @if ($name === 'passport_issue_date')
+            <div class="col-md-3">
+                <label class="form-label fw-semibold" for="passport_validity">Passport Validity</label>
+                <select id="passport_validity" class="form-select">
+                    <option value="5">5 Years</option>
+                    <option value="10" selected>10 Years</option>
+                </select>
+            </div>
+        @endif
+        @if ($name === 'dob')
+            <div class="col-md-3">
+                <label class="form-label fw-semibold" for="age_display">Age</label>
+                <input id="age_display" class="form-control bg-light" readonly value="0 Years 0 Months 0 Days">
+            </div>
+        @endif
     @endforeach
-
-    <div class="col-md-3">
-        <label class="form-label fw-semibold">Passport Validity</label>
-        <select id="passport_validity" class="form-select">
-            <option value="5">5 Years</option>
-            <option value="10" selected>10 Years</option>
-        </select>
-    </div>
-    <div class="col-md-3">
-        <label class="form-label fw-semibold">Age</label>
-        <input id="age_display" class="form-control bg-light" readonly value="0 Years 0 Months 0 Days">
-    </div>
 
     {{-- ✅ Documents Section --}}
     <div class="col-12">

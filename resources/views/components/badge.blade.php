@@ -1,13 +1,4 @@
-{{--
-    x-badge
-    Props:
-      - status: optional status string used to choose the Bootstrap colour
-      - label: optional override text
-    If no status is supplied, the slot text is displayed with a neutral colour.
-    Known statuses: pending, approved, completed, rejected, returned, cancelled,
-    fit, unfit, cleared, uncleared, submitted, draft, posted, reversed, active,
-    inactive, paid, ticket_issued, arrived, settled, open, resolved, closed.
---}}
+
 @props(['status' => null, 'label' => null])
 
 @php

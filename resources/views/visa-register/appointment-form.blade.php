@@ -1,0 +1,13 @@
+@extends('layouts.app')
+@section('title', isset($appointment) ? __('Edit Appointment') : __('Add Appointment'))
+@section('content')
+<h1 class="mb-3">{{ isset($appointment) ? __('Edit Appointment') : __('Add Appointment') }}</h1>
+<div class="card"><div class="card-body"><form method="POST" action="{{ isset($appointment) ? route('appointments.update', $appointment) : route('appointments.store') }}">@csrf @if(isset($appointment))@method('PUT')@endif
+<div class="row g-3">
+<div class="col-md-6"><label class="form-label" for="visa_id">{{ __('Visa / Candidate') }} *</label><select class="form-select @error('visa_id') is-invalid @enderror" name="visa_id" id="visa_id" required><option value="">{{ __('Select visa') }}</option>@foreach($visas as $visa)<option value="{{ $visa->id }}" @selected(old('visa_id', $appointment->visa_id ?? request('visa_id')) == $visa->id)>{{ $visa->recruitment?->tracking_number }} — {{ $visa->recruitment?->passportHolder?->full_name }}</option>@endforeach</select>@error('visa_id')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+<div class="col-md-6"><label class="form-label" for="appointment_date">{{ __('Appointment Date and Time') }} *</label><input type="datetime-local" class="form-control @error('appointment_date') is-invalid @enderror" name="appointment_date" id="appointment_date" required value="{{ old('appointment_date', isset($appointment) ? $appointment->appointment_date?->format('Y-m-d\TH:i') : '') }}">@error('appointment_date')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+<div class="col-md-6"><label class="form-label" for="location">{{ __('Location') }}</label><input class="form-control @error('location') is-invalid @enderror" name="location" id="location" maxlength="255" value="{{ old('location', $appointment->location ?? '') }}">@error('location')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+<div class="col-md-6"><label class="form-label" for="status">{{ __('Status') }} *</label><select class="form-select" name="status" id="status" required>@foreach(['pending','confirmed','completed','cancelled'] as $status)<option value="{{ $status }}" @selected(old('status', $appointment->status ?? 'pending') === $status)>{{ __(ucfirst($status)) }}</option>@endforeach</select></div>
+<div class="col-12"><label class="form-label" for="remarks">{{ __('Remarks') }}</label><textarea class="form-control" name="remarks" id="remarks" rows="3">{{ old('remarks', $appointment->remarks ?? '') }}</textarea></div>
+</div><div class="d-flex gap-2 mt-4"><button class="btn btn-success">{{ __('Save') }}</button><a class="btn btn-secondary" href="{{ route('visa-register.appointments') }}">{{ __('Cancel') }}</a></div></form></div></div>
+@endsection

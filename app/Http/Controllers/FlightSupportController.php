@@ -48,6 +48,31 @@ class FlightSupportController extends Controller
         return redirect()->route('airlines.index')->with('success', __('Airline created successfully.'));
     }
 
+    public function editAirline(Airline $airline): View
+    {
+        abort_unless(auth()->user()?->can('flight.edit'), 403);
+        return view('flight-support.airlines-edit', compact('airline'));
+    }
+
+    public function updateAirline(Request $request, Airline $airline)
+    {
+        abort_unless($request->user()->can('flight.edit'), 403);
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'code' => ['nullable', 'string', 'max:10', Rule::unique('airlines', 'code')->ignore($airline->id)],
+            'status' => ['required', Rule::in(['active', 'inactive'])],
+        ]);
+        $airline->update($data);
+        return redirect()->route('airlines.index')->with('success', __('Airline updated successfully.'));
+    }
+
+    public function destroyAirline(Airline $airline)
+    {
+        abort_unless(auth()->user()?->can('flight.edit'), 403);
+        $airline->delete();
+        return redirect()->route('airlines.index')->with('success', __('Airline deleted successfully.'));
+    }
+
     public function travelAgencies(Request $request): View
     {
         $this->authorize('viewAny', Flight::class);
@@ -86,6 +111,33 @@ class FlightSupportController extends Controller
         TravelAgency::create($data);
 
         return redirect()->route('travel-agencies.index')->with('success', __('Travel agency created successfully.'));
+    }
+
+    public function editTravelAgency(TravelAgency $travelAgency): View
+    {
+        abort_unless(auth()->user()?->can('flight.edit'), 403);
+        return view('flight-support.travel-agencies-edit', compact('travelAgency'));
+    }
+
+    public function updateTravelAgency(Request $request, TravelAgency $travelAgency)
+    {
+        abort_unless($request->user()->can('flight.edit'), 403);
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'address' => ['nullable', 'string', 'max:5000'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'status' => ['required', Rule::in(['active', 'inactive'])],
+        ]);
+        $travelAgency->update($data);
+        return redirect()->route('travel-agencies.index')->with('success', __('Travel agency updated successfully.'));
+    }
+
+    public function destroyTravelAgency(TravelAgency $travelAgency)
+    {
+        abort_unless(auth()->user()?->can('flight.edit'), 403);
+        $travelAgency->delete();
+        return redirect()->route('travel-agencies.index')->with('success', __('Travel agency deleted successfully.'));
     }
 
     public function airportPickup(Request $request): View

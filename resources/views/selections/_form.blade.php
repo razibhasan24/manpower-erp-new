@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
         {{ __('Save') }}
     </x-button>
 
-    <x-button href="{{ route('selections.index') }}" variant="secondary">
+    <x-button href="{{ route('selections.index') }}" variant="danger">
         {{ __('Cancel') }}
     </x-button>
 </div>

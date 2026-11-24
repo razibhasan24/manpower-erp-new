@@ -127,7 +127,23 @@ class PostArrivalService
             'post_arrival_id' => $postArrival->id,
             'type' => $data['type'], 'description' => $data['description'] ?? null,
             'status' => $data['status'] ?? 'open',
+            'resolved_at' => in_array($data['status'] ?? 'open', ['resolved', 'closed'], true) ? now() : null,
             'created_by' => $user?->id, 'updated_by' => $user?->id,
         ]);
+    }
+
+    public function updateSupport(ArrivalSupport $support, array $data, ?User $user = null): ArrivalSupport
+    {
+        $status = $data['status'] ?? $support->status;
+        $support->update([
+            'post_arrival_id' => $data['post_arrival_id'],
+            'type' => $data['type'],
+            'description' => $data['description'] ?? null,
+            'status' => $status,
+            'resolved_at' => in_array($status, ['resolved', 'closed'], true) ? ($support->resolved_at ?? now()) : null,
+            'updated_by' => $user?->id,
+        ]);
+
+        return $support->fresh();
     }
 }
