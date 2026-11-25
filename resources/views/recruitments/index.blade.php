@@ -110,41 +110,56 @@
                         <td><x-badge>{{ $item->current_status }}</x-badge></td>
                         <td class="text-nowrap">
                             @can('recruitment.view')
-                                <div class="btn-group btn-group-sm me-1" role="group" aria-label="Download candidate formats">
-                                    <a href="{{ route('recruitments.download-format', [$item, 'cv']) }}"
-                                        class="btn btn-outline-dark" title="Download CV">CV</a>
-                                    <a href="{{ route('recruitments.download-format', [$item, 'entry-form']) }}"
-                                        class="btn btn-outline-dark" title="Download barcode entry form">Entry</a>
-                                    <a href="{{ route('recruitments.download-format', [$item, 'id-card']) }}"
-                                        class="btn btn-outline-dark" title="Download ID card">ID Card</a>
-                                </div>
+                                
+                            <div class="btn-group btn-group-sm me-1" role="group" aria-label="Download candidate formats">
+
+                                <a href="{{ route('recruitments.download-format', [$item, 'cv']) }}"
+                                    class="btn btn-primary fw-bold shadow-sm"
+                                    title="Download CV">
+                                    <i class="fas fa-file-pdf me-1"></i> CV
+                                </a>
+
+                                <a href="{{ route('recruitments.download-format', [$item, 'entry-form']) }}"
+                                    class="btn btn-success fw-bold shadow-sm"
+                                    title="Download barcode entry form">
+                                    <i class="fas fa-barcode me-1"></i> Entry
+                                </a>
+
+                                <a href="{{ route('recruitments.download-format', [$item, 'id-card']) }}"
+                                    class="btn btn-warning fw-bold shadow-sm"
+                                    title="Download ID card">
+                                    <i class="fas fa-id-card me-1"></i> ID Card
+                                </a>
+
+                            </div>
+
                             @endcan
                             @if ($item->selection)
                                 @can('selection.view')
-                                    <x-button href="{{ route('selections.show', $item->selection) }}"
-                                        class="btn-sm btn-outline-success" title="View Selection &amp; Grading">Selection &amp;
+                                    <x-button variant="success" href="{{ route('selections.show', $item->selection) }}"
+                                        class="btn-sm btn-success" title="View Selection &amp; Grading">Selection &amp;
                                         Grading</x-button>
                                 @endcan
                             @elseif ($item->current_status !== 'cancelled')
                                 @can('selection.create')
-                                    <x-button href="{{ route('selections.create', ['recruitment_id' => $item->id]) }}"
+                                    <x-button variant="success" href="{{ route('selections.create', ['recruitment_id' => $item->id]) }}"
                                         class="btn-sm btn-success" title="Proceed to Selection &amp; Grading">Selection &amp;
                                         Grading</x-button>
                                 @endcan
                             @endif
 
                             @can('recruitment.view')
-                                <x-button href="{{ route('recruitments.show', $item) }}"
-                                    class="btn-sm btn-outline-primary">View</x-button>
+                                <x-button variant="primary" href="{{ route('recruitments.show', $item) }}"
+                                    class="btn-sm btn-primary">View</x-button>
                             @endcan
                             @can('recruitment.edit')
-                                <x-button href="{{ route('recruitments.edit', $item) }}"
-                                    class="btn-sm btn-outline-secondary">Edit</x-button>
+                                <x-button variant="warning" href="{{ route('recruitments.edit', $item) }}"
+                                    class="btn-sm btn-warning">Edit</x-button>
                             @endcan
                             @can('recruitment.delete')
-                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                <x-button variant='danger' type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
                                     data-bs-target="#deleteModal"
-                                    data-action="{{ route('recruitments.destroy', $item) }}">Cancel registration</button>
+                                    data-action="{{ route('recruitments.destroy', $item) }}">Cancel registration</x-button>
                             @endcan
                         </td>
                     </tr>

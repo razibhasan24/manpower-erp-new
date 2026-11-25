@@ -7,9 +7,7 @@ namespace App\Http\Requests\Recruitment;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/**
- * Store Recruitment validation + authorisation (Phases 08-12).
- */
+
 class StoreRecruitmentRequest extends FormRequest
 {
     public function authorize(): bool

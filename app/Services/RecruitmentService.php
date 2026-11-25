@@ -116,6 +116,15 @@ class RecruitmentService
 
             $holderFields = ['full_name','father_name','mother_name','dob','gender','phone','email','present_address','nid','passport_number','passport_issue_date','passport_expiry_date','agent_id','branch_id','country_id','company_id','position_id','referer','religion','marital_status','height','weight','village_road','post_office','police_station','district'];
             $holderData = array_intersect_key($data, array_flip($holderFields));
+
+            // ✅ FIX: $data['documents'] এর বদলে $files['photo'] চেক করা হয়েছে
+            if (isset($data['photo']) && $data['photo'] instanceof UploadedFile) {
+                $holderData['photo_path'] = $data['photo']->store('recruitments/photos', 'private');
+                unset($data['photo']); 
+            } elseif (isset($files['photo']) && $files['photo'] instanceof UploadedFile) {
+                $holderData['photo_path'] = $files['photo']->store('recruitments/photos', 'private');
+            }
+
             $holderData['status'] = 'active';
             $holderData['created_by'] = $user->id;
             $holderData['updated_by'] = $user->id;
@@ -130,8 +139,6 @@ class RecruitmentService
                 ->whereKey((int) $data['branch_id'])
                 ->firstOrFail();
 
-            // Package registrations assign the package due immediately to
-            // the introducing agent, or to the passport holder if there is none.
             if ($serviceType === 'overseas') {
                 $data['financial_responsible_type'] = null;
                 $data['financial_responsible_id'] = null;
@@ -141,17 +148,12 @@ class RecruitmentService
                 $data['financial_responsible_id'] = $responsible === 'agent' ? $passportHolder->agent_id : $passportHolder->id;
             }
 
-            // Generate tracking number.
-            [$trackingNumber, $sequence] =
-                $this->generateTrackingNumber($branch);
+            [$trackingNumber, $sequence] = $this->generateTrackingNumber($branch);
 
             $data['tracking_number'] = $trackingNumber;
-
-            // Initial workflow status.
             $data['current_stage'] = 'registration';
             $data['current_status'] = 'pending';
 
-            // Create recruitment.
             $recruitment = Recruitment::create($data);
 
             $recruitment->forceFill([
@@ -177,7 +179,6 @@ class RecruitmentService
                 ]);
             }
 
-            // Save tracking number.
             TrackingNumber::create([
                 'tracking_number' => $trackingNumber,
                 'recruitment_id' => $recruitment->id,
@@ -186,9 +187,7 @@ class RecruitmentService
                 'sequence' => $sequence,
             ]);
 
-            // Upload registration documents.
             foreach ((array) $files as $type => $file) {
-
                 if ($file instanceof UploadedFile) {
                     $this->storeDocument(
                         $recruitment,
@@ -199,7 +198,6 @@ class RecruitmentService
                 }
             }
 
-            // Record initial registration history and audit log.
             app(WorkflowService::class)->recordInitialRegistration(
                 $recruitment,
                 $data['remarks'] ?? null,
@@ -219,8 +217,6 @@ class RecruitmentService
 
     /**
      * Update recruitment information.
-     *
-     * Workflow fields cannot be changed through this method.
      */
     public function update(
         Recruitment $recruitment,
@@ -239,10 +235,18 @@ class RecruitmentService
 
             $holderFields = ['full_name','father_name','mother_name','dob','gender','phone','email','present_address','nid','passport_number','passport_issue_date','passport_expiry_date','agent_id','branch_id','country_id','company_id','position_id','referer','religion','marital_status','height','weight','village_road','post_office','police_station','district'];
             $holderData = array_intersect_key($data, array_flip($holderFields));
+
+            // ✅ FIX: $data['documents'] এর বদলে $files['photo'] চেক করা হয়েছে
+            if (isset($data['photo']) && $data['photo'] instanceof UploadedFile) {
+                $holderData['photo_path'] = $data['photo']->store('recruitments/photos', 'private');
+                unset($data['photo']);
+            } elseif (isset($files['photo']) && $files['photo'] instanceof UploadedFile) {
+                $holderData['photo_path'] = $files['photo']->store('recruitments/photos', 'private');
+            }
+
             $recruitment->passportHolder->update($holderData);
             foreach ($holderFields as $field) unset($data[$field]);
 
-            // Protect workflow-managed and financial fields.
             unset(
                 $data['tracking_number'],
                 $data['current_stage'],
@@ -257,9 +261,7 @@ class RecruitmentService
                 'updated_by' => $user->id,
             ])->save();
 
-            // Upload additional documents.
             foreach ((array) $files as $type => $file) {
-
                 if ($file instanceof UploadedFile) {
                     $this->storeDocument(
                         $recruitment,
@@ -298,14 +300,8 @@ class RecruitmentService
         });
     }
 
-    /**
-     * Delete means cancel.
-     * Recruitment records are never hard-deleted here.
-     */
-    public function delete(
-        Recruitment $recruitment,
-        User $user
-    ): Recruitment {
+    public function delete(Recruitment $recruitment, User $user): Recruitment
+    {
         return $this->cancel(
             $recruitment,
             'Cancelled from the registrations list.',
@@ -313,47 +309,24 @@ class RecruitmentService
         );
     }
 
-    /**
-     * Generate tracking number.
-     *
-     * Format: YYYY-BRANCH-000001
-     */
     public function generateTrackingNumber(Branch $branch): array
     {
         $year = now()->format('Y');
-
         $prefix = $year . '-' . strtoupper($branch->code) . '-';
-
         $max = Recruitment::query()
             ->where('tracking_number', 'like', $prefix . '%')
             ->lockForUpdate()
             ->max('tracking_number');
 
         $serial = 1;
-
         if ($max !== null) {
-            $serial = (
-                (int) substr(
-                    (string) $max,
-                    strlen($prefix)
-                )
-            ) + 1;
+            $serial = ((int) substr((string) $max, strlen($prefix))) + 1;
         }
 
-        $trackingNumber = $prefix
-            . str_pad(
-                (string) $serial,
-                6,
-                '0',
-                STR_PAD_LEFT
-            );
-
+        $trackingNumber = $prefix . str_pad((string) $serial, 6, '0', STR_PAD_LEFT);
         return [$trackingNumber, $serial];
     }
 
-    /**
-     * Store document privately.
-     */
     public function storeDocument(
         Recruitment $recruitment,
         UploadedFile $file,
@@ -361,11 +334,7 @@ class RecruitmentService
         User $user,
         ?string $stage = null
     ): RecruitmentDocument {
-
-        $path = $file->store(
-            'recruitments/' . $recruitment->id,
-            'private'
-        );
+        $path = $file->store('recruitments/' . $recruitment->id, 'private');
 
         return RecruitmentDocument::create([
             'recruitment_id' => $recruitment->id,
@@ -379,27 +348,9 @@ class RecruitmentService
         ]);
     }
 
-    /**
-     * Cancel recruitment through WorkflowService.
-     *
-     * WorkflowService handles:
-     * - Authorization
-     * - Database transaction
-     * - Recruitment status
-     * - Stage history
-     * - Audit log
-     */
-    public function cancel(
-        Recruitment $recruitment,
-        ?string $remarks,
-        User $user
-    ): Recruitment {
-
-        app(WorkflowService::class)->cancel(
-            $recruitment,
-            $remarks,
-            $user
-        );
+    public function cancel(Recruitment $recruitment, ?string $remarks, User $user): Recruitment
+    {
+        app(WorkflowService::class)->cancel($recruitment, $remarks, $user);
 
         return $recruitment->fresh([
             'passportHolder',
@@ -411,27 +362,14 @@ class RecruitmentService
         ]);
     }
 
-    /**
-     * Prevent duplicate active registrations
-     * for the same passport holder.
-     */
-    protected function assertNoActiveDuplicate(
-        PassportHolder $passportHolder
-    ): void {
-
+    protected function assertNoActiveDuplicate(PassportHolder $passportHolder): void
+    {
         $exists = Recruitment::query()
-            ->where(
-                'passport_holder_id',
-                $passportHolder->id
-            )
-            ->whereIn(
-                'current_status',
-                self::ACTIVE_STATUSES
-            )
+            ->where('passport_holder_id', $passportHolder->id)
+            ->whereIn('current_status', self::ACTIVE_STATUSES)
             ->exists();
 
         if ($exists) {
-
             throw ValidationException::withMessages([
                 'passport_holder_id' =>
                     'This passport already has an active registration. '
@@ -439,5 +377,4 @@ class RecruitmentService
             ]);
         }
     }
-    
 }

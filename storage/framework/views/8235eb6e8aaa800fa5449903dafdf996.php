@@ -209,27 +209,42 @@
 <?php endif; ?></td>
                         <td class="text-nowrap">
                             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('recruitment.view')): ?>
-                                <div class="btn-group btn-group-sm me-1" role="group" aria-label="Download candidate formats">
-                                    <a href="<?php echo e(route('recruitments.download-format', [$item, 'cv'])); ?>"
-                                        class="btn btn-outline-dark" title="Download CV">CV</a>
-                                    <a href="<?php echo e(route('recruitments.download-format', [$item, 'entry-form'])); ?>"
-                                        class="btn btn-outline-dark" title="Download barcode entry form">Entry</a>
-                                    <a href="<?php echo e(route('recruitments.download-format', [$item, 'id-card'])); ?>"
-                                        class="btn btn-outline-dark" title="Download ID card">ID Card</a>
-                                </div>
+                                
+                            <div class="btn-group btn-group-sm me-1" role="group" aria-label="Download candidate formats">
+
+                                <a href="<?php echo e(route('recruitments.download-format', [$item, 'cv'])); ?>"
+                                    class="btn btn-primary fw-bold shadow-sm"
+                                    title="Download CV">
+                                    <i class="fas fa-file-pdf me-1"></i> CV
+                                </a>
+
+                                <a href="<?php echo e(route('recruitments.download-format', [$item, 'entry-form'])); ?>"
+                                    class="btn btn-success fw-bold shadow-sm"
+                                    title="Download barcode entry form">
+                                    <i class="fas fa-barcode me-1"></i> Entry
+                                </a>
+
+                                <a href="<?php echo e(route('recruitments.download-format', [$item, 'id-card'])); ?>"
+                                    class="btn btn-warning fw-bold shadow-sm"
+                                    title="Download ID card">
+                                    <i class="fas fa-id-card me-1"></i> ID Card
+                                </a>
+
+                            </div>
+
                             <?php endif; ?>
                             <?php if($item->selection): ?>
                                 <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('selection.view')): ?>
                                     <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['href' => ''.e(route('selections.show', $item->selection)).'','class' => 'btn-sm btn-outline-success','title' => 'View Selection &amp; Grading']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['variant' => 'success','href' => ''.e(route('selections.show', $item->selection)).'','class' => 'btn-sm btn-success','title' => 'View Selection &amp; Grading']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('button'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['href' => ''.e(route('selections.show', $item->selection)).'','class' => 'btn-sm btn-outline-success','title' => 'View Selection &amp; Grading']); ?>Selection &amp;
+<?php $component->withAttributes(['variant' => 'success','href' => ''.e(route('selections.show', $item->selection)).'','class' => 'btn-sm btn-success','title' => 'View Selection &amp; Grading']); ?>Selection &amp;
                                         Grading <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561)): ?>
@@ -245,14 +260,14 @@
                                 <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('selection.create')): ?>
                                     <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['href' => ''.e(route('selections.create', ['recruitment_id' => $item->id])).'','class' => 'btn-sm btn-success','title' => 'Proceed to Selection &amp; Grading']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['variant' => 'success','href' => ''.e(route('selections.create', ['recruitment_id' => $item->id])).'','class' => 'btn-sm btn-success','title' => 'Proceed to Selection &amp; Grading']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('button'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['href' => ''.e(route('selections.create', ['recruitment_id' => $item->id])).'','class' => 'btn-sm btn-success','title' => 'Proceed to Selection &amp; Grading']); ?>Selection &amp;
+<?php $component->withAttributes(['variant' => 'success','href' => ''.e(route('selections.create', ['recruitment_id' => $item->id])).'','class' => 'btn-sm btn-success','title' => 'Proceed to Selection &amp; Grading']); ?>Selection &amp;
                                         Grading <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561)): ?>
@@ -269,14 +284,14 @@
                             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('recruitment.view')): ?>
                                 <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['href' => ''.e(route('recruitments.show', $item)).'','class' => 'btn-sm btn-outline-primary']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['variant' => 'primary','href' => ''.e(route('recruitments.show', $item)).'','class' => 'btn-sm btn-primary']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('button'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['href' => ''.e(route('recruitments.show', $item)).'','class' => 'btn-sm btn-outline-primary']); ?>View <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['variant' => 'primary','href' => ''.e(route('recruitments.show', $item)).'','class' => 'btn-sm btn-primary']); ?>View <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561)): ?>
 <?php $attributes = $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561; ?>
@@ -290,14 +305,14 @@
                             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('recruitment.edit')): ?>
                                 <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['href' => ''.e(route('recruitments.edit', $item)).'','class' => 'btn-sm btn-outline-secondary']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['variant' => 'warning','href' => ''.e(route('recruitments.edit', $item)).'','class' => 'btn-sm btn-warning']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('button'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['href' => ''.e(route('recruitments.edit', $item)).'','class' => 'btn-sm btn-outline-secondary']); ?>Edit <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['variant' => 'warning','href' => ''.e(route('recruitments.edit', $item)).'','class' => 'btn-sm btn-warning']); ?>Edit <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561)): ?>
 <?php $attributes = $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561; ?>
@@ -309,9 +324,25 @@
 <?php endif; ?>
                             <?php endif; ?>
                             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('recruitment.delete')): ?>
-                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
-                                    data-bs-target="#deleteModal"
-                                    data-action="<?php echo e(route('recruitments.destroy', $item)); ?>">Cancel registration</button>
+                                <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['variant' => 'danger','type' => 'button','class' => 'btn btn-sm btn-danger','dataBsToggle' => 'modal','dataBsTarget' => '#deleteModal','dataAction' => ''.e(route('recruitments.destroy', $item)).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('button'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['variant' => 'danger','type' => 'button','class' => 'btn btn-sm btn-danger','data-bs-toggle' => 'modal','data-bs-target' => '#deleteModal','data-action' => ''.e(route('recruitments.destroy', $item)).'']); ?>Cancel registration <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561)): ?>
+<?php $attributes = $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561; ?>
+<?php unset($__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald0f1fd2689e4bb7060122a5b91fe8561)): ?>
+<?php $component = $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561; ?>
+<?php unset($__componentOriginald0f1fd2689e4bb7060122a5b91fe8561); ?>
+<?php endif; ?>
                             <?php endif; ?>
                         </td>
                     </tr>

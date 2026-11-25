@@ -1,9 +1,4 @@
-{{-- Reports index — Phase 28. Lists every report the current user may open, grouped. --}}
-{{-- MERGE FIX 2026-11-13 (coordinator): this view used the
-     x-app-layout component, but no AppLayout component or class
-     exists anywhere, so the page could not render. Converted to
-     the layouts.app pattern every other view uses; the header
-     slot content is now a page header inside the content. --}}
+
 @extends('layouts.app')
 
 @section('title', __('Reports & Analytics'))

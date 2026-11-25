@@ -1,4 +1,0 @@
-<?php $__env->startSection('title', __('Register Training Certificate')); ?>
-<?php $__env->startSection('content'); ?><h1 class="mb-3"><?php echo e(__('Register Training Certificate')); ?></h1><form method="POST" action="<?php echo e(route('training-certificates.store')); ?>" enctype="multipart/form-data"><?php echo $__env->make('training-certificates._form', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?></form><?php $__env->stopSection(); ?>
-
-<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH R:\xampp\htdocs\manpower-erp-new\resources\views/training-certificates/create.blade.php ENDPATH**/ ?>

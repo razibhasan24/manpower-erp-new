@@ -38,11 +38,6 @@ class RecruitmentController extends Controller
         return view('recruitments.index', ['items' => $recruitments, 'filterBranches' => $filterBranches, 'filterCountries' => $filterCountries, 'filterAgents' => $filterAgents, 'serviceType' => $serviceType]);
     }
 
-    /**
-     * Read-only pipeline board. Shows the current stage for every visible
-     * registration and the 15-stage progress indicator. No stage can be
-     * changed from this screen — transitions stay in WorkflowService.
-     */
     public function tracking(Request $request)
     {
         $this->authorize('viewAny', Recruitment::class);
@@ -129,16 +124,112 @@ class RecruitmentController extends Controller
     }
 
     /** Download print-ready CV, barcode entry form, or candidate ID card. */
-    public function downloadFormat(Recruitment $recruitment, string $format)
+    // public function downloadFormat(Recruitment $recruitment, string $format)
+    // {
+    //     $this->authorize('view', $recruitment);
+
+    //     $recruitment->load(['passportHolder', 'agent', 'branch', 'country', 'company', 'position', 'medical']);
+    //     $holder = $recruitment->passportHolder;
+        
+    //     $photoData = null;
+
+    //     // ✅ রোবাস্ট ইমেজ লজিক
+    //     if ($holder && !empty($holder->photo_path)) {
+    //         // স্ল্যাশ ফিক্স ও অপ্রয়োজনীয় পাথ বাদ দেওয়া
+    //         $cleanPath = str_replace('\\', '/', $holder->photo_path);
+    //         $cleanPath = str_replace(['storage/app/private/', 'storage/app/'], '', $cleanPath);
+    //         $cleanPath = ltrim($cleanPath, '/');
+
+    //         // সম্ভাব্য সব ফাইল পাথ
+    //         $possiblePaths = [
+    //             storage_path('app/private/' . $cleanPath),
+    //             storage_path('app/' . $cleanPath),
+    //             public_path($cleanPath),
+    //             $holder->photo_path // ডাটাবেসে যদি সরাসরি R:\ পাথ থাকে
+    //         ];
+
+    //         $filePath = null;
+    //         foreach ($possiblePaths as $path) {
+    //             if (file_exists($path) && is_file($path)) {
+    //                 $filePath = $path;
+    //                 break;
+    //             }
+    //         }
+
+    //         // বেস৬৪ কনভার্ট
+    //         if ($filePath) {
+    //             $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+    //             $mime = ($ext === 'png') ? 'image/png' : 'image/jpeg';
+    //             $fileContent = file_get_contents($filePath);
+    //             $photoData = 'data:' . $mime . ';base64,' . base64_encode($fileContent);
+    //         }
+    //     }
+
+    //     $view = match ($format) {
+    //         'cv' => 'recruitments.downloads.cv',
+    //         'entry-form' => 'recruitments.downloads.entry-form',
+    //         'id-card' => 'recruitments.downloads.id-card',
+    //         default => abort(404),
+    //     };
+
+    //     return Pdf::loadView($view, [
+    //         'recruitment' => $recruitment,
+    //         'holder' => $holder,
+    //         'photoData' => $photoData,
+    //         'barcodeSvg' => $this->code39Svg($recruitment->tracking_number),
+    //     ])->setPaper($format === 'id-card' ? [0, 0, 340, 510] : 'a4')
+    //       ->stream($recruitment->tracking_number.'-'.$format.'.pdf');
+    // }
+
+      public function downloadFormat(Recruitment $recruitment, string $format)
     {
         $this->authorize('view', $recruitment);
 
         $recruitment->load(['passportHolder', 'agent', 'branch', 'country', 'company', 'position', 'medical']);
         $holder = $recruitment->passportHolder;
+        
         $photoData = null;
-        if ($holder?->photo_path && Storage::disk('private')->exists($holder->photo_path)) {
-            $photoData = 'data:'.(Storage::disk('private')->mimeType($holder->photo_path) ?: 'image/jpeg').';base64,'.base64_encode(Storage::disk('private')->get($holder->photo_path));
+
+        if ($holder && !empty($holder->photo_path)) {
+            // ১. ডাটাবেসের পাথ ক্লিন করা
+            $cleanPath = str_replace(['\\', 'storage/app/private/', 'storage/app/'], ['/', '', ''], $holder->photo_path);
+            $cleanPath = ltrim($cleanPath, '/');
+            $filename = basename($cleanPath);
+
+            // ২. সম্ভাব্য সব জায়গায় ফাইলটি খোঁজা (ডাটাবেসের পাথ ভুল থাকলেও এটি খুঁজে বের করবে)
+            $searchPaths = [
+                $cleanPath,                                         // recruitments/photos/xxx.jpg
+                'recruitments/' . $recruitment->id . '/' . $filename, // recruitments/3/xxx.jpg
+                'recruitments/photos/' . $filename                  // recruitments/photos/xxx.jpg
+            ];
+
+            $fileContent = null;
+            $mimeType = 'image/jpeg';
+
+            foreach ($searchPaths as $path) {
+                if (Storage::disk('private')->exists($path)) {
+                    $fileContent = Storage::disk('private')->get($path);
+                    $mimeType = Storage::disk('private')->mimeType($path);
+                    break;
+                }
+                $absolutePath = storage_path('app/private/' . $path);
+                if (file_exists($absolutePath)) {
+                    $fileContent = file_get_contents($absolutePath);
+                    $mimeType = mime_content_type($absolutePath);
+                    break;
+                }
+            }
+
+            // ৩. ছবি পাওয়া গেলে Base64 তৈরি করা
+            if ($fileContent) {
+                // DomPDF-এর জন্য সঠিক MIME টাইপ নিশ্চিত করা
+                $ext = strtolower(pathinfo($cleanPath, PATHINFO_EXTENSION));
+                $mimeType = ($ext === 'png') ? 'image/png' : 'image/jpeg';
+                $photoData = 'data:' . $mimeType . ';base64,' . base64_encode($fileContent);
+            }
         }
+
+               // ... [আগের কোডগুলো একই থাকবে] ...
 
         $view = match ($format) {
             'cv' => 'recruitments.downloads.cv',
@@ -147,15 +238,24 @@ class RecruitmentController extends Controller
             default => abort(404),
         };
 
-        return Pdf::loadView($view, [
+        // ✅ SVG বারকোড জেনারেট করে সেটাকে Base64 ইমেজে কনভার্ট করছি
+        $svgCode = $this->code39Svg($recruitment->tracking_number);
+        $barcodeBase64 = 'data:image/svg+xml;base64,' . base64_encode($svgCode);
+
+        $pdf = Pdf::setOptions([
+            'isRemoteEnabled' => true,
+            'isHtml5ParserEnabled' => true,
+            'chroot' => storage_path('app'), 
+        ]);
+
+        return $pdf->loadView($view, [
             'recruitment' => $recruitment,
             'holder' => $holder,
             'photoData' => $photoData,
-            'barcodeSvg' => $this->code39Svg($recruitment->tracking_number),
+            'barcodeBase64' => $barcodeBase64, // <--- SVG এর বদলে Base64 পাঠালাম
         ])->setPaper($format === 'id-card' ? [0, 0, 340, 510] : 'a4')
-            ->stream($recruitment->tracking_number.'-'.$format.'.pdf');
+          ->stream($recruitment->tracking_number.'-'.$format.'.pdf');
     }
-
     /** Build a standards based Code 39 barcode from the registration code. */
     private function code39Svg(string $value): string
     {
@@ -211,10 +311,6 @@ class RecruitmentController extends Controller
             ->with('success', 'Recruitment removed successfully.');
     }
 
-    /**
-     * Authorised download of a recruitment document. The file lives on
-     * the private disk; there is no public URL for it.
-     */
     public function downloadDocument(Recruitment $recruitment, RecruitmentDocument $document)
     {
         $this->authorize('downloadDocument', $recruitment);
@@ -233,10 +329,6 @@ class RecruitmentController extends Controller
         );
     }
 
-    /**
-     * Cancel a registration. The record is kept as history; only its
-     * status changes to cancelled.
-     */
     public function cancel(HttpRequest $request, Recruitment $recruitment)
     {
         $this->authorize('cancel', $recruitment);

@@ -343,13 +343,13 @@
 
                     <div class="col-md-2 d-flex align-items-end">
                         <div class="report-filter-actions w-100">
-                            <button type="submit" class="btn btn-success">
+                            <x-button variant="success" type="submit" class="btn btn-success">
                                 <i class="fas fa-search me-1"></i> {{ __('Filter') }}
-                            </button>
+                            </x-button>
 
-                            <a href="{{ route('reports.show', $report) }}" class="btn btn-outline-secondary">
+                            <x-button variant="dark" href="{{ route('reports.show', $report) }}" class="btn btn-dark">
                                 <i class="fas fa-redo me-1"></i> {{ __('Reset') }}
-                            </a>
+                            </x-button>
                         </div>
                     </div>
 
